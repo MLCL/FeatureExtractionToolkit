@@ -14,9 +14,10 @@ public class Config implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	@Parameter(names={"-nc", "--numCores"},
-			description = "Number of concurrent worker threads to use.")
-	public int numCores = 1;
+
+    @Parameter(names = {"-nc", "--numCores"},
+               description = "Number of concurrent worker threads to use.")
+    public int numCores = Runtime.getRuntime().availableProcessors();
 	
     @Parameter(names = {"-h", "--help"},
             description = "Display this help message.")

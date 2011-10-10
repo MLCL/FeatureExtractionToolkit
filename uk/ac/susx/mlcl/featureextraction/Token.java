@@ -27,12 +27,12 @@ public class Token {
 	
 	@SuppressWarnings("unchecked")
 	public <T> T get(Class<? extends Annotation<T>> k) {
-		try {
-			return (T)annotations.get(k).getValue();	
-		} catch (NullPointerException e ) {
+		Annotation<?> a = annotations.get(k);
+		if(a == null) {
 			return null;
+		} else {
+			return (T)a.getValue();
 		}
-		
 	}
 	
 	public String get(String k) {

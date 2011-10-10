@@ -1,5 +1,6 @@
 package uk.ac.susx.mlcl.featureextraction;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -125,6 +126,10 @@ public class Annotations {
 		public void addToCollection(Collection<String> list, String prefix) throws OperationNotSupportedException {
 			throw new OperationNotSupportedException();
 		}
+		
+		public String toString() {
+			return Arrays.toString(span);
+		}
 
 	}
 	
@@ -198,6 +203,9 @@ public class Annotations {
 	public static class TokenAnnotation extends AbstractStringAnnotation {
 	}
 	
+	public static class NERAnnotation extends AbstractStringAnnotation {
+	}
+	
 	public static class PoSAnnotation extends AbstractStringAnnotation {
 	}
 
@@ -214,10 +222,12 @@ public class Annotations {
 	}
 	
 	public static class __FeatureAnnotation extends AbstractStringListAnnotation {
-	
 	}
-	public static class __KeyAnnotation extends AbstractStringAnnotation {
 	
+	public static class __KeyAnnotation extends AbstractStringAnnotation {
+	}
+	
+	public static class __SpanAnnotation extends AbstractSpanAnnotation {	
 	}
 	
 }

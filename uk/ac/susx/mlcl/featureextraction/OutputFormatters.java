@@ -4,7 +4,7 @@ import java.util.List;
 
 public class OutputFormatters {
 
-	public static Class<? extends OutputFormatter> defaultFormatter = TabOutput.class;
+	public static Class<? extends OutputFormatter> defaultFormatter = NewlineOutput.class;
 	
 	public static class TabOutput implements OutputFormatter {
 
