@@ -117,7 +117,9 @@ public class Sentence extends ArrayList<Token> {
 	
 	public void useShortestSegmentationPathKeys() {
 		
+		Collection<IndexToken<?>> shortestPath = getShortestSegmentationPathKeys();
 		
+		keys = new TreeSet<IndexToken<?>>(shortestPath);
 		
 	}
 	

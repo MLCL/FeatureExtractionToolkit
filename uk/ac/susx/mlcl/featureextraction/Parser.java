@@ -97,9 +97,11 @@ public abstract class Parser implements Configurable {
 	    
 	    @Parameter(names = {"-of", "--outputFormatter"}, description = "class that specifies the output format.",
 	    		converter = OutputFormatterConverter.class)
-	    
 	    public OutputFormatter outputFormatter;
 	    
+	    
+	    @Parameter(names = {"-v", "--verbose"})
+	    public boolean verbose = false;
 	    
 	    @Parameter(names = {"-l", "--limit"})
 	    public int limit = 0;
@@ -197,25 +199,31 @@ public abstract class Parser implements Configurable {
 				
                 public Void call() {
                 	try {
-	                    String output = handleEntry(entry);
+                		String output = handleEntry(entry);
+
+                        synchronized (outFile) {
+                            handleOutput(output);
+                            
+                            int c = count.addAndGet(1);
+                            if (c % 1000 == 0) {
+                                System.err.print("[" + c + "]");
+                            }
+                        }
 	
-	                    synchronized (outFile) {
-	                        handleOutput(output);
-	                        
-	                        int c = count.addAndGet(1);
-	                        if (c % 1000 == 0) {
-	                            System.err.print("[" + c + "]");
-	                        }
-	                    }
-	                    throttle.release();
-                	} catch (Throwable t) {
-                		t.printStackTrace();
+                	} catch (InvalidEntryException e) {
+                		if(config().verbose) {
+                			LOG.warning(e.getMessage());	
+                		}
+                	} finally {
+                		throttle.release();	
                 	}
+                    
+            	
                     return null;
                 }
             }); 
 			
-        	//futures.add(f);
+        	futures.add(f);
         }
 
         if (prePost) {
@@ -252,18 +260,17 @@ public abstract class Parser implements Configurable {
             //System.err.println("processing " + prefix + File.separator + file);
             parse(Path.getText(prefix + File.separator + file, false, true), false);
 
-            /*
-            for(Future<?> f : futures) {
-            	try {
-					f.get();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					e.printStackTrace();
-				}
-            }
-            */
-            futures.clear();
+            try {
+		        for(Future<?> f : futures) {
+		        	if(f.isDone()) {
+		        		f.get();	
+		        	}					
+		        }
+            } catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
         }
         
         cleanupThreads();
