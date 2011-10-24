@@ -1,14 +1,24 @@
+/*
+ * Copyright (c) 2011, Sussex University.
+ * All rights reserverd.
+ */
 package uk.ac.susx.mlcl.featureextraction;
 
 import java.util.Collection;
 
 import javax.naming.OperationNotSupportedException;
 
-public abstract class Annotation<T> {
-	
-	public abstract T getValue();
-	public abstract void setValue(T v);
+/**
+ * 
+ * @author Simon Wibberley
+ * @param <T> 
+ */
+public interface Annotation<T> {
 
-	public abstract void addToCollection(Collection<String> list, String prefix) throws OperationNotSupportedException;
-	
+    T getValue();
+
+    void setValue(T v);
+
+    void addToCollection(Collection<? super String> list, String prefix)
+            throws OperationNotSupportedException;
 }

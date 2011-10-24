@@ -1,23 +1,22 @@
+/*
+ * Copyright (c) 2011, Sussex University.
+ * All rights reserverd.
+ */
 package uk.ac.susx.mlcl.featureextraction;
 
+/**
+ * 
+ * @author Simon Wibberley
+ */
 public class InvalidEntryException extends RuntimeException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private String msg;
-	
-	public InvalidEntryException () {
-		this("");
-	}
-	
-	public InvalidEntryException (String message) {
-		super();
-		msg = message;
-	}
-	
-	@Override
-	public String getMessage() {
-		return msg;
-	}
+    public InvalidEntryException() {
+        super();
+    }
 
+    public InvalidEntryException(String message) {
+        super(message);
+    }
 }

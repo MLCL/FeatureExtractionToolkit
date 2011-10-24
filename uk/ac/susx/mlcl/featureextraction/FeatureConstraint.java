@@ -1,6 +1,14 @@
+/*
+ * Copyright (c) 2011, Sussex University.
+ * All rights reserverd.
+ */
 package uk.ac.susx.mlcl.featureextraction;
 
+/**
+ * 
+ * @author Simon Wibberley
+ */
 public interface FeatureConstraint {
-	public boolean accept(Sentence s, IndexToken<?> cur, int i);
-	//public <T> boolean accept(Sentence s, IndexToken<T> cur, int i);
+
+    boolean accept(Sentence s, IndexToken<?> cur, int i);
 }

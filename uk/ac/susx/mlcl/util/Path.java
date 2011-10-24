@@ -11,10 +11,11 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -23,16 +24,20 @@ import java.util.zip.GZIPInputStream;
  * @author Simon Wibberley
  */
 public final class Path {
-    
-    private Path() {}
+
+    private static final Logger LOG = Logger.getLogger(
+            Path.class.getName());
+
+    private Path() {
+    }
 
     public static void catFiles(String inputDir, String suffix, String outputDir,
-            String name) {
+                                String name) {
         catFiles(inputDir, suffix, outputDir, name, true);
     }
 
     public static void catFiles(String inputDir, String suffix, String outputDir,
-            String name, boolean rm) {
+                                String name, boolean rm) {
 
         String input = String.format("%s/*%s", inputDir, suffix);
         String output = String.format("%s/%s", outputDir, name);
@@ -91,12 +96,13 @@ public final class Path {
     }
 
     public static List<String> getFileList(String pathName, final String suffix,
-            final boolean includeHidden) {
+                                           final boolean includeHidden) {
         return getFileList(pathName, suffix, includeHidden, false);
     }
 
     public static List<String> getFileList(String pathName, final String suffix,
-            final boolean includeHidden, final boolean recursive) {
+                                           final boolean includeHidden,
+                                           final boolean recursive) {
         File path = new File(pathName);
 
         final ArrayList<String> fileList = new ArrayList<String>();
@@ -111,7 +117,8 @@ public final class Path {
                     if (f.isDirectory()) {
 
                         List<String> subList = getFileList(f.getAbsolutePath(),
-                                suffix, includeHidden, recursive);
+                                                           suffix, includeHidden,
+                                                           recursive);
 
                         for (String file : subList) {
                             String subPath = name + File.separator + file;
@@ -140,14 +147,14 @@ public final class Path {
     }
 
     public static String getText(String filePath, boolean gzip,
-            boolean incNewline) {
+                                 boolean incNewline) {
         try {
             if (gzip) {
                 return getText(new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(
                         filePath)))), incNewline);
             } else {
                 return getText(new BufferedReader(new FileReader(filePath)),
-                        incNewline);
+                               incNewline);
             }
 
         } catch (Exception e) {
@@ -185,7 +192,7 @@ public final class Path {
             return getTextWholeFile(reader);
         }
         try {
-            StringBuffer strbfr = new StringBuffer();
+            StringBuilder strbfr = new StringBuilder();
             String tmpStr;
             while ((tmpStr = reader.readLine()) != null) {
                 strbfr.append(tmpStr);
@@ -203,28 +210,27 @@ public final class Path {
 
         return null;
     }
-    
-    
+
     public static int countLines(String in) {
-    	try{
-    		return countLines(new BufferedReader(new FileReader(in)));	
-    	} catch(IOException e) {
-    		e.printStackTrace();
-    	}
-    	return -1;
+        try {
+            return countLines(new BufferedReader(new FileReader(in)));
+        } catch (IOException e) {
+            LOG.log(Level.SEVERE, null, e);
+        }
+        return -1;
     }
-    
+
     public static int countLines(BufferedReader in) {
-    	BufferedReader r = new BufferedReader(in);
-    	int count = 0;
-    	try{
-	    	while (r.readLine()!=null) {
-	    		++count;
-	    	}
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    	}
-    	
-    	return count;
+        BufferedReader r = new BufferedReader(in);
+        int count = 0;
+        try {
+            while (r.readLine() != null) {
+                ++count;
+            }
+        } catch (IOException e) {
+            LOG.log(Level.SEVERE, null, e);
+        }
+
+        return count;
     }
 }

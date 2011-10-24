@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.Parameter;
 
+import java.util.logging.Level;
 import uk.ac.susx.mlcl.util.Config;
 import uk.ac.susx.mlcl.util.Configurable;
 import uk.ac.susx.mlcl.util.DocSplitter;
@@ -36,91 +37,88 @@ import uk.ac.susx.mlcl.util.Path;
  * @author Simon Wibberley
  */
 public abstract class Parser implements Configurable {
-	
+
     private static final Logger LOG =
             Logger.getLogger(Parser.class.getName());
-	
-	public static class PConfig extends Config {
-		
-		public static final class OutputFormatterConverter implements IStringConverter<OutputFormatter> {
-			@SuppressWarnings("unchecked")
-			public OutputFormatter convert(String value) {
-				
-				
-				OutputFormatter f = null;
-					try {
-						try {
-							f = ((Class<OutputFormatter>)Class.forName(value)).newInstance();	
-							
-							
-							
-						} catch (ClassNotFoundException e) {
-							LOG.warning("OutputFormatter " + value + " not found.");
-							f = OutputFormatters.defaultFormatter.newInstance();
-						}
-					} catch (InstantiationException e) {
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-						e.printStackTrace();
-					}
-					
-				 
-				return f;
-				
-			}
-		}
-		
 
-		private static final long serialVersionUID = 1L;
+    public static final class OutputFormatterConverter implements IStringConverter<OutputFormatter> {
 
-		@Parameter(names = {"-es", "--entrySeparator"},
-	               description = "base term / feature delimiter for the thesaurus output.")
-	    public String entrySeparator = "\t";
+        @SuppressWarnings("unchecked")
+        @Override
+        public OutputFormatter convert(String value) {
 
-	    @Parameter(names = {"-op", "--outPath"})
-	    public String outPath;
+            OutputFormatter f = null;
+            try {
+                try {
+                    f = ((Class<OutputFormatter>) Class.forName(value)).
+                            newInstance();
 
-	    @Parameter(names = {"-ip", "--inPath"})
-	    public String inPath;
+                } catch (ClassNotFoundException e) {
+                    LOG.log(Level.WARNING, "OutputFormatter {0} not found.", value);
+                    f = OutputFormatters.defaultFormatter.newInstance();
+                }
+            } catch (InstantiationException e) {
+                LOG.log(Level.SEVERE, null, e);
+            } catch (IllegalAccessException e) {
+                LOG.log(Level.SEVERE, null, e);
+            }
 
-	    @Parameter(names = {"-r", "--recursive"},
-	               description = "Descend into subfolder of the input path.")
-	    public boolean recursive = false;
 
-	    @Parameter(names = {"-is", "--inSuffix"},
-	               description = "Only read files with the given suffix.")
-	    public String inSuffix;
+            return f;
 
-	    @Parameter(names = {"-gz", "--useGzip"})
-	    public boolean useGzip = false;
-	    
-	    
-	    @Parameter(names = {"-of", "--outputFormatter"}, description = "class that specifies the output format.",
-	    		converter = OutputFormatterConverter.class)
-	    public OutputFormatter outputFormatter;
-	    
-	    
-	    @Parameter(names = {"-v", "--verbose"})
-	    public boolean verbose = false;
-	    
-	    @Parameter(names = {"-l", "--limit"})
-	    public int limit = 0;
-		
-		
-	}
-	
-	protected abstract PConfig config(); 
-	
+        }
+    }
+
+    public static class ParserConfig extends Config {
+
+        private static final long serialVersionUID = 1L;
+
+        @Parameter(names = {"-es", "--entrySeparator"},
+                   description = "base term / feature delimiter for the thesaurus output.")
+        public String entrySeparator = "\t";
+
+        @Parameter(names = {"-op", "--outPath"})
+        public String outPath;
+
+        @Parameter(names = {"-ip", "--inPath"})
+        public String inPath;
+
+        @Parameter(names = {"-r", "--recursive"},
+                   description = "Descend into subfolder of the input path.")
+        public boolean recursive = false;
+
+        @Parameter(names = {"-is", "--inSuffix"},
+                   description = "Only read files with the given suffix.")
+        public String inSuffix;
+
+        @Parameter(names = {"-gz", "--useGzip"})
+        public boolean useGzip = false;
+
+        @Parameter(names = {"-of", "--outputFormatter"},
+                   description = "class that specifies the output format.",
+                   converter = OutputFormatterConverter.class)
+        public OutputFormatter outputFormatter;
+
+        @Parameter(names = {"-v", "--verbose"})
+        public boolean verbose = false;
+
+        @Parameter(names = {"-l", "--limit"})
+        public int limit = 0;
+
+    }
+
+    protected abstract ParserConfig config();
+
     protected BufferedWriter outFile;
 
     protected DocSplitter splitter;
 
     final AtomicInteger count = new AtomicInteger();
-    
+
     private ExecutorService exec;
-    
+
     private List<Future<?>> futures;
-    
+
     protected FeatureFactory featureFactory;
 
     protected String getOutPath() {
@@ -129,16 +127,18 @@ public abstract class Parser implements Configurable {
 
     protected abstract void buildFeatureFactory();
 
-    public void parse() {    	
-    	
-    	System.err.println("Building file list...");
-    	
-        List<String> files = Path.getFileList(config().inPath, config().inSuffix, false, config().recursive);
-        
+    public void parse() {
+
+        System.err.println("Building file list...");
+
+        List<String> files = Path.getFileList(
+                config().inPath, config().inSuffix,
+                false, config().recursive);
+
         System.err.println("File list built.");
-        
+
         buildFeatureFactory();
-        
+
         parse(config().inPath, files);
 
     }
@@ -181,100 +181,101 @@ public abstract class Parser implements Configurable {
             handleOutputPre();
         }
         List<String> entries = splitter.split(input);
-        
+
         final int limit = config().limit;
-        
-        final Semaphore throttle = new Semaphore(2*config().numCores);
+
+        final Semaphore throttle = new Semaphore(2 * config().numCores);
 
         for (final String entry : entries) {
-        	try {
-				throttle.acquire();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-        	if(limit > 0 && count.get() > limit ) {
-        		break;
-        	}
-			Future<?> f = exec.submit(new Callable<Void>() {
-				
+            try {
+                throttle.acquire();
+            } catch (InterruptedException e) {
+                LOG.log(Level.SEVERE, null, e);
+            }
+            if (limit > 0 && count.get() > limit) {
+                break;
+            }
+            Future<?> f = exec.submit(new Callable<Void>() {
+
+                @Override
                 public Void call() {
-                	try {
-                		String output = handleEntry(entry);
+                    try {
+                        String output = handleEntry(entry);
 
                         synchronized (outFile) {
                             handleOutput(output);
-                            
+
                             int c = count.addAndGet(1);
                             if (c % 1000 == 0) {
                                 System.err.print("[" + c + "]");
                             }
                         }
-	
-                	} catch (InvalidEntryException e) {
-                		if(config().verbose) {
-                			LOG.warning(e.getMessage());	
-                		}
-                	} finally {
-                		throttle.release();	
-                	}
-                    
-            	
+
+                    } catch (InvalidEntryException e) {
+                        if (config().verbose) {
+                            LOG.log(Level.WARNING, null, e);
+                        }
+                    } finally {
+                        throttle.release();
+                    }
+
+
                     return null;
                 }
-            }); 
-			
-        	futures.add(f);
+            });
+
+            futures.add(f);
         }
 
         if (prePost) {
             handleOutputPost();
         }
     }
-    
+
     private void initThreads() {
-    	exec = Executors.newFixedThreadPool(config().numCores);
-    	futures = new ArrayList<Future<?>>();    	
+        exec = Executors.newFixedThreadPool(config().numCores);
+        futures = new ArrayList<Future<?>>();
     }
-    
+
     private void cleanupThreads() {
         exec.shutdown();
 
         try {
             exec.awaitTermination(1, TimeUnit.DAYS);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, null, e);
             exec.shutdownNow();
         } catch (Exception e) {
-            System.err.println(e);
-            e.printStackTrace();
-        } 	
+            LOG.log(Level.SEVERE, null, e);
+        }
     }
 
     public void parse(String prefix, List<String> files) {
         handleOutputPre();
-        
+
         initThreads();
 
         for (String file : files) {
 
             //System.err.println("processing " + prefix + File.separator + file);
-            parse(Path.getText(prefix + File.separator + file, false, true), false);
+            parse(Path.getText(prefix + File.separator + file, false, true),
+                  false);
 
             try {
-		        for(Future<?> f : futures) {
-		        	if(f.isDone()) {
-		        		f.get();	
-		        	}					
-		        }
+                for (Future<?> f : futures) {
+                    if (f.isDone()) {
+                        f.get();
+                    }
+                }
             } catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				e.printStackTrace();
-			}
+                LOG.log(Level.SEVERE, null, e);
+            } catch (ExecutionException e) {
+                LOG.log(Level.SEVERE, null, e);
+            }
         }
-        
+
         cleanupThreads();
-        
+
         handleOutputPost();
     }
 
@@ -317,7 +318,7 @@ public abstract class Parser implements Configurable {
         for (String el1 : baseEntries) {
 
             for (String el2 : featureEntries) {
-                if (el2 == el1) {
+                if (el2.equals(el1)) {
                     continue;
                 }
                 String line = el1 + config().entrySeparator + el2;
@@ -332,38 +333,39 @@ public abstract class Parser implements Configurable {
 
     /**
      * Process one entry. An Entry is the scope of the context. 
+     * @param entry
+     * @return  
      */
     protected String handleEntry(String entry) {
         //System.err.println(entry);
         //List<String> baseEntries = new ArrayList<String>();
         //List<String> featureEntries = new ArrayList<String>();
         Sentence annotated = annotate(entry);
-        
+
         //getElements(entry, baseEntries, featureEntries);
         //String lines = allPairs(baseEntries, featureEntries);
-        
+
         String lines = getLines(annotated);
 
         return lines;
     }
-    
+
     protected String getLines(Sentence sentence) {
-    	
-    	StringBuilder out = new StringBuilder();
-    	
-    	for(IndexToken<?> t : sentence.getKeys()) {
-    		
-    		String output = config().outputFormatter.getOutput(t);
-    		
-    		//System.err.print(output);
-    		out.append(output);
-    	}
-    	
-    	return out.toString();
-    	
+
+        StringBuilder out = new StringBuilder();
+
+        for (IndexToken<?> t : sentence.getKeys()) {
+
+            String output = config().outputFormatter.getOutput(t);
+
+            //System.err.print(output);
+            out.append(output);
+        }
+
+        return out.toString();
+
     }
 
     abstract protected Sentence annotate(String entry);
-    
     //abstract protected void getElements(String entry, List<String> baseEntries, List<String> featureEntries);
 }
