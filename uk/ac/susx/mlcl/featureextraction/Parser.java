@@ -4,6 +4,8 @@
  */
 package uk.ac.susx.mlcl.featureextraction;
 
+import com.beust.jcommander.IParameterValidator;
+import com.beust.jcommander.ParameterException;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -68,6 +70,7 @@ public abstract class Parser implements Configurable {
 
         }
     }
+   
 
     public static class ParserConfig extends Config {
 
@@ -77,10 +80,10 @@ public abstract class Parser implements Configurable {
                    description = "base term / feature delimiter for the thesaurus output.")
         public String entrySeparator = "\t";
 
-        @Parameter(names = {"-op", "--outPath"})
+        @Parameter(names = {"-op", "--outPath"}, required=true)
         public String outPath;
 
-        @Parameter(names = {"-ip", "--inPath"})
+        @Parameter(names = {"-ip", "--inPath"}, required=true)
         public String inPath;
 
         @Parameter(names = {"-r", "--recursive"},
