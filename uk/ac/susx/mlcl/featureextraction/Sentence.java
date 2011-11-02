@@ -80,7 +80,7 @@ public class Sentence extends ArrayList<Token> {
         keys.addAll(ks);
     }
 
-    public String getKeyString(IndexToken<?> key) {
+    public CharSequence getKeyString(IndexToken<?> key) {
 
         int[] span = key.getSpan();
 
@@ -93,7 +93,7 @@ public class Sentence extends ArrayList<Token> {
             }
         }
 
-        return sb.toString();
+        return sb;
 
     }
 
@@ -101,9 +101,9 @@ public class Sentence extends ArrayList<Token> {
         Collection<FeatureFunction> fns = featureFactory.getAllFeatures();
 
         for (IndexToken<?> key : keys) {
-            String keyStr = getKeyString(key);
+            CharSequence keyStr = getKeyString(key);
             //StringBuilder featStr = new StringBuilder();
-            List<String> featureList = new ArrayList<String>();
+            List<CharSequence> featureList = new ArrayList<CharSequence>();
             key.setKey(keyStr);
             //System.err.println(keyStr);
 
@@ -216,12 +216,12 @@ public class Sentence extends ArrayList<Token> {
     public static void main(String[] args) {
 
         Sentence s = new Sentence(true);
-        s.addKey(new IndexToken<String>(new int[]{0, 1}, TokenAnnotation.class));
+        s.addKey(new IndexToken<CharSequence>(new int[]{0, 1}, TokenAnnotation.class));
         //s.addKey(new IndexToken<String>(new int[]{1,2}, TokenAnnotation.class));
-        s.addKey(new IndexToken<String>(new int[]{2, 3}, TokenAnnotation.class));
-        s.addKey(new IndexToken<String>(new int[]{3, 4}, TokenAnnotation.class));
-        s.addKey(new IndexToken<String>(new int[]{4, 5}, TokenAnnotation.class));
-        s.addKey(new IndexToken<String>(new int[]{5, 6}, TokenAnnotation.class));
+        s.addKey(new IndexToken<CharSequence>(new int[]{2, 3}, TokenAnnotation.class));
+        s.addKey(new IndexToken<CharSequence>(new int[]{3, 4}, TokenAnnotation.class));
+        s.addKey(new IndexToken<CharSequence>(new int[]{4, 5}, TokenAnnotation.class));
+        s.addKey(new IndexToken<CharSequence>(new int[]{5, 6}, TokenAnnotation.class));
 
         //s.addKey(new IndexToken<String>(new int[]{2,4}, TokenAnnotation.class));
         //s.addKey(new IndexToken<String>(new int[]{1,4}, TokenAnnotation.class));
@@ -236,7 +236,7 @@ public class Sentence extends ArrayList<Token> {
         s.addKey(new IndexToken<String>(new int[]{4,5}, TokenAnnotation.class));
         s.addKey(new IndexToken<String>(new int[]{5,6}, TokenAnnotation.class));
          */
-        s.addKey(new IndexToken<String>(new int[]{4, 6}, TokenAnnotation.class));
+        s.addKey(new IndexToken<CharSequence>(new int[]{4, 6}, TokenAnnotation.class));
 
         s.add(new Token());
         s.add(new Token());

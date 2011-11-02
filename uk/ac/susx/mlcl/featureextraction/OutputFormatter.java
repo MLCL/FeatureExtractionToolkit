@@ -10,5 +10,5 @@ package uk.ac.susx.mlcl.featureextraction;
  */
 public interface OutputFormatter {
 
-    String getOutput(IndexToken<?> key);
+    CharSequence getOutput(IndexToken<?> key);
 }

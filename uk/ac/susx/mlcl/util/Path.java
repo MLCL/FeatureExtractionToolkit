@@ -32,12 +32,12 @@ public final class Path {
     }
 
     public static void catFiles(String inputDir, String suffix, String outputDir,
-                                String name) {
+            String name) {
         catFiles(inputDir, suffix, outputDir, name, true);
     }
 
     public static void catFiles(String inputDir, String suffix, String outputDir,
-                                String name, boolean rm) {
+            String name, boolean rm) {
 
         String input = String.format("%s/*%s", inputDir, suffix);
         String output = String.format("%s/%s", outputDir, name);
@@ -66,8 +66,7 @@ public final class Path {
 
             child.waitFor();
 
-            BufferedReader input = new BufferedReader(new InputStreamReader(child.
-                    getInputStream()));
+            BufferedReader input = new BufferedReader(new InputStreamReader(child.getInputStream()));
             String line;
 
             while ((line = input.readLine()) != null) {
@@ -77,8 +76,7 @@ public final class Path {
             int exitVal = child.waitFor();
             if (exitVal > 0) {
                 System.err.println("Exited with error code " + exitVal);
-                input = new BufferedReader(new InputStreamReader(child.
-                        getErrorStream()));
+                input = new BufferedReader(new InputStreamReader(child.getErrorStream()));
 
                 while ((line = input.readLine()) != null) {
                     System.err.println(line);
@@ -96,14 +94,28 @@ public final class Path {
     }
 
     public static List<String> getFileList(String pathName, final String suffix,
-                                           final boolean includeHidden) {
+            final boolean includeHidden) {
         return getFileList(pathName, suffix, includeHidden, false);
     }
 
     public static List<String> getFileList(String pathName, final String suffix,
-                                           final boolean includeHidden,
-                                           final boolean recursive) {
+            final boolean includeHidden,
+            final boolean recursive) {
+        if(pathName == null)
+            throw new NullPointerException("pathName is null");
+        if(suffix == null)
+            throw new NullPointerException("suffix is null");
+        
         File path = new File(pathName);
+        if (!path.exists()) {
+            throw new IllegalArgumentException("path does not exist: " + path);
+        }
+        if (!path.isDirectory()) {
+            throw new IllegalArgumentException("path is not a directory: " + path);
+        }
+        if (!path.canRead()) {
+            throw new IllegalArgumentException("path is not readable: " + path);
+        }
 
         final ArrayList<String> fileList = new ArrayList<String>();
 
@@ -117,8 +129,8 @@ public final class Path {
                     if (f.isDirectory()) {
 
                         List<String> subList = getFileList(f.getAbsolutePath(),
-                                                           suffix, includeHidden,
-                                                           recursive);
+                                suffix, includeHidden,
+                                recursive);
 
                         for (String file : subList) {
                             String subPath = name + File.separator + file;
@@ -141,20 +153,20 @@ public final class Path {
         return fileList;
     }
 
-    public static String getText(String filePath) {
+    public static CharSequence getText(String filePath) {
         return getText(filePath, false, false);
 
     }
 
-    public static String getText(String filePath, boolean gzip,
-                                 boolean incNewline) {
+    public static CharSequence getText(String filePath, boolean gzip,
+            boolean incNewline) {
         try {
             if (gzip) {
                 return getText(new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(
                         filePath)))), incNewline);
             } else {
                 return getText(new BufferedReader(new FileReader(filePath)),
-                               incNewline);
+                        incNewline);
             }
 
         } catch (Exception e) {
@@ -163,11 +175,11 @@ public final class Path {
 
     }
 
-    public static String getText(BufferedReader reader) {
+    public static CharSequence getText(BufferedReader reader) {
         return getText(reader, false);
     }
 
-    public static String getTextWholeFile(BufferedReader reader) {
+    public static CharSequence getTextWholeFile(BufferedReader reader) {
 
         try {
             char[] strbuf = new char[9999];
@@ -177,9 +189,10 @@ public final class Path {
                 strbldr.append(strbuf, 0, read);
             }
 
-            String text = strbldr.toString();
+            
+//            String text = strbldr.toString();
             reader.close();
-            return text;
+            return strbldr;
         } catch (IOException e) {
             System.out.println(e);
         }
@@ -187,7 +200,7 @@ public final class Path {
         return null;
     }
 
-    public static String getText(BufferedReader reader, boolean incNewline) {
+    public static CharSequence getText(BufferedReader reader, boolean incNewline) {
         if (incNewline) {
             return getTextWholeFile(reader);
         }
@@ -201,9 +214,9 @@ public final class Path {
                 }
             }
 
-            String text = strbfr.toString();
+//            String text = strbfr.toString();
             reader.close();
-            return text;
+            return strbfr;
         } catch (IOException e) {
             System.out.println(e);
         }

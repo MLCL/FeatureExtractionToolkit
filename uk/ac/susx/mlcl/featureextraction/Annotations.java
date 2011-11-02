@@ -73,19 +73,19 @@ public class Annotations {
         }
     }
 
-    public static abstract class AbstractStringAnnotation extends AbstractObjectAnnotation<String> {
+    public static abstract class AbstractStringAnnotation extends AbstractObjectAnnotation<CharSequence> {
     }
 
     public abstract static class AbstractIntegerAnnotation extends AbstractObjectAnnotation<Integer> {
     }
 
-    public abstract static class AbstractStringListAnnotation extends AbstractObjectAnnotation<List<String>> {
+    public abstract static class AbstractStringListAnnotation extends AbstractObjectAnnotation<List<CharSequence>> {
 
         @Override
         public String toString() {
             final StringBuilder out = new StringBuilder();
             boolean first = true;
-            for (String s : getValue()) {
+            for (CharSequence s : getValue()) {
                 if (!first) {
                     out.append("\t");
                 }
@@ -98,9 +98,14 @@ public class Annotations {
         @Override
         public void addToCollection(Collection<? super String> list,
                                     String prefix) {
-            for (String c : getValue()) {
-                list.add(prefix + c);
-            }
+            if(prefix.length() == 0)
+                 for (CharSequence c : getValue()) {
+                    list.add(c.toString());
+                }
+            else
+                for (CharSequence c : getValue()) {
+                    list.add(prefix + c);
+                }
         }
     }
 

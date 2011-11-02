@@ -33,19 +33,19 @@ public class IndexToken<T> extends Token implements Comparable<IndexToken<?>> {
         return get(__SpanAnnotation.class);
     }
 
-    public String getKey() {
+    public CharSequence getKey() {
         return get(__KeyAnnotation.class);
     }
 
-    public void setKey(String key) {
+    public void setKey(CharSequence key) {
         set(__KeyAnnotation.class, key);
     }
 
-    public List<String> getFeature() {
+    public List<CharSequence> getFeature() {
         return get(__FeatureAnnotation.class);
     }
 
-    public void setFeature(List<String> feature) {
+    public void setFeature(List<CharSequence> feature) {
         set(__FeatureAnnotation.class, feature);
     }
 

@@ -12,41 +12,41 @@ import java.util.List;
  */
 public class OutputFormatters {
 
-    public static Class<? extends OutputFormatter> defaultFormatter = NewlineOutput.class;
+    public static final Class<? extends OutputFormatter> defaultFormatterClass = NewlineOutput.class;
+    public static final OutputFormatter defaultFormatter = new NewlineOutput();
 
     public static class TabOutput implements OutputFormatter {
 
         @Override
-        public String getOutput(IndexToken<?> key) {
+        public CharSequence getOutput(IndexToken<?> key) {
             StringBuilder out = new StringBuilder();
-            List<String> features = key.getFeature();
+            List<CharSequence> features = key.getFeature();
             out.append(key.getKey());
-            for (String feature : features) {
+            for (CharSequence feature : features) {
                 out.append("\t");
                 out.append(feature);
             }
             out.append("\n");
-            return out.toString();
+            return out;
         }
     }
 
     public static class NewlineOutput implements OutputFormatter {
 
         @Override
-        public String getOutput(IndexToken<?> key) {
+        public CharSequence getOutput(IndexToken<?> key) {
 
-            String keyStr = key.getKey();
-            StringBuilder out = new StringBuilder();
-            List<String> features = key.getFeature();
+            final CharSequence keyStr = key.getKey();
+            final StringBuilder out = new StringBuilder();
 
-            for (String feature : features) {
+            for (final CharSequence feature : key.getFeature()) {
                 out.append(keyStr);
                 out.append("\n");
                 out.append(feature);
                 out.append("\n");
             }
 
-            return out.toString();
+            return out;
         }
     }
 

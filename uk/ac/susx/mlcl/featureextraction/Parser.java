@@ -4,8 +4,6 @@
  */
 package uk.ac.susx.mlcl.featureextraction;
 
-import com.beust.jcommander.IParameterValidator;
-import com.beust.jcommander.ParameterException;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -13,7 +11,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -26,6 +23,7 @@ import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.Parameter;
 
 import java.util.logging.Level;
+import uk.ac.susx.mlcl.lib.MiscUtil;
 import uk.ac.susx.mlcl.util.Config;
 import uk.ac.susx.mlcl.util.Configurable;
 import uk.ac.susx.mlcl.util.DocSplitter;
@@ -52,12 +50,11 @@ public abstract class Parser implements Configurable {
             OutputFormatter f = null;
             try {
                 try {
-                    f = ((Class<OutputFormatter>) Class.forName(value)).
-                            newInstance();
+                    f = ((Class<OutputFormatter>) Class.forName(value)).newInstance();
 
                 } catch (ClassNotFoundException e) {
                     LOG.log(Level.WARNING, "OutputFormatter {0} not found.", value);
-                    f = OutputFormatters.defaultFormatter.newInstance();
+                    f = OutputFormatters.defaultFormatterClass.newInstance();
                 }
             } catch (InstantiationException e) {
                 LOG.log(Level.SEVERE, null, e);
@@ -70,58 +67,44 @@ public abstract class Parser implements Configurable {
 
         }
     }
-   
 
     public static class ParserConfig extends Config {
 
         private static final long serialVersionUID = 1L;
-
         @Parameter(names = {"-es", "--entrySeparator"},
-                   description = "base term / feature delimiter for the thesaurus output.")
+        description = "base term / feature delimiter for the thesaurus output.")
         public String entrySeparator = "\t";
-
-        @Parameter(names = {"-op", "--outPath"}, required=true)
+        @Parameter(names = {"-op", "--outPath"},
+        required = true)
         public String outPath;
-
-        @Parameter(names = {"-ip", "--inPath"}, required=true)
+        @Parameter(names = {"-ip", "--inPath"},
+        required = true)
         public String inPath;
-
         @Parameter(names = {"-r", "--recursive"},
-                   description = "Descend into subfolder of the input path.")
+        description = "Descend into subfolder of the input path.")
         public boolean recursive = false;
-
         @Parameter(names = {"-is", "--inSuffix"},
-                   description = "Only read files with the given suffix.")
+        description = "Only read files with the given suffix.",
+        required = true)
         public String inSuffix;
-
         @Parameter(names = {"-gz", "--useGzip"})
         public boolean useGzip = false;
-
         @Parameter(names = {"-of", "--outputFormatter"},
-                   description = "class that specifies the output format.",
-                   converter = OutputFormatterConverter.class)
-        public OutputFormatter outputFormatter;
-
+        description = "class that specifies the output format.",
+        converter = OutputFormatterConverter.class)
+        public OutputFormatter outputFormatter = OutputFormatters.defaultFormatter;
         @Parameter(names = {"-v", "--verbose"})
         public boolean verbose = false;
-
         @Parameter(names = {"-l", "--limit"})
         public int limit = 0;
-
     }
 
     protected abstract ParserConfig config();
-
     protected BufferedWriter outFile;
-
     protected DocSplitter splitter;
-
     final AtomicInteger count = new AtomicInteger();
-
     private ExecutorService exec;
-
-    private List<Future<?>> futures;
-
+    private List<Future<Void>> futures;
     protected FeatureFactory featureFactory;
 
     protected String getOutPath() {
@@ -177,13 +160,13 @@ public abstract class Parser implements Configurable {
     }
     }
      */
-    public void parse(String input, boolean prePost) {
+    public void parse(final CharSequence input, final boolean prePost) {
         //System.err.println(input);
 
         if (prePost) {
             handleOutputPre();
         }
-        List<String> entries = splitter.split(input);
+        final List<String> entries = splitter.split(input.toString());
 
         final int limit = config().limit;
 
@@ -195,23 +178,21 @@ public abstract class Parser implements Configurable {
             } catch (InterruptedException e) {
                 LOG.log(Level.SEVERE, null, e);
             }
+
             if (limit > 0 && count.get() > limit) {
                 break;
             }
-            Future<?> f = exec.submit(new Callable<Void>() {
+
+            final Future<Void> f = exec.submit(new Callable<Void>() {
 
                 @Override
                 public Void call() {
                     try {
-                        String output = handleEntry(entry);
+                        final CharSequence output = handleEntry(entry);
+                        handleOutput(output);
 
-                        synchronized (outFile) {
-                            handleOutput(output);
-
-                            int c = count.addAndGet(1);
-                            if (c % 1000 == 0) {
-                                System.err.print("[" + c + "]");
-                            }
+                        if (count.addAndGet(1) % 1000 == 0) {
+                            System.err.print("[" + count.get() + "]");
                         }
 
                     } catch (InvalidEntryException e) {
@@ -237,7 +218,7 @@ public abstract class Parser implements Configurable {
 
     private void initThreads() {
         exec = Executors.newFixedThreadPool(config().numCores);
-        futures = new ArrayList<Future<?>>();
+        futures = new ArrayList<Future<Void>>();
     }
 
     private void cleanupThreads() {
@@ -260,21 +241,25 @@ public abstract class Parser implements Configurable {
 
         for (String file : files) {
 
-            //System.err.println("processing " + prefix + File.separator + file);
-            parse(Path.getText(prefix + File.separator + file, false, true),
-                  false);
+//            System.gc();
+            System.err.println("processing " + prefix + File.separator + file);
+            System.err.println(MiscUtil.memoryInfoString());
 
-            try {
-                for (Future<?> f : futures) {
-                    if (f.isDone()) {
-                        f.get();
-                    }
-                }
-            } catch (InterruptedException e) {
-                LOG.log(Level.SEVERE, null, e);
-            } catch (ExecutionException e) {
-                LOG.log(Level.SEVERE, null, e);
-            }
+            parse(Path.getText(prefix + File.separator + file, false, true),
+                    false);
+
+//            try {
+            futures.clear();
+//                for (Future<Void> f : futures) {
+////                    if (f.isDone()) {
+//                    f.get();
+////                    }
+//                }
+//            } catch (InterruptedException e) {
+//                LOG.log(Level.SEVERE, null, e);
+//            } catch (ExecutionException e) {
+//                LOG.log(Level.SEVERE, null, e);
+//            }
         }
 
         cleanupThreads();
@@ -305,16 +290,20 @@ public abstract class Parser implements Configurable {
 
     }
 
-    protected void handleOutput(String output) {
+    protected final void handleOutput(final CharSequence output) {
+        if(output.length() == 0)
+            return;
         try {
-            outFile.write(output);
+            synchronized (outFile) {
+                outFile.append(output);
+            }
         } catch (IOException e) {
             System.err.println(e);
         }
 
     }
 
-    protected String allPairs(
+    protected CharSequence allPairs(
             List<String> baseEntries, List<String> featureEntries) {
 
         StringBuilder strbldr = new StringBuilder();
@@ -331,7 +320,7 @@ public abstract class Parser implements Configurable {
             }
 
         }
-        return strbldr.toString();
+        return strbldr;
     }
 
     /**
@@ -339,7 +328,7 @@ public abstract class Parser implements Configurable {
      * @param entry
      * @return  
      */
-    protected String handleEntry(String entry) {
+    protected CharSequence handleEntry(String entry) {
         //System.err.println(entry);
         //List<String> baseEntries = new ArrayList<String>();
         //List<String> featureEntries = new ArrayList<String>();
@@ -348,24 +337,24 @@ public abstract class Parser implements Configurable {
         //getElements(entry, baseEntries, featureEntries);
         //String lines = allPairs(baseEntries, featureEntries);
 
-        String lines = getLines(annotated);
+        CharSequence lines = getLines(annotated);
 
         return lines;
     }
 
-    protected String getLines(Sentence sentence) {
+    protected CharSequence getLines(Sentence sentence) {
 
         StringBuilder out = new StringBuilder();
 
         for (IndexToken<?> t : sentence.getKeys()) {
 
-            String output = config().outputFormatter.getOutput(t);
+            CharSequence output = config().outputFormatter.getOutput(t);
 
             //System.err.print(output);
             out.append(output);
         }
 
-        return out.toString();
+        return out;
 
     }
 

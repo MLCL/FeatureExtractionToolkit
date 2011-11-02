@@ -74,7 +74,7 @@ public class Token {
                 sb.append(", ");
                 first = true;
             }
-            sb.append(a.toString());
+            sb.append(a);
         }
         sb.append("] ");
 

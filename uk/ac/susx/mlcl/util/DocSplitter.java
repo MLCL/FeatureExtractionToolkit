@@ -12,5 +12,5 @@ import java.util.List;
  */
 public interface DocSplitter {
 
-    public List<String> split(String input);
+    public List<String> split(CharSequence input);
 }
