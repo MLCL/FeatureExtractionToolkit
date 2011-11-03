@@ -4,14 +4,14 @@
  */
 package uk.ac.susx.mlcl.featureextraction;
 
+import uk.ac.susx.mlcl.featureextraction.features.FeatureFactory;
+import uk.ac.susx.mlcl.featureextraction.features.FeatureFunction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
-
-import uk.ac.susx.mlcl.featureextraction.Annotations.TokenAnnotation;
 
 /**
  * 
@@ -21,31 +21,33 @@ public class Sentence extends ArrayList<Token> {
 
     private static final long serialVersionUID = 1L;
 
-    private Collection<IndexToken<?>> keys;
-
     private static final String DEFAULT_TOKEN_SEPARATOR = "+";
 
-    private String tokenSeparator = DEFAULT_TOKEN_SEPARATOR;
+    private static final boolean DEFAULT_SORTED_KEYS = false;
 
-    private boolean sortedKeys;
+    private final String tokenSeparator;
+
+    private final Collection<IndexToken<?>> keys;
+
+    private final boolean sortedKeys;
 
     public Sentence() {
-        this(DEFAULT_TOKEN_SEPARATOR);
+        this(DEFAULT_TOKEN_SEPARATOR, DEFAULT_SORTED_KEYS);
     }
 
-    public Sentence(String ts) {
-        this(ts, false);
+    public Sentence(String tokenSeparator) {
+        this(tokenSeparator, DEFAULT_SORTED_KEYS);
     }
 
-    public Sentence(boolean sk) {
-        this(DEFAULT_TOKEN_SEPARATOR, sk);
+    public Sentence(boolean sortedKeys) {
+        this(DEFAULT_TOKEN_SEPARATOR, sortedKeys);
     }
 
-    public Sentence(String ts, boolean sk) {
+    public Sentence(String tokenSeparator, boolean sortedKeys) {
         super();
-        tokenSeparator = ts;
-        sortedKeys = sk;
-        if (sk) {
+        this.tokenSeparator = tokenSeparator;
+        this.sortedKeys = sortedKeys;
+        if (sortedKeys) {
             keys = new TreeSet<IndexToken<?>>(IndexToken.END_ORDER);
         } else {
             keys = new ArrayList<IndexToken<?>>();
@@ -59,17 +61,13 @@ public class Sentence extends ArrayList<Token> {
     public String getTokenSeparator() {
         return tokenSeparator;
     }
-
-    public void setTokenSeparator(String ts) {
-        tokenSeparator = ts;
-    }
+//
+//    public void setTokenSeparator(String ts) {
+//        tokenSeparator = ts;
+//    }
 
     public Collection<IndexToken<?>> getKeys() {
-        return keys;
-    }
-
-    public List<Token> get() {
-        return (List<Token>) this;
+        return new ArrayList<IndexToken<?>>(keys);
     }
 
     public void addKey(IndexToken<?> key) {
@@ -87,7 +85,7 @@ public class Sentence extends ArrayList<Token> {
         StringBuilder sb = new StringBuilder();
 
         for (int i = span[0]; i < span[1]; ++i) {
-            sb.append(get(i).get(key.getKeyType()));
+            sb.append(get(i).getAnnotation(key.getKeyType()));
             if (i < span[1] - 1) {
                 sb.append(tokenSeparator);
             }
@@ -122,20 +120,20 @@ public class Sentence extends ArrayList<Token> {
 
             }
 
-            key.setFeature(featureList);
+            key.setFeatures(featureList);
             //System.err.print(featStr.toString());
             //System.err.println("\n---------------------------");
         }
 
     }
-
-    public void useShortestSegmentationPathKeys() {
-
-        Collection<IndexToken<?>> shortestPath = getShortestSegmentationPathKeys();
-
-        keys = new TreeSet<IndexToken<?>>(shortestPath);
-
-    }
+//
+//    public void useShortestSegmentationPathKeys() {
+//
+//        Collection<IndexToken<?>> shortestPath = getShortestSegmentationPathKeys();
+//
+//        keys = new TreeSet<IndexToken<?>>(shortestPath);
+//
+//    }
 
     public Collection<IndexToken<?>> getShortestSegmentationPathKeys() {
 
@@ -213,46 +211,46 @@ public class Sentence extends ArrayList<Token> {
 
     }
 
-    public static void main(String[] args) {
-
-        Sentence s = new Sentence(true);
-        s.addKey(new IndexToken<CharSequence>(new int[]{0, 1}, TokenAnnotation.class));
-        //s.addKey(new IndexToken<String>(new int[]{1,2}, TokenAnnotation.class));
-        s.addKey(new IndexToken<CharSequence>(new int[]{2, 3}, TokenAnnotation.class));
-        s.addKey(new IndexToken<CharSequence>(new int[]{3, 4}, TokenAnnotation.class));
-        s.addKey(new IndexToken<CharSequence>(new int[]{4, 5}, TokenAnnotation.class));
-        s.addKey(new IndexToken<CharSequence>(new int[]{5, 6}, TokenAnnotation.class));
-
-        //s.addKey(new IndexToken<String>(new int[]{2,4}, TokenAnnotation.class));
-        //s.addKey(new IndexToken<String>(new int[]{1,4}, TokenAnnotation.class));
-		/*
-        s.addKey(new IndexToken<String>(new int[]{0,1}, TokenAnnotation.class));
-        s.addKey(new IndexToken<String>(new int[]{1,2}, TokenAnnotation.class));
-        
-        s.addKey(new IndexToken<String>(new int[]{4,6}, TokenAnnotation.class));
-        
-        
-        s.addKey(new IndexToken<String>(new int[]{0,4}, TokenAnnotation.class));
-        s.addKey(new IndexToken<String>(new int[]{4,5}, TokenAnnotation.class));
-        s.addKey(new IndexToken<String>(new int[]{5,6}, TokenAnnotation.class));
-         */
-        s.addKey(new IndexToken<CharSequence>(new int[]{4, 6}, TokenAnnotation.class));
-
-        s.add(new Token());
-        s.add(new Token());
-        s.add(new Token());
-        s.add(new Token());
-        s.add(new Token());
-        s.add(new Token());
-
-        Collection<IndexToken<?>> path = s.getShortestSegmentationPathKeys();
-
-
-        for (IndexToken<?> key : path) {
-            System.err.println(key);
-        }
-
-
-
-    }
+//    public static void main(String[] args) {
+//
+//        Sentence s = new Sentence(true);
+//        s.addKey(new IndexToken<CharSequence>(new int[]{0, 1}, TokenAnnotation.class));
+//        //s.addKey(new IndexToken<String>(new int[]{1,2}, TokenAnnotation.class));
+//        s.addKey(new IndexToken<CharSequence>(new int[]{2, 3}, TokenAnnotation.class));
+//        s.addKey(new IndexToken<CharSequence>(new int[]{3, 4}, TokenAnnotation.class));
+//        s.addKey(new IndexToken<CharSequence>(new int[]{4, 5}, TokenAnnotation.class));
+//        s.addKey(new IndexToken<CharSequence>(new int[]{5, 6}, TokenAnnotation.class));
+//
+//        //s.addKey(new IndexToken<String>(new int[]{2,4}, TokenAnnotation.class));
+//        //s.addKey(new IndexToken<String>(new int[]{1,4}, TokenAnnotation.class));
+//		/*
+//        s.addKey(new IndexToken<String>(new int[]{0,1}, TokenAnnotation.class));
+//        s.addKey(new IndexToken<String>(new int[]{1,2}, TokenAnnotation.class));
+//        
+//        s.addKey(new IndexToken<String>(new int[]{4,6}, TokenAnnotation.class));
+//        
+//        
+//        s.addKey(new IndexToken<String>(new int[]{0,4}, TokenAnnotation.class));
+//        s.addKey(new IndexToken<String>(new int[]{4,5}, TokenAnnotation.class));
+//        s.addKey(new IndexToken<String>(new int[]{5,6}, TokenAnnotation.class));
+//         */
+//        s.addKey(new IndexToken<CharSequence>(new int[]{4, 6}, TokenAnnotation.class));
+//
+//        s.add(new Token());
+//        s.add(new Token());
+//        s.add(new Token());
+//        s.add(new Token());
+//        s.add(new Token());
+//        s.add(new Token());
+//
+//        Collection<IndexToken<?>> path = s.getShortestSegmentationPathKeys();
+//
+//
+//        for (IndexToken<?> key : path) {
+//            System.err.println(key);
+//        }
+//
+//
+//
+//    }
 }

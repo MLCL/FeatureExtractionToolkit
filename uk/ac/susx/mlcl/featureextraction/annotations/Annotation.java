@@ -2,7 +2,7 @@
  * Copyright (c) 2011, Sussex University.
  * All rights reserverd.
  */
-package uk.ac.susx.mlcl.featureextraction;
+package uk.ac.susx.mlcl.featureextraction.annotations;
 
 import java.util.Collection;
 
@@ -19,6 +19,8 @@ public interface Annotation<T> {
 
     void setValue(T v);
 
-    void addToCollection(Collection<? super String> list, String prefix)
+    void addToCollection(
+            Collection<? super String> list, String prefix)
             throws OperationNotSupportedException;
+
 }

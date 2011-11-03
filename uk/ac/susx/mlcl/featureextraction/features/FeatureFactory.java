@@ -2,7 +2,7 @@
  * Copyright (c) 2011, Sussex University.
  * All rights reserverd.
  */
-package uk.ac.susx.mlcl.featureextraction;
+package uk.ac.susx.mlcl.featureextraction.features;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,14 +24,13 @@ public class FeatureFactory {
         fns.put(key, fn);
     }
 
-    public void addFeature(String key, FeatureFunction fn, String prefix,
-                           FeatureConstraint... constraints) {
-        fn.setPrefix(prefix);
-        for (FeatureConstraint fc : constraints) {
-            fn.addConstraint(fc);
-        }
-        fns.put(key, fn);
-    }
+//    public void addFeature(String key, FeatureFunction fn, 
+//                           FeatureConstraint... constraints) {
+//        for (FeatureConstraint fc : constraints) {
+//            fn.addConstraint(fc);
+//        }
+//        fns.put(key, fn);
+//    }
 
     public FeatureFunction getFeature(String key) {
         return fns.get(key);

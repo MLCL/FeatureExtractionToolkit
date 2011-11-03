@@ -23,12 +23,12 @@ import java.util.zip.GZIPInputStream;
  * 
  * @author Simon Wibberley
  */
-public final class Path {
+public final class Paths {
 
     private static final Logger LOG = Logger.getLogger(
-            Path.class.getName());
+            Paths.class.getName());
 
-    private Path() {
+    private Paths() {
     }
 
     public static void catFiles(String inputDir, String suffix, String outputDir,
@@ -42,9 +42,9 @@ public final class Path {
         String input = String.format("%s/*%s", inputDir, suffix);
         String output = String.format("%s/%s", outputDir, name);
         String cmdStr = String.format("/bin/cat %s > %s", input, output);
-        Path.exec(cmdStr);
+        Paths.exec(cmdStr);
         if (rm) {
-            Path.exec(String.format("rm %s/*%s", inputDir, suffix));
+            Paths.exec(String.format("rm %s/*%s", inputDir, suffix));
         }
 
 
