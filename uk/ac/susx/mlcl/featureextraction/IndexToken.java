@@ -4,6 +4,7 @@
  */
 package uk.ac.susx.mlcl.featureextraction;
 
+import uk.ac.susx.mlcl.util.IntSpan;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotation;
 import java.util.Comparator;
 import java.util.List;
@@ -21,7 +22,7 @@ public class IndexToken<T> extends Token implements Comparable<IndexToken<?>> {
 
     private final Class<? extends Annotation<T>> keyType;
 
-    public IndexToken(int[] span, Class<? extends Annotation<T>> type) {
+    public IndexToken(IntSpan span, Class<? extends Annotation<T>> type) {
         super();
         setAnnotation(__SpanAnnotation.class, span);
         keyType = type;
@@ -31,7 +32,7 @@ public class IndexToken<T> extends Token implements Comparable<IndexToken<?>> {
         return keyType;
     }
 
-    public int[] getSpan() {
+    public IntSpan getSpan() {
         return getAnnotation(__SpanAnnotation.class);
     }
 
@@ -65,21 +66,7 @@ public class IndexToken<T> extends Token implements Comparable<IndexToken<?>> {
 
                 @Override
                 public int compare(IndexToken<?> arg0, IndexToken<?> arg1) {
-                    final int[] span0 = arg0.getSpan();
-                    final int[] span1 = arg1.getSpan();
-                    if (span0[0] < span1[0]) {
-                        return -1;
-                    } else if (span0[0] == span1[0]) {
-                        if (span0[1] < span1[1]) {
-                            return -1;
-                        } else if (span0[1] == span1[1]) {
-                            return 0;
-                        } else {
-                            return 1;
-                        }
-                    } else {
-                        return 1;
-                    }
+                    return IntSpan.LEFT_FIRST_COMPARATOR.compare(arg0.getSpan(), arg1.getSpan());
                 }
 
             };
@@ -89,21 +76,7 @@ public class IndexToken<T> extends Token implements Comparable<IndexToken<?>> {
 
                 @Override
                 public int compare(IndexToken<?> arg0, IndexToken<?> arg1) {
-                    final int[] span0 = arg0.getSpan();
-                    final int[] span1 = arg1.getSpan();
-                    if (span0[1] < span1[1]) {
-                        return -1;
-                    } else if (span0[1] == span1[1]) {
-                        if (span0[0] < span1[0]) {
-                            return -1;
-                        } else if (span0[0] == span1[0]) {
-                            return 0;
-                        } else {
-                            return 1;
-                        }
-                    } else {
-                        return 1;
-                    }
+                    return IntSpan.RIGHT_FIRST_COMPARATOR.compare(arg0.getSpan(), arg1.getSpan());
                 }
 
             };

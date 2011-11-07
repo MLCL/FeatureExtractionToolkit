@@ -9,6 +9,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import uk.ac.susx.mlcl.featureextraction.IndexToken;
+import uk.ac.susx.mlcl.featureextraction.Sentence;
+import uk.ac.susx.mlcl.featureextraction.Token;
+import uk.ac.susx.mlcl.featureextraction.annotations.Annotation;
 import uk.ac.susx.mlcl.lib.Checks;
 
 /**
@@ -54,4 +58,23 @@ public abstract class AbstractFeatureFunction implements FeatureFunction {
         return Collections.unmodifiableCollection(constraints);
     }
 
+    protected <T> Collection<String> extractFeatures(
+            Sentence sentence, IndexToken<?> index, Class<? extends Annotation<T>> annotation) {
+        List<String> context = new ArrayList<String>();
+        for (int i = 0; i < sentence.size(); ++i) {
+
+            Token t = sentence.get(i);
+            boolean accept = true;
+            for (FeatureConstraint constraint : getConstraints()) {
+                if (!constraint.accept(sentence, index, i)) {
+                    accept = false;
+                    break;
+                }
+            }
+            if (accept) {
+                t.addAnnotationToCollection(annotation, context, getPrefix());
+            }
+        }
+        return context;
+    }
 }

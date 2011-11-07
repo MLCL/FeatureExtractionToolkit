@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.OperationNotSupportedException;
+import uk.ac.susx.mlcl.util.IntSpan;
 
 /**
  * Static utility class for handling Annotation objects.
@@ -43,7 +44,7 @@ public class Annotations {
     public static class CharAnnotation extends AbstractAnnotation<Character> {
     }
 
-    public static class NgramSpanAnnotation extends AbstractAnnotation<List<int[]>> {
+    public static class NgramSpanAnnotation extends AbstractAnnotation<List<IntSpan>> {
 
         @Override
         public void addToCollection(

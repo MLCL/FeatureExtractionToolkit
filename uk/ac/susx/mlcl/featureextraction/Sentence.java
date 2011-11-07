@@ -4,6 +4,7 @@
  */
 package uk.ac.susx.mlcl.featureextraction;
 
+import uk.ac.susx.mlcl.util.IntSpan;
 import uk.ac.susx.mlcl.featureextraction.features.FeatureFactory;
 import uk.ac.susx.mlcl.featureextraction.features.FeatureFunction;
 import java.util.ArrayList;
@@ -80,13 +81,13 @@ public class Sentence extends ArrayList<Token> {
 
     public CharSequence getKeyString(IndexToken<?> key) {
 
-        int[] span = key.getSpan();
+        IntSpan span = key.getSpan();
 
         StringBuilder sb = new StringBuilder();
 
-        for (int i = span[0]; i < span[1]; ++i) {
+        for (int i = span.left; i <= span.right; ++i) {
             sb.append(get(i).getAnnotation(key.getKeyType()));
-            if (i < span[1] - 1) {
+            if (i < span.right) {
                 sb.append(tokenSeparator);
             }
         }
@@ -152,15 +153,15 @@ public class Sentence extends ArrayList<Token> {
 
         for (IndexToken<?> key : keys) {
 
-            int[] span = key.getSpan();
+            IntSpan span = key.getSpan();
 
-            int begin = span[0];
-            int end = span[1] - 1;
+//            int begin = span.left;
+//            int end = span.right;
 //			int len = end-begin;
 
-            if (shortest[begin] + 1 < shortest[end]) {
-                shortest[end] = shortest[begin] + 1;
-                path[end] = key;
+            if (shortest[span.left] + 1 < shortest[span.right]) {
+                shortest[span.right] = shortest[span.left] + 1;
+                path[span.right] = key;
             }
         }
 
@@ -205,7 +206,7 @@ public class Sentence extends ArrayList<Token> {
         }
 
         path.add(key);
-        int begin = key.getSpan()[0] - 1;
+        int begin = key.getSpan().left - 1;
         //System.err.println(begin + " : " + i);
         getPath(keys, begin, path);
 

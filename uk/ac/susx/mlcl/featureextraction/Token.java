@@ -33,6 +33,11 @@ public class Token {
         annotations.put((Class<? extends Annotation<?>>) a.getClass(), a);
     }
 
+    
+    public final <T> void removeAnnotation(Class<? extends Annotation<T>> a) {
+        annotations.remove(a);
+    }
+    
     public final <T> T getAnnotation(Class<? extends Annotation<T>> k) {
         @SuppressWarnings("unchecked")
         final Annotation<T> a = (Annotation<T>) annotations.get(k);
@@ -67,16 +72,16 @@ public class Token {
     @Override
     public final String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("[");
+        sb.append("(");
         boolean first = true;
         for (Annotation<?> a : annotations.values()) {
             if (!first) {
-                sb.append(", ");
-                first = true;
+                sb.append(",");
             }
+                first = false;
             sb.append(a);
         }
-        sb.append("] ");
+        sb.append(")");
         return sb.toString();
     }
 
@@ -85,8 +90,11 @@ public class Token {
             Collection<? super String> list,
             String prefix) {
         try {
+            if(!annotations.containsKey(k))
+                    throw new IllegalArgumentException("No suck element " + k);
             annotations.get(k).addToCollection(list, prefix);
         } catch (OperationNotSupportedException e) {
+        }catch (IllegalArgumentException e) {
         }
     }
 

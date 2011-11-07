@@ -13,45 +13,28 @@ import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.NgramSpanAnnota
 import uk.ac.susx.mlcl.featureextraction.IndexToken;
 import uk.ac.susx.mlcl.featureextraction.Sentence;
 import uk.ac.susx.mlcl.featureextraction.Token;
-import uk.ac.susx.mlcl.featureextraction.annotations.Annotation;
+import uk.ac.susx.mlcl.util.IntSpan;
 
 /**
- *
- * @author hiam20
+ * 
  */
 public class NGramFeatureFunction extends AbstractFeatureFunction {
 
-    private int[] window;
+    private IntSpan window;
 
     private int nmin;
 
     private int nmax;
-    //private Sentence cache;
-    //private Sentence ngrams;
 
-    public NGramFeatureFunction(int[] w, int min, int max) {
+    public NGramFeatureFunction(IntSpan w, int min, int max) {
         window = w;
         nmin = min;
         nmax = max;
-        addConstraint(new FeatureConstraint() {
-
-            @Override
-            public boolean accept(Sentence s, IndexToken<?> cur, int i) {
-                return s.get(i).getAnnotation(NgramAnnotation.class) != null;
-            }
-        });
-        addConstraint(new FeatureConstraint() {
-
-            @Override
-            public boolean accept(Sentence s, IndexToken<?> cur, int i) {
-                int[] curSpan = cur.getSpan();
-                return i < curSpan[0] || i >= curSpan[1];
-            }
-        });
     }
 
     @Override
     public Collection<String> extractFeatures(Sentence sentence, IndexToken<?> index) {
+
         Collection<String> features = new ArrayList<String>();
         getLeftNgrams(sentence, index);
         getRightNgrams(sentence, index);
@@ -72,47 +55,73 @@ public class NGramFeatureFunction extends AbstractFeatureFunction {
     }
 
     private void getLeftNgrams(Sentence s, IndexToken<?> index) {
-        int[] indexSpan = index.getSpan();
-        int begin = Math.max(0, indexSpan[0] + window[0]);
-        int end = indexSpan[0];
+        if (Math.abs(window.left) < 1)
+            return;
+
+        IntSpan indexSpan = index.getSpan();
+        int begin = Math.max(0, indexSpan.left + window.left);
+        int end = indexSpan.left;
+
         for (int i = begin; i < end; ++i) {
-            List<int[]> spans = new ArrayList<int[]>();
-            List<CharSequence> ngrams = new ArrayList<CharSequence>();
-            StringBuilder sb = new StringBuilder();
-            for (int j = i + nmin - 1; j < Math.min(i + nmax, end); ++j) {
-                char c = s.get(j).getAnnotation(CharAnnotation.class);
-                sb.append(c);
-                //System.err.println(sb.toString());
-                int[] span = new int[]{i, j};
+            s.get(i).removeAnnotation(NgramSpanAnnotation.class);;
+            s.get(i).removeAnnotation(NgramAnnotation.class);;
+
+            final List<IntSpan> spans = new ArrayList<IntSpan>();
+            final List<CharSequence> ngrams = new ArrayList<CharSequence>();
+            final StringBuilder sb = new StringBuilder();
+
+            for (int n = nmin; n <= nmax; n++) {
+                int j = i - (n - 1);
+
+                if (j < 0)
+                    break;
+
+                final char c = s.get(j).getAnnotation(CharAnnotation.class);
+                sb.insert(0, c);
+                IntSpan span = new IntSpan(j, i);
                 spans.add(span);
-                ngrams.add(sb);
+                ngrams.add(sb.toString());
             }
+
             s.get(i).setAnnotation(NgramSpanAnnotation.class, spans);
-            
             s.get(i).setAnnotation(NgramAnnotation.class, ngrams);
-            
+
         }
     }
 
     private void getRightNgrams(Sentence s, IndexToken<?> index) {
-        int[] indexSpan = index.getSpan();
-        int begin = indexSpan[1];
-        int end = Math.min(s.size(), indexSpan[1] + window[1] + 1);
+        if (Math.abs(window.right) < 1)
+            return;
+        IntSpan indexSpan = index.getSpan();
+        int begin = indexSpan.right + 1;
+        int end = Math.min(s.size(), indexSpan.right + window.right + 1);
+
         for (int i = begin; i < end; ++i) {
-            List<int[]> spans = new ArrayList<int[]>();
-            List<CharSequence> ngrams = new ArrayList<CharSequence>();
-            StringBuilder sb = new StringBuilder();
-            for (int j = i + nmin - 1; j < Math.min(i + nmax, end); ++j) {
-                char c = s.get(j).getAnnotation(CharAnnotation.class);
+
+            s.get(i).removeAnnotation(NgramSpanAnnotation.class);;
+            s.get(i).removeAnnotation(NgramAnnotation.class);;
+
+            final List<IntSpan> spans = new ArrayList<IntSpan>();
+            final List<CharSequence> ngrams = new ArrayList<CharSequence>();
+            final StringBuilder sb = new StringBuilder();
+
+            for (int n = nmin; n <= nmax; n++) {
+                int j = i + n - 1;
+                if (j >= s.size())
+                    break;
+
+                final char c = s.get(j).getAnnotation(CharAnnotation.class);
                 sb.append(c);
-                //System.err.println(sb.toString());
-                int[] span = new int[]{i, j};
+                IntSpan span = new IntSpan(i, j);
                 spans.add(span);
-                ngrams.add(sb);
+                ngrams.add(sb.toString());
             }
+
             s.get(i).setAnnotation(NgramSpanAnnotation.class, spans);
             s.get(i).setAnnotation(NgramAnnotation.class, ngrams);
+
         }
+
     }
-    
+
 }

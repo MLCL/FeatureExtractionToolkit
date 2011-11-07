@@ -46,39 +46,56 @@ public abstract class Parser implements Configurable {
     public static class ParserConfig extends Config {
 
         private static final long serialVersionUID = 1L;
+
         @Parameter(names = {"-es", "--entrySeparator"},
         description = "base term / feature delimiter for the thesaurus output.")
         public String entrySeparator = "\t";
+
         @Parameter(names = {"-op", "--outPath"},
         required = true)
         public String outPath;
+
         @Parameter(names = {"-ip", "--inPath"},
         required = true)
         public String inPath;
+
         @Parameter(names = {"-r", "--recursive"},
         description = "Descend into subfolder of the input path.")
         public boolean recursive = false;
+
         @Parameter(names = {"-is", "--inSuffix"},
         description = "Only read files with the given suffix.",
         required = true)
         public String inSuffix;
+
         @Parameter(names = {"-z", "--gzip"})
         public boolean useGzip = false;
+
         @Parameter(names = {"-of", "--outputFormatter"},
         description = "class that specifies the output format.",
         converter = OutputFormatterConverter.class)
         public OutputFormatter outputFormatter = new TabOutputFormatter();
+
         @Parameter(names = {"-v", "--verbose"})
         public boolean verbose = false;
+
         @Parameter(names = {"-l", "--limit"}, description = "Maximum number of documents (not files) to process.")
         public int limit = 0;
+
     }
+
     protected BufferedWriter outFile;
+
     protected StringSplitter splitter;
+
     final AtomicInteger count = new AtomicInteger();
-    protected FeatureFactory featureFactory;
+
+    private FeatureFactory featureFactory;
+
     private ExecutorService exec;
+
     private Semaphore throttle;
+
     private Queue<Future<Void>> futures;
 
     protected String getOutPath() {
@@ -95,15 +112,15 @@ public abstract class Parser implements Configurable {
 
         System.err.println("File list built.");
 
-        buildFeatureFactory();
+        featureFactory = buildFeatureFactory();
 
         parse(config().inPath, files);
 
     }
-//
-//    private void parse(String input) {
-//        parse(input, true);
-//    }
+
+    public FeatureFactory getFeatureFactory() {
+        return featureFactory;
+    }
 
     private void parse(String prefix, List<String> files) {
         handleOutputPre();
@@ -119,7 +136,7 @@ public abstract class Parser implements Configurable {
             System.err.println("Processing file: " + new File(prefix, file).toString());
 
             parse(Paths.getText(new File(prefix, file).toString(), false, true),
-                    false);
+                  false);
 
             try {
                 while (!futures.isEmpty()) {
@@ -137,36 +154,7 @@ public abstract class Parser implements Configurable {
         handleOutputPost();
     }
 
-    /*
-    public void parse(String input, boolean prePost) {
-    //System.err.println(input);
-    
-    if(prePost) {
-    handleOutputPre();
-    }
-    List<String> entries = splitter.split(input);
-    
-    
-    for(String entry : entries){
-    
-    String output = handleEntry(entry);
-    
-    handleOutput(output);
-    
-    int c = count.addAndGet(1);
-    if (c % 1000 == 0) {
-    System.err.print("[" + c + "]");
-    }
-    }
-    
-    if(prePost) { 
-    handleOutputPost();
-    }
-    }
-     */
     private void parse(final CharSequence input, final boolean prePost) {
-        //System.err.println(input);
-
         if (prePost) {
             handleOutputPre();
         }
@@ -194,22 +182,20 @@ public abstract class Parser implements Configurable {
 
                 @Override
                 public final Void call() throws IOException {
-//                    System.err.println("Prcessing entry " + entryid);
                     try {
                         final CharSequence output = handleEntry(entry);
 
                         handleOutput(output);
 
                     } catch (InvalidEntryException e) {
-                        if (config().verbose) {
-                            LOG.log(Level.WARNING, null, e);
-                        }
+                        // just ignore singlton or empty sentences
                     } finally {
                         throttle.release();
-                        return null;
                     }
+                    return null;
 
                 }
+
             }));
         }
 
@@ -269,30 +255,11 @@ public abstract class Parser implements Configurable {
         }
         synchronized (outFile) {
             outFile.append(output);
+//            System.out.println(output);
         }
 
 
     }
-//
-//    protected CharSequence allPairs(
-//            List<String> baseEntries, List<String> featureEntries) {
-//
-//        StringBuilder strbldr = new StringBuilder();
-//        for (String el1 : baseEntries) {
-//
-//            for (String el2 : featureEntries) {
-//                if (el2.equals(el1)) {
-//                    continue;
-//                }
-//                String line = el1 + config().entrySeparator + el2;
-//                strbldr.append(line);
-//                strbldr.append("\n");
-//                //System.err.println(line);
-//            }
-//
-//        }
-//        return strbldr;
-//    }
 
     /**
      * Process one entry. An Entry is the scope of the context. 
@@ -300,13 +267,15 @@ public abstract class Parser implements Configurable {
      * @return  
      */
     private CharSequence handleEntry(String entry) {
-        //System.err.println(entry);
-        //List<String> baseEntries = new ArrayList<String>();
-        //List<String> featureEntries = new ArrayList<String>();
+
         Sentence annotated = annotate(entry);
 
-        //getElements(entry, baseEntries, featureEntries);
-        //String lines = allPairs(baseEntries, featureEntries);
+
+        if (annotated.isEmpty()) {
+            throw new InvalidEntryException("empty sentence!");
+        } else if (annotated.size() <= 1) {
+            throw new InvalidEntryException("single entry sentence!");
+        }
 
         CharSequence lines = getLines(annotated);
 
@@ -321,7 +290,6 @@ public abstract class Parser implements Configurable {
 
             CharSequence output = config().outputFormatter.getOutput(t);
 
-            //System.err.print(output);
             out.append(output);
         }
 
@@ -329,12 +297,10 @@ public abstract class Parser implements Configurable {
 
     }
 
-    abstract protected Sentence annotate(String entry);
-    //abstract protected void getElements(String entry, List<String> baseEntries, List<String> featureEntries);
+    protected abstract Sentence annotate(String entry);
 
-    protected abstract void buildFeatureFactory();
-
-   
+    protected abstract FeatureFactory buildFeatureFactory();
 
     protected abstract ParserConfig config();
+
 }
