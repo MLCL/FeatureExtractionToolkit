@@ -84,7 +84,7 @@ public class IndexToken<T> extends Token implements Comparable<IndexToken<?>> {
     public static class __SpanAnnotation extends AbstractSpanAnnotation {
 
         public __SpanAnnotation() {
-            // The public constructor is required, otherwise the private class 
+            // The public constructor is required, otherwise the class 
             // can't be instantiated through relfection.
         }
 
@@ -93,7 +93,7 @@ public class IndexToken<T> extends Token implements Comparable<IndexToken<?>> {
     public static class __FeatureAnnotation extends AbstractListAnnotation<CharSequence> {
 
         public __FeatureAnnotation() {
-            // The public constructor is required, otherwise the private class 
+            // The public constructor is required, otherwise the class 
             // can't be instantiated through relfection.
         }
 
@@ -102,7 +102,7 @@ public class IndexToken<T> extends Token implements Comparable<IndexToken<?>> {
     public static class __KeyAnnotation extends AbstractAnnotation<CharSequence> {
 
         public __KeyAnnotation() {
-            // The public constructor is required, otherwise the private class 
+            // The public constructor is required, otherwise the class 
             // can't be instantiated through relfection.
         }
 

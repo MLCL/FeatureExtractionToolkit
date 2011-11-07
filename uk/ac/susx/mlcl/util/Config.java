@@ -24,7 +24,7 @@ public class Config implements Serializable {
 
     @Parameter(names = {"-nc", "--numCores"},
                description = "Number of concurrent worker threads to use.")
-    public int numCores = Runtime.getRuntime().availableProcessors() + 1;
+    private int numCores = Runtime.getRuntime().availableProcessors() + 1;
 
     @Parameter(names = {"-h", "--help"},
                description = "Display this help message.")
@@ -54,4 +54,12 @@ public class Config implements Serializable {
             jc.usage();
         }
     }
+
+    /**
+     * @return the numCores
+     */
+    public int getNumCores() {
+        return numCores;
+    }
+
 }

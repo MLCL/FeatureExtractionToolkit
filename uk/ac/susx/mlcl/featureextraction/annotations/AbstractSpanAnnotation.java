@@ -1,17 +1,16 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (c) 2011, Sussex University.
+ * All rights reserved.
  */
 package uk.ac.susx.mlcl.featureextraction.annotations;
 
-import java.util.Arrays;
 import java.util.Collection;
 import javax.naming.OperationNotSupportedException;
 import uk.ac.susx.mlcl.util.IntSpan;
 
 /**
  *
- * @author hiam20
+ * @author Simon Wibberley
  */
 public abstract class AbstractSpanAnnotation extends AbstractAnnotation<IntSpan> {
 
@@ -25,5 +24,5 @@ public abstract class AbstractSpanAnnotation extends AbstractAnnotation<IntSpan>
     public String toString() {
         return getValue().toString();
     }
-    
+
 }

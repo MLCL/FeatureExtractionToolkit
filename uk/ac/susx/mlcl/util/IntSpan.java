@@ -20,8 +20,8 @@ import static java.lang.Math.*;
  * IntSpan objects are immutable, and their fields are final --- hence the rather 
  * complicated serialization code.
  * 
- * @author Hamish Morgan
- */
+ * @author Hamish Morgan &lt;hamish.morgan@sussex.ac.uk&gt;
+å */
 public final class IntSpan implements Serializable, Comparable<IntSpan> {
 
     private static final long serialVersionUID = 1L;

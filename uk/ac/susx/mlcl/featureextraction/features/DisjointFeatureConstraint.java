@@ -1,6 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (c) 2011, Sussex University.
+ * All rights reserved.
  */
 package uk.ac.susx.mlcl.featureextraction.features;
 
@@ -9,7 +9,7 @@ import uk.ac.susx.mlcl.featureextraction.Sentence;
 
 /**
  *
- * @author hiam20
+ * @author Simon Wibberley
  */
 public final class DisjointFeatureConstraint implements FeatureConstraint {
 
@@ -17,5 +17,5 @@ public final class DisjointFeatureConstraint implements FeatureConstraint {
     public boolean accept(Sentence s, IndexToken<?> currentToken, int index) {
         return !(currentToken.getSpan().intersects(index));
     }
-    
+
 }

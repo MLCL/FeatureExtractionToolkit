@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2011, Sussex University.
- * All rights reserverd.
+ * All rights reserved.
  */
 package uk.ac.susx.mlcl.strings;
 

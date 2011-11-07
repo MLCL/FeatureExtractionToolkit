@@ -30,11 +30,6 @@
  */
 package uk.ac.susx.mlcl.util;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 /**
  * Static utility methods that don't fit anywhere else.
  *
@@ -125,9 +120,9 @@ public class MiscUtil {
         }
 
         return String.format("%s%.1f%sB",
-                signum == -1 ? "-" : "",
-                byteFrac,
-                unit);
+                             signum == -1 ? "-" : "",
+                             byteFrac,
+                             unit);
     }
 
     /**
@@ -225,28 +220,4 @@ public class MiscUtil {
         System.out.println(memoryInfoString());
     }
 
-    private static final File[] paths = {new File("/bin"),
-        new File("/usr/bin"),
-        new File("/usr/local/bin"),
-        new File("/opt/bin"),
-        new File("/opt/local/bin")};
-
-    public static String which(String command)
-            throws IOException, InterruptedException {
-        Process proc = Runtime.getRuntime().exec("which " + command);
-        if (proc.waitFor() != 0) {
-
-            System.out.println(System.getProperties());
-//            if (new File("/usr/bin/truncate").exists()) {
-//            }
-
-            System.out.println(System.getProperty("java.ext.dirs"));
-            return null;
-        } else {
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(proc.getInputStream()));
-            String which = in.readLine();
-            return which;
-        }
-    }
 }

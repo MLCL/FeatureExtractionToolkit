@@ -1,6 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (c) 2011, Sussex University.
+ * All rights reserved.
  */
 package uk.ac.susx.mlcl.featureextraction.features;
 
@@ -10,19 +10,19 @@ import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.ChunkSpanAnnota
 import uk.ac.susx.mlcl.util.IntSpan;
 
 /**
- *
- * @author hiam20
+ * 
+ * 
+ * @author Simon Wibberley
  */
-public class MysteriousFeatureConstraint implements FeatureConstraint {
-
-    public MysteriousFeatureConstraint() {
-    }
+public class TheNonIntersectingChunkTokenThingFeatureConstraintTingDem
+        implements FeatureConstraint {
 
     @Override
     public boolean accept(Sentence sentence, IndexToken<?> currentToken, int index) {
         final IntSpan chunkSpan = sentence.get(index).getAnnotation(ChunkSpanAnnotation.class);
         final IntSpan tokenSpan = currentToken.getSpan();
-        return (chunkSpan.right < tokenSpan.left && index == chunkSpan.right) || (tokenSpan.right < chunkSpan.left && index == chunkSpan.left);
+        return (chunkSpan.right < tokenSpan.left && index == chunkSpan.right)
+                || (tokenSpan.right < chunkSpan.left && index == chunkSpan.left);
     }
-    
+
 }

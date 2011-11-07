@@ -27,7 +27,7 @@ public class Annotations {
     }
 
     public static <T> Annotation<T> createAnnotation(Class<? extends Annotation<T>> cls,
-                                        T value) {
+                                                     T value) {
 
         Annotation<T> a = null;
         try {
@@ -52,19 +52,14 @@ public class Annotations {
                 throws OperationNotSupportedException {
             throw new OperationNotSupportedException();
         }
+
     }
-//
-//    public static class ContextAnnotation extends AbstractListAnnotation<String> {
-//    }
 
     public static class NgramAnnotation extends AbstractListAnnotation<CharSequence> {
     }
 
     public static class ChunkSpanAnnotation extends AbstractSpanAnnotation {
     }
-//
-//    public static class BaseAnnotation extends AbstractSpanAnnotation {
-//    }
 
     public static class IndexAnnotation extends AbstractAnnotation<Integer> {
     }
@@ -72,14 +67,8 @@ public class Annotations {
     public static class SentenceLengthAnnotation extends AbstractAnnotation<Integer> {
     }
 
-//    public static class WordAnnotation extends AbstractAnnotation<String> {
-//    }
-
     public static class TokenAnnotation extends AbstractAnnotation<CharSequence> {
     }
-
-//    public static class NERAnnotation extends AbstractAnnotation<String> {
-//    }
 
     public static class PoSAnnotation extends AbstractAnnotation<String> {
     }
@@ -89,15 +78,4 @@ public class Annotations {
 
     public static class ChunkTagAnnotation extends AbstractAnnotation<String> {
     }
-
-//    public static class NEAnnotation extends AbstractAnnotation<String> {
-//    }
-
-//    public static class AnswerAnnotation extends AbstractAnnotation<String> {
-//    }
-
-  
-   
-
-  
 }

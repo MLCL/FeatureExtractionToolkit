@@ -54,21 +54,6 @@ public class Token {
 
     }
 
-//    public String getString(String k) {
-//        try {
-//            return get(k).toString();
-//        } catch (NullPointerException e) {
-//            return null;
-//        }
-////        try {
-////            return annotations.get(Class.forName(k)).getValue().toString();
-////        } catch (NullPointerException e) {
-////            return null;
-////        } catch (ClassNotFoundException e) {
-////            return null;
-////        }
-//
-//    }
     @Override
     public final String toString() {
         final StringBuilder sb = new StringBuilder();

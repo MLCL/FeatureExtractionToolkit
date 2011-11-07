@@ -1,6 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (c) 2011, Sussex University.
+ * All rights reserved.
  */
 package uk.ac.susx.mlcl.featureextraction;
 
@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  *
- * @author hiam20
+ * @author Simon Wibberley
  */
 public class TabOutputFormatter implements OutputFormatter {
 
@@ -24,5 +24,5 @@ public class TabOutputFormatter implements OutputFormatter {
         out.append('\n');
         return out;
     }
-    
+
 }

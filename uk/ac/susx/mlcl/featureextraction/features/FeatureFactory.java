@@ -24,14 +24,6 @@ public class FeatureFactory {
         fns.put(key, fn);
     }
 
-//    public void addFeature(String key, FeatureFunction fn, 
-//                           FeatureConstraint... constraints) {
-//        for (FeatureConstraint fc : constraints) {
-//            fn.addConstraint(fc);
-//        }
-//        fns.put(key, fn);
-//    }
-
     public FeatureFunction getFeature(String key) {
         return fns.get(key);
     }
@@ -39,4 +31,5 @@ public class FeatureFactory {
     public Collection<FeatureFunction> getAllFeatures() {
         return fns.values();
     }
+
 }

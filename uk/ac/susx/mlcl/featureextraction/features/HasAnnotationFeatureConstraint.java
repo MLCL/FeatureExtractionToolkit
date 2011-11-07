@@ -1,12 +1,11 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (c) 2011, Sussex University.
+ * All rights reserved.
  */
 package uk.ac.susx.mlcl.featureextraction.features;
 
 import uk.ac.susx.mlcl.featureextraction.IndexToken;
 import uk.ac.susx.mlcl.featureextraction.Sentence;
-import uk.ac.susx.mlcl.featureextraction.annotations.Annotation;
 
 /**
  *

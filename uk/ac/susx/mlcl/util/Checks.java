@@ -202,38 +202,5 @@ public class Checks {
             throw new NullPointerException(
                     "Argument '" + name + "' is null.");
     }
-//    public static void checkNotNull(Object o) {
-//        if (o == null)
-//            throw new NullPointerException("Argument is null.");
-//    }
-//
-//    public static void checkNotNull(String name, Object o) {
-//        if (o == null)
-//            throw new NullPointerException("Argument '" + name + "' is null.");
-//    }
-//
-//    public static void checkInputFile(String name, File file) {
-//        if (file == null)
-//            throw new NullPointerException("file == null");
-//        if (!file.exists())
-//            throw new IllegalArgumentException(
-//                    "File " + name + " '" + file + "' does not exist.");
-//        if (!file.canRead())
-//            throw new IllegalArgumentException(
-//                    "Don't have read permissions on " + name + " file '"
-//                    + file + "'");
-//        if (!file.isFile())
-//            throw new IllegalArgumentException(
-//                    "File " + name + " '" + file
-//                    + "' is not a normal data file (could be a directory)");
-//    }
-//
-//    public static void checkOutputFile(String name, File file) {
-//        if (file == null)
-//            throw new NullPointerException(" file == null");
-//        if (file.exists())
-//            throw new IllegalArgumentException(
-//                    "The '" + name + "' file '" + file.toString()
-//                    + "' already exists. (It needs to be deleted.)");
-//    }
+
 }

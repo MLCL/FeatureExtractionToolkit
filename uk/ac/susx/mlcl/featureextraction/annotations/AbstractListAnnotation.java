@@ -1,6 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (c) 2011, Sussex University.
+ * All rights reserved.
  */
 package uk.ac.susx.mlcl.featureextraction.annotations;
 
@@ -11,7 +11,7 @@ import javax.naming.OperationNotSupportedException;
 /**
  *
  * @param <T> 
- * @author hiam20
+ * @author Simon Wibberley
  */
 public abstract class AbstractListAnnotation<T> extends AbstractAnnotation<List<T>> {
 

@@ -23,70 +23,56 @@ import java.util.zip.GZIPInputStream;
  * 
  * @author Simon Wibberley
  */
-public final class Paths {
+public final class Files {
 
     private static final Logger LOG = Logger.getLogger(
-            Paths.class.getName());
+            Files.class.getName());
 
-    private Paths() {
+    private Files() {
     }
 
     public static void catFiles(String inputDir, String suffix, String outputDir,
-            String name) {
+                                String name) throws IOException, InterruptedException {
         catFiles(inputDir, suffix, outputDir, name, true);
     }
 
     public static void catFiles(String inputDir, String suffix, String outputDir,
-            String name, boolean rm) {
+                                String name, boolean rm) throws IOException, InterruptedException {
 
         String input = String.format("%s/*%s", inputDir, suffix);
         String output = String.format("%s/%s", outputDir, name);
         String cmdStr = String.format("/bin/cat %s > %s", input, output);
-        Paths.exec(cmdStr);
+        Files.exec(cmdStr);
         if (rm) {
-            Paths.exec(String.format("rm %s/*%s", inputDir, suffix));
+            Files.exec(String.format("rm %s/*%s", inputDir, suffix));
         }
 
 
     }
 
-    public static void exec(String command) {
+    public static void exec(String command) throws IOException, InterruptedException {
         System.err.println(command);
-        //String cmdStr = String.format("/bin/bash -c \"%s\"", command);
-        try {
+        Process child = Runtime.getRuntime().exec(
+                new String[]{"/bin/bash", "-c", command});
 
-            //System.err.println(cmdStr);
-            Process child = Runtime.getRuntime().exec(
-                    new String[]{"/bin/bash", "-c", command});
+        child.waitFor();
 
-            //BufferedWriter output = new BufferedWriter(new OutputStreamWriter(child.getOutputStream()));
-            //output.write(command);
-            //output.write("\n");
-            //output.flush();
+        BufferedReader input = new BufferedReader(new InputStreamReader(child.getInputStream()));
+        String line;
 
-            child.waitFor();
+        while ((line = input.readLine()) != null) {
+            System.err.println(line);
+        }
 
-            BufferedReader input = new BufferedReader(new InputStreamReader(child.getInputStream()));
-            String line;
+        int exitVal = child.waitFor();
+        if (exitVal > 0) {
+            System.err.println("Exited with error code " + exitVal);
+            input = new BufferedReader(new InputStreamReader(child.getErrorStream()));
 
             while ((line = input.readLine()) != null) {
                 System.err.println(line);
             }
-
-            int exitVal = child.waitFor();
-            if (exitVal > 0) {
-                System.err.println("Exited with error code " + exitVal);
-                input = new BufferedReader(new InputStreamReader(child.getErrorStream()));
-
-                while ((line = input.readLine()) != null) {
-                    System.err.println(line);
-                }
-
-            }
-        } catch (Exception e) {
-            System.err.println(e);
         }
-
     }
 
     public static List<String> getFileList(String pathName, final String suffix) {
@@ -94,18 +80,18 @@ public final class Paths {
     }
 
     public static List<String> getFileList(String pathName, final String suffix,
-            final boolean includeHidden) {
+                                           final boolean includeHidden) {
         return getFileList(pathName, suffix, includeHidden, false);
     }
 
     public static List<String> getFileList(String pathName, final String suffix,
-            final boolean includeHidden,
-            final boolean recursive) {
-        if(pathName == null)
+                                           final boolean includeHidden,
+                                           final boolean recursive) {
+        if (pathName == null)
             throw new NullPointerException("pathName is null");
-        if(suffix == null)
+        if (suffix == null)
             throw new NullPointerException("suffix is null");
-        
+
         File path = new File(pathName);
         if (!path.exists()) {
             throw new IllegalArgumentException("path does not exist: " + path);
@@ -129,8 +115,8 @@ public final class Paths {
                     if (f.isDirectory()) {
 
                         List<String> subList = getFileList(f.getAbsolutePath(),
-                                suffix, includeHidden,
-                                recursive);
+                                                           suffix, includeHidden,
+                                                           recursive);
 
                         for (String file : subList) {
                             String subPath = name + File.separator + file;
@@ -146,6 +132,7 @@ public final class Paths {
                 }
 
             }
+
         };
 
         fileList.addAll(Arrays.asList(path.list(filter)));
@@ -159,14 +146,14 @@ public final class Paths {
     }
 
     public static CharSequence getText(String filePath, boolean gzip,
-            boolean incNewline) {
+                                       boolean incNewline) {
         try {
             if (gzip) {
                 return getText(new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(
                         filePath)))), incNewline);
             } else {
                 return getText(new BufferedReader(new FileReader(filePath)),
-                        incNewline);
+                               incNewline);
             }
 
         } catch (Exception e) {
@@ -188,9 +175,6 @@ public final class Paths {
             while ((read = reader.read(strbuf)) >= 0) {
                 strbldr.append(strbuf, 0, read);
             }
-
-            
-//            String text = strbldr.toString();
             reader.close();
             return strbldr;
         } catch (IOException e) {
@@ -213,8 +197,6 @@ public final class Paths {
                     strbfr.append("\n");
                 }
             }
-
-//            String text = strbfr.toString();
             reader.close();
             return strbfr;
         } catch (IOException e) {
@@ -246,4 +228,5 @@ public final class Paths {
 
         return count;
     }
+
 }

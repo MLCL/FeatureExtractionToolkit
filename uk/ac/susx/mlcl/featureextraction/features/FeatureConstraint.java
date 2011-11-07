@@ -14,4 +14,5 @@ import uk.ac.susx.mlcl.featureextraction.Sentence;
 public interface FeatureConstraint {
 
     boolean accept(Sentence s, IndexToken<?> cur, int i);
+
 }

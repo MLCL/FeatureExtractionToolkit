@@ -29,7 +29,7 @@ import uk.ac.susx.mlcl.util.Config;
 import uk.ac.susx.mlcl.util.Configurable;
 import uk.ac.susx.mlcl.strings.StringSplitter;
 import uk.ac.susx.mlcl.util.MiscUtil;
-import uk.ac.susx.mlcl.util.Paths;
+import uk.ac.susx.mlcl.util.Files;
 
 /**
  * Change Log 09-09-2011
@@ -38,57 +38,93 @@ import uk.ac.susx.mlcl.util.Paths;
  * 
  * @author Simon Wibberley
  */
-public abstract class Parser implements Configurable {
+public abstract class AbstractParser implements Configurable {
 
     private static final Logger LOG =
-            Logger.getLogger(Parser.class.getName());
+            Logger.getLogger(AbstractParser.class.getName());
 
-    public static class ParserConfig extends Config {
+    protected abstract static class AbstractParserConfig extends Config {
 
         private static final long serialVersionUID = 1L;
 
         @Parameter(names = {"-es", "--entrySeparator"},
         description = "base term / feature delimiter for the thesaurus output.")
-        public String entrySeparator = "\t";
+        private String entrySeparator = "\t";
 
         @Parameter(names = {"-op", "--outPath"},
         required = true)
-        public String outPath;
+        private String outPath;
 
         @Parameter(names = {"-ip", "--inPath"},
         required = true)
-        public String inPath;
+        private String inPath;
 
         @Parameter(names = {"-r", "--recursive"},
         description = "Descend into subfolder of the input path.")
-        public boolean recursive = false;
+        private boolean recursive = false;
 
         @Parameter(names = {"-is", "--inSuffix"},
         description = "Only read files with the given suffix.",
         required = true)
-        public String inSuffix;
+        private String inSuffix;
 
         @Parameter(names = {"-z", "--gzip"})
-        public boolean useGzip = false;
+        private boolean useGzip = false;
 
         @Parameter(names = {"-of", "--outputFormatter"},
         description = "class that specifies the output format.",
         converter = OutputFormatterConverter.class)
-        public OutputFormatter outputFormatter = new TabOutputFormatter();
+        private OutputFormatter outputFormatter = new TabOutputFormatter();
 
         @Parameter(names = {"-v", "--verbose"})
-        public boolean verbose = false;
+        private boolean verbose = false;
 
         @Parameter(names = {"-l", "--limit"}, description = "Maximum number of documents (not files) to process.")
-        public int limit = 0;
+        private int limit = 0;
+
+        public String getEntrySeparator() {
+            return entrySeparator;
+        }
+
+        public String getOutPath() {
+            return outPath;
+        }
+
+        public String getInPath() {
+            return inPath;
+        }
+
+        public boolean isRecursive() {
+            return recursive;
+        }
+
+        public String getInSuffix() {
+            return inSuffix;
+        }
+
+        public boolean isUseGzip() {
+            return useGzip;
+        }
+
+        public OutputFormatter getOutputFormatter() {
+            return outputFormatter;
+        }
+
+        public boolean isVerbose() {
+            return verbose;
+        }
+
+        public int getLimit() {
+            return limit;
+        }
 
     }
 
-    protected BufferedWriter outFile;
+    private BufferedWriter outFile;
 
-    protected StringSplitter splitter;
+    private StringSplitter splitter;
 
-    final AtomicInteger count = new AtomicInteger();
+    private final AtomicInteger count = new AtomicInteger();
 
     private FeatureFactory featureFactory;
 
@@ -98,23 +134,31 @@ public abstract class Parser implements Configurable {
 
     private Queue<Future<Void>> futures;
 
+    public StringSplitter getSplitter() {
+        return splitter;
+    }
+
+    public void setSplitter(StringSplitter splitter) {
+        this.splitter = splitter;
+    }
+
     protected String getOutPath() {
-        return config().outPath;
+        return config().getOutPath();
     }
 
     public void parse() {
 
         System.err.println("Building file list...");
 
-        List<String> files = Paths.getFileList(
-                config().inPath, config().inSuffix,
-                false, config().recursive);
+        List<String> files = Files.getFileList(
+                config().getInPath(), config().getInSuffix(),
+                false, config().isRecursive());
 
         System.err.println("File list built.");
 
         featureFactory = buildFeatureFactory();
 
-        parse(config().inPath, files);
+        parse(config().getInPath(), files);
 
     }
 
@@ -129,13 +173,13 @@ public abstract class Parser implements Configurable {
 
         for (String file : files) {
 
-            if (config().limit > 0 && count.get() > config().limit) {
+            if (config().getLimit() > 0 && count.get() > config().getLimit()) {
                 break;
             }
 
             System.err.println("Processing file: " + new File(prefix, file).toString());
 
-            parse(Paths.getText(new File(prefix, file).toString(), false, true),
+            parse(Files.getText(new File(prefix, file).toString(), false, true),
                   false);
 
             try {
@@ -158,7 +202,7 @@ public abstract class Parser implements Configurable {
         if (prePost) {
             handleOutputPre();
         }
-        final List<String> entries = splitter.split(input.toString());
+        final List<String> entries = getSplitter().split(input.toString());
 
         for (final String entry : entries) {
             try {
@@ -167,7 +211,7 @@ public abstract class Parser implements Configurable {
                 LOG.log(Level.SEVERE, null, e);
             }
 
-            if (config().limit > 0 && count.get() > config().limit) {
+            if (config().getLimit() > 0 && count.get() > config().getLimit()) {
                 throttle.release();
                 break;
             }
@@ -208,8 +252,8 @@ public abstract class Parser implements Configurable {
         if (exec != null || throttle != null || futures != null) {
             throw new IllegalStateException();
         }
-        exec = Executors.newFixedThreadPool(config().numCores);
-        throttle = new Semaphore(3 * config().numCores);
+        exec = Executors.newFixedThreadPool(config().getNumCores());
+        throttle = new Semaphore(3 * config().getNumCores());
         futures = new ArrayDeque<Future<Void>>();
     }
 
@@ -288,7 +332,7 @@ public abstract class Parser implements Configurable {
 
         for (IndexToken<?> t : sentence.getKeys()) {
 
-            CharSequence output = config().outputFormatter.getOutput(t);
+            CharSequence output = config().getOutputFormatter().getOutput(t);
 
             out.append(output);
         }
@@ -301,6 +345,6 @@ public abstract class Parser implements Configurable {
 
     protected abstract FeatureFactory buildFeatureFactory();
 
-    protected abstract ParserConfig config();
+    protected abstract AbstractParserConfig config();
 
 }
