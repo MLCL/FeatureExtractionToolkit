@@ -13,7 +13,7 @@ import uk.ac.susx.mlcl.featureextraction.IndexToken;
 import uk.ac.susx.mlcl.featureextraction.Sentence;
 import uk.ac.susx.mlcl.featureextraction.Token;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotation;
-import uk.ac.susx.mlcl.lib.Checks;
+import uk.ac.susx.mlcl.util.Checks;
 
 /**
  * 

@@ -25,10 +25,10 @@ import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
-import uk.ac.susx.mlcl.lib.MiscUtil;
 import uk.ac.susx.mlcl.util.Config;
 import uk.ac.susx.mlcl.util.Configurable;
 import uk.ac.susx.mlcl.strings.StringSplitter;
+import uk.ac.susx.mlcl.util.MiscUtil;
 import uk.ac.susx.mlcl.util.Paths;
 
 /**
