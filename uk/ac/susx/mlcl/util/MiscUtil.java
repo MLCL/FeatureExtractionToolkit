@@ -30,6 +30,11 @@
  */
 package uk.ac.susx.mlcl.util;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 /**
  * Static utility methods that don't fit anywhere else.
  *
@@ -120,9 +125,9 @@ public class MiscUtil {
         }
 
         return String.format("%s%.1f%sB",
-                             signum == -1 ? "-" : "",
-                             byteFrac,
-                             unit);
+                signum == -1 ? "-" : "",
+                byteFrac,
+                unit);
     }
 
     /**
