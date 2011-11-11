@@ -25,11 +25,11 @@ import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
+import uk.ac.susx.mlcl.lib.io.Files;
+import uk.ac.susx.mlcl.lib.MiscUtil;
 import uk.ac.susx.mlcl.util.Config;
 import uk.ac.susx.mlcl.util.Configurable;
 import uk.ac.susx.mlcl.strings.StringSplitter;
-import uk.ac.susx.mlcl.util.MiscUtil;
-import uk.ac.susx.mlcl.util.Files;
 
 /**
  * Change Log 09-09-2011
@@ -171,16 +171,21 @@ public abstract class AbstractParser implements Configurable {
 
         initThreads();
 
-        for (String file : files) {
+        for (String fileName : files) {
 
             if (config().getLimit() > 0 && count.get() > config().getLimit()) {
                 break;
             }
 
-            System.err.println("Processing file: " + new File(prefix, file).toString());
+            File file = new File(prefix, fileName);
+            System.err.println("Processing file: " + file);
 
-            parse(Files.getText(new File(prefix, file).toString(), false, true),
-                  false);
+            try {
+                CharSequence text = Files.getText(file, false, true);
+                parse(text, false);
+            } catch (IOException e) {
+                LOG.log(Level.SEVERE, null, e);
+            }
 
             try {
                 while (!futures.isEmpty()) {
