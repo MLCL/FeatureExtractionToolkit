@@ -10,6 +10,8 @@ import java.util.Map;
 
 /**
  * 
+ * Contains a collection of FeatureFunctions with the necessary get and set methods
+ * 
  * @author Simon Wibberley
  */
 public class FeatureFactory {

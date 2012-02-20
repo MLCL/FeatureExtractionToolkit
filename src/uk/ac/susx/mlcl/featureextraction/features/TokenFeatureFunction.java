@@ -10,7 +10,9 @@ import uk.ac.susx.mlcl.featureextraction.IndexToken;
 import uk.ac.susx.mlcl.featureextraction.Sentence;
 
 /**
- *
+ * Extends the AbstractFeatureFunction to provide Token Feature specific functionality
+ * to the overridden method extractFeatures()
+ * 
  * @author Simon Wibberley
  */
 public class TokenFeatureFunction extends AbstractFeatureFunction {

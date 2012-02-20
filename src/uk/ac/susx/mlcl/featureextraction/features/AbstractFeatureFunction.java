@@ -16,6 +16,7 @@ import uk.ac.susx.mlcl.featureextraction.annotations.Annotation;
 import uk.ac.susx.mlcl.lib.Checks;
 
 /**
+ * Instantiates the general methods needed for FeatureFunctions
  * 
  * @author Simon Wibberley
  */
@@ -36,6 +37,9 @@ public abstract class AbstractFeatureFunction implements FeatureFunction {
         this.prefix = prefix;
     }
 
+    /*
+     * Basic constructor
+     */
     public AbstractFeatureFunction(FeatureConstraint... constraints) {
         this(DEFAULT_PREFIX, constraints);
     }
@@ -44,29 +48,46 @@ public abstract class AbstractFeatureFunction implements FeatureFunction {
         return prefix;
     }
 
+    /*
+     * Allows the ability to set a prefix to a feature in order to characterise it
+     * as a particular feature
+     */
     public final void setPrefix(String prefix) {
         Checks.checkNotNull("prefix", prefix);
         this.prefix = prefix;
     }
 
+    /*
+     * Adds a constraint 
+     */
     public final void addConstraint(FeatureConstraint constraint) {
         Checks.checkNotNull("constraint", constraint);
         constraints.add(constraint);
     }
 
+    /*
+     * Gets all constraints
+     */
     protected final Collection<FeatureConstraint> getConstraints() {
         return Collections.unmodifiableCollection(constraints);
     }
 
+    /* Iterates over each token in a given sentence adding the necessary
+     * annotations to the Tokens collections if all constraints are met.
+     * 
+     * @param Sentence
+     * @param index 
+     * @param annotation The key which represents the class of annotation 
+     */
     protected <T> Collection<String> extractFeatures(
             Sentence sentence, IndexToken<?> index, Class<? extends Annotation<T>> annotation) {
-        List<String> context = new ArrayList<String>();
+        List<String> context = new ArrayList<String>(); // Collection to be appended to (e.g. feature list)
         for (int i = 0; i < sentence.size(); ++i) {
 
             Token t = sentence.get(i);
             boolean accept = true;
             for (FeatureConstraint constraint : getConstraints()) {
-                if (!constraint.accept(sentence, index, i)) {
+                if (!constraint.accept(sentence, index, i)) { // 
                     accept = false;
                     break;
                 }

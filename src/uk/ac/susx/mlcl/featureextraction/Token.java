@@ -13,7 +13,8 @@ import java.util.Map;
 import javax.naming.OperationNotSupportedException;
 
 /**
- * 
+ * The Token class which holds a map of annotations and includes their
+ * methods of manipulation
  * @author Simon Wibberley
  */
 public class Token {
@@ -70,13 +71,17 @@ public class Token {
         return sb.toString();
     }
 
+    /*
+     * Adds an annotations to a tokens collection, providing the
+     * annotations exists. Used by a feature function.
+     */
     public final <T> void addAnnotationToCollection(
             Class<? extends Annotation<T>> k,
             Collection<? super String> list,
             String prefix) {
         try {
             if(!annotations.containsKey(k))
-                    throw new IllegalArgumentException("No suck element " + k);
+                    throw new IllegalArgumentException("No such element " + k);
             annotations.get(k).addToCollection(list, prefix);
         } catch (OperationNotSupportedException e) {
         }catch (IllegalArgumentException e) {

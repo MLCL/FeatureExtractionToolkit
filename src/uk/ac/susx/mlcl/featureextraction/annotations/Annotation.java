@@ -9,7 +9,7 @@ import java.util.Collection;
 import javax.naming.OperationNotSupportedException;
 
 /**
- * 
+ * The interface for the annotation class
  * @author Simon Wibberley
  * @param <T> 
  */
