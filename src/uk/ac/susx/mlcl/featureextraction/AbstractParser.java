@@ -4,7 +4,7 @@
  */
 package uk.ac.susx.mlcl.featureextraction;
 
-import uk.ac.susx.mlcl.featureextraction.features.FeatureFactory;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -19,22 +19,30 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import com.beust.jcommander.Parameter;
+import featureextraction.featureconstraint.NoDeterminersKeyConstraint;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
+import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
+import uk.ac.susx.mlcl.featureextraction.featureconstraint.FeatureConstraint;
 import uk.ac.susx.mlcl.lib.io.Files;
 import uk.ac.susx.mlcl.lib.MiscUtil;
 import uk.ac.susx.mlcl.util.Config;
 import uk.ac.susx.mlcl.util.Configurable;
 import uk.ac.susx.mlcl.strings.StringSplitter;
+import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
+import uk.ac.susx.mlcl.featureextraction.featurefunction.FeatureFunction;
+import uk.ac.susx.mlcl.featureextraction.featureconstraint.PoSKeyConstraint;
+import uk.ac.susx.mlcl.featureextraction.featureconstraint.ChunkTagKeyConstraint;
+import uk.ac.susx.mlcl.util.IntSpan;
 
 /**
- * Change Log 09-09-2011
+ * Change Log 07-03-2012
  * ==============================
  * * Added command line usage descriptions and "--help" option.
+ * * Added ability to have key constraints in the configuration options
  * 
  * @author Simon Wibberley
  */
@@ -78,6 +86,10 @@ public abstract class AbstractParser implements Configurable {
 
         @Parameter(names = {"-v", "--verbose"})
         private boolean verbose = false;
+        
+        @Parameter (names = {"-ep","--posTagToExclude"},
+        description = "Excludes from the output all entry tokens with a given PoS tag")
+        private String exPoS = null;
 
         @Parameter(names = {"-l", "--limit"}, description = "Maximum number of documents (not files) to process.")
         private int limit = 0;
@@ -117,7 +129,10 @@ public abstract class AbstractParser implements Configurable {
         public int getLimit() {
             return limit;
         }
-
+               
+        public String getExPoSCon(){
+            return exPoS;
+        }
     }
 
     private BufferedWriter outFile;
@@ -133,9 +148,15 @@ public abstract class AbstractParser implements Configurable {
     private Semaphore throttle;
 
     private Queue<Future<Void>> futures;
+    
+    private List<FeatureConstraint> constraints;
 
     public StringSplitter getSplitter() {
         return splitter;
+    }
+    
+    public List<FeatureConstraint> getConstraints(){
+        return constraints;
     }
 
     public void setSplitter(StringSplitter splitter) {
@@ -155,6 +176,9 @@ public abstract class AbstractParser implements Configurable {
                 false, config().isRecursive());
 
         System.err.println("File list built.");
+        
+        constraints = new ArrayList<FeatureConstraint>();
+        setKeyConstraints();
 
         featureFactory = buildFeatureFactory();
 
@@ -316,9 +340,8 @@ public abstract class AbstractParser implements Configurable {
      * @return  
      */
     private CharSequence handleEntry(String entry) {
-
+        
         Sentence annotated = annotate(entry);
-
 
         if (annotated.isEmpty()) {
             throw new InvalidEntryException("empty sentence!");
@@ -331,22 +354,52 @@ public abstract class AbstractParser implements Configurable {
         return lines;
     }
 
-    private CharSequence getLines(Sentence sentence) {
+    protected CharSequence getLines(Sentence sentence) {
 
         StringBuilder out = new StringBuilder();
-
+        
         for (IndexToken<?> t : sentence.getKeys()) {
-
-            CharSequence output = config().getOutputFormatter().getOutput(t);
-
+            CharSequence output = "";
+            if(t.getKey() != null){
+                output = config().getOutputFormatter().getOutput(t);
+            }
+            
             out.append(output);
         }
 
         return out;
+    }
+    
+    
+    public void applyFeatureFactory(FeatureFactory featureFactory, Sentence s) {
 
+        Collection<FeatureFunction> fns = featureFactory.getAllFeatures();
+        for (IndexToken<?> key : s.getKeys()) {
+            boolean accept = true;
+            for(FeatureConstraint constraint : constraints){
+                if(!constraint.accept(s, key, key.getSpan().left)){
+                    accept = false;
+                    break;
+                }
+            }
+            if(accept){
+                CharSequence keyStr = s.getKeyString(config().getExPoSCon(),key);
+                List<CharSequence> featureList = new ArrayList<CharSequence>();
+                key.setKey(keyStr);
+                
+                for (FeatureFunction f : fns) {
+                    Collection<String> features = f.extractFeatures(s, key);
+                    featureList.addAll(features);
+                }
+
+                key.setFeatures(featureList);
+            }
+        }
     }
 
     protected abstract Sentence annotate(String entry);
+    
+    protected abstract void setKeyConstraints();
 
     protected abstract FeatureFactory buildFeatureFactory();
 

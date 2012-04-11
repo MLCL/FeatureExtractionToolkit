@@ -2,7 +2,7 @@
  * Copyright (c) 2011, Sussex University.
  * All rights reserved.
  */
-package uk.ac.susx.mlcl.featureextraction.features;
+package uk.ac.susx.mlcl.featureextraction.featureconstraint;
 
 import uk.ac.susx.mlcl.featureextraction.IndexToken;
 import uk.ac.susx.mlcl.featureextraction.Sentence;

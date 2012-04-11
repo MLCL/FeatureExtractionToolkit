@@ -5,14 +5,15 @@
 package uk.ac.susx.mlcl.featureextraction;
 
 import uk.ac.susx.mlcl.util.IntSpan;
-import uk.ac.susx.mlcl.featureextraction.features.FeatureFactory;
-import uk.ac.susx.mlcl.featureextraction.features.FeatureFunction;
+import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
+import uk.ac.susx.mlcl.featureextraction.featurefunction.FeatureFunction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
+import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
 
 /**
  * 
@@ -74,40 +75,30 @@ public class Sentence extends ArrayList<Token> {
     public void addAllKey(Collection<? extends IndexToken<?>> ks) {
         keys.addAll(ks);
     }
-
-    public CharSequence getKeyString(IndexToken<?> key) {
+    
+    /**
+     * Returns the string representation of a key, will either be a single token
+     * or a concatenation of tokens from a given span (i.e. chunk)
+     * Change Log: Addition to allow tokens with a given PoS tag to be excluded
+     * @param exPos PoS tag of tokens to exclude (if any)
+     * @param key Key indicating span of sentence to return
+     * @return String representation of a key
+     */
+    public CharSequence getKeyString(String exPos, IndexToken<?> key) {
 
         IntSpan span = key.getSpan();
 
         StringBuilder sb = new StringBuilder();
 
         for (int i = span.left; i <= span.right; ++i) {
-            sb.append(get(i).getAnnotation(key.getKeyType()));
-            if (i < span.right) {
-                sb.append(tokenSeparator);
+            if(exPos == null || !exPos.equals(this.get(i).getAnnotation(Annotations.PoSAnnotation.class))){
+                sb.append(this.get(i).getAnnotation(key.getKeyType()));
+                if (i < span.right) {
+                    sb.append(this.getTokenSeparator());
+                }
             }
         }
-
         return sb;
-
-    }
-
-    public void applyFeatureFactory(FeatureFactory featureFactory) {
-        Collection<FeatureFunction> fns = featureFactory.getAllFeatures();
-
-        for (IndexToken<?> key : keys) {
-            CharSequence keyStr = getKeyString(key);
-            List<CharSequence> featureList = new ArrayList<CharSequence>();
-            key.setKey(keyStr);
-
-            for (FeatureFunction f : fns) {
-
-                Collection<String> features = f.extractFeatures(this, key);
-                featureList.addAll(features);
-            }
-
-            key.setFeatures(featureList);
-        }
     }
 
     public Collection<IndexToken<?>> getShortestSegmentationPathKeys() {

@@ -14,12 +14,12 @@ import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
 import uk.ac.susx.mlcl.util.IntSpan;
 
 /**
- * Represents the feature function which identifies nouns on the left of another noun 
- * appearing in the same chunk.
+ *
  * @author jp242
  */
-public class NounToLeftFeatureFunction extends AbstractFeatureFunction{
-
+public class AdjectiveToLeftFeatureFunction extends AbstractFeatureFunction{
+    
+    
     @Override
     public Collection<String> extractFeatures(Sentence sentence, IndexToken<?> index) {
 
@@ -28,17 +28,17 @@ public class NounToLeftFeatureFunction extends AbstractFeatureFunction{
         if(index.getSpan().left == index.getSpan().right){
             int idx = index.getSpan().left;
             IntSpan chunkSpan = sentence.get(idx).getAnnotation(Annotations.ChunkSpanAnnotation.class);
-            boolean nounFound = false;
+            boolean adjFound = false;
             int i = idx-1;
-            while(i >= chunkSpan.left && nounFound == false){
+            while(i >= chunkSpan.left && adjFound == false){
                 final StringBuilder sb = new StringBuilder();
                 Token token = sentence.get(i);
-                if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith("NN")){
+                if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith("JJ")){
                     final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
                     sb.insert(0,c);
-                    token.setAnnotation(Annotations.LeftNounAnnotation.class, sb.toString());
-                    token.addAnnotationToCollection(Annotations.LeftNounAnnotation.class, features, getPrefix());
-                    nounFound = true;
+                    token.setAnnotation(Annotations.LeftAdjectiveAnnotation.class, sb.toString());
+                    token.addAnnotationToCollection(Annotations.LeftAdjectiveAnnotation.class, features, getPrefix());
+                    adjFound = true;
                 }
                 i--;
             }
@@ -60,4 +60,29 @@ public class NounToLeftFeatureFunction extends AbstractFeatureFunction{
 //        }
         return features;
     }
+//    
+//    @Override
+//    public Collection<String> extractFeatures(Sentence sentence, IndexToken<?> index) {
+//    
+//        Collection<String> features = new ArrayList<String>();
+//        
+//        int idx = index.getSpan().left;
+//        for(int i = 0; i < idx; i++)
+//        {
+//            Token token = sentence.get(i);
+//            IntSpan chunkSpan = token.getAnnotation(Annotations.ChunkSpanAnnotation.class);
+//
+//            final StringBuilder sb = new StringBuilder();
+//            if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith("JJ")
+//                    && chunkSpan.intersects(idx)){
+//                
+//                final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
+//                sb.insert(0,c);
+//                token.setAnnotation(Annotations.LeftAdjectiveAnnotation.class, sb.toString());
+//                token.addAnnotationToCollection(Annotations.LeftAdjectiveAnnotation.class, features, getPrefix());
+//            }
+//        }
+//        return features;
+//    }
+    
 }

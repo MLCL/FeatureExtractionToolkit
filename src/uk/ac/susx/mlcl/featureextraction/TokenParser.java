@@ -8,17 +8,17 @@ import uk.ac.susx.mlcl.strings.NewlineStringSplitter;
 import com.beust.jcommander.Parameter;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.IndexAnnotation;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.TokenAnnotation;
-import uk.ac.susx.mlcl.featureextraction.features.FeatureFactory;
+import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
 
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import uk.ac.susx.mlcl.featureextraction.features.ContextWindowsFeatureConstraint;
-import uk.ac.susx.mlcl.featureextraction.features.DisjointFeatureConstraint;
+import uk.ac.susx.mlcl.featureextraction.featureconstraint.ContextWindowsFeatureConstraint;
+import uk.ac.susx.mlcl.featureextraction.featureconstraint.DisjointFeatureConstraint;
 import uk.ac.susx.mlcl.util.IntSpan;
-import uk.ac.susx.mlcl.featureextraction.features.TokenFeatureFunction;
+import uk.ac.susx.mlcl.featureextraction.featurefunction.TokenFeatureFunction;
 
 /**
  * 
@@ -184,7 +184,7 @@ public class TokenParser extends AbstractParser {
         }
 
 
-        annotated.applyFeatureFactory(getFeatureFactory());
+        applyFeatureFactory(getFeatureFactory(),annotated);
 
         return annotated;
     }
@@ -223,5 +223,12 @@ public class TokenParser extends AbstractParser {
     public TokenConfig config() {
         return config;
     }
+    
+    
+    @Override
+    protected void setKeyConstraints() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 
 }

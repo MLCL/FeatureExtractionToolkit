@@ -2,11 +2,12 @@
  * Copyright (c) 2011, Sussex University.
  * All rights reserverd.
  */
-package uk.ac.susx.mlcl.featureextraction.features;
+package uk.ac.susx.mlcl.featureextraction.featurefactory;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import uk.ac.susx.mlcl.featureextraction.featurefunction.FeatureFunction;
 
 /**
  * 

@@ -12,13 +12,11 @@ import com.beust.jcommander.Parameter;
 
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.CharAnnotation;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.IndexAnnotation;
-import uk.ac.susx.mlcl.featureextraction.features.FeatureFactory;
+import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
 import uk.ac.susx.mlcl.util.IntSpan;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.NgramAnnotation;
-import uk.ac.susx.mlcl.featureextraction.features.ContextWindowsFeatureConstraint;
-import uk.ac.susx.mlcl.featureextraction.features.DisjointFeatureConstraint;
-import uk.ac.susx.mlcl.featureextraction.features.NGramFeatureFunction;
-import uk.ac.susx.mlcl.featureextraction.features.HasAnnotationFeatureConstraint;
+import uk.ac.susx.mlcl.featureextraction.featureconstraint.*;
+import uk.ac.susx.mlcl.featureextraction.featurefunction.NGramFeatureFunction;
 
 /**
  * 
@@ -160,7 +158,7 @@ public class NgramParser extends AbstractParser {
 
         annotated.addAllKey(getKeyNgrams(chars.length));
 
-        annotated.applyFeatureFactory(getFeatureFactory());
+        applyFeatureFactory(getFeatureFactory(),annotated);
         return annotated;
     }
 
@@ -168,5 +166,10 @@ public class NgramParser extends AbstractParser {
     protected AbstractParserConfig config() {
         return config;
     }
-
+    
+    
+    @Override
+    protected void setKeyConstraints() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

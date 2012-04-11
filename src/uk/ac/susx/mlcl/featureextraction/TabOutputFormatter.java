@@ -5,6 +5,8 @@
 package uk.ac.susx.mlcl.featureextraction;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -16,13 +18,14 @@ public class TabOutputFormatter implements OutputFormatter {
     public CharSequence getOutput(IndexToken<?> key) {
         StringBuilder out = new StringBuilder();
         List<CharSequence> features = key.getFeatures();
-        out.append(key.getKey());
-        for (CharSequence feature : features) {
-            out.append('\t');
-            out.append(feature);
+        if(features.size() > 0 && key.getKey().length() > 0){
+            out.append(key.getKey());
+            for (CharSequence feature : features) {
+                out.append('\t');
+                out.append(feature);
+            }
+            out.append('\n');
         }
-        out.append('\n');
         return out;
     }
-
 }

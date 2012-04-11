@@ -2,7 +2,7 @@
  * Copyright (c) 2011, Sussex University.
  * All rights reserved.
  */
-package uk.ac.susx.mlcl.featureextraction.features;
+package uk.ac.susx.mlcl.featureextraction.featurefunction;
 
 import java.util.Collection;
 import uk.ac.susx.mlcl.featureextraction.IndexToken;

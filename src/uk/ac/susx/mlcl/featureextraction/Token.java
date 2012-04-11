@@ -81,7 +81,7 @@ public class Token {
             String prefix) {
         try {
             if(!annotations.containsKey(k))
-                    throw new IllegalArgumentException("No such element " + k);
+                    throw new IllegalArgumentException("No such element " + k);    
             annotations.get(k).addToCollection(list, prefix);
         } catch (OperationNotSupportedException e) {
         }catch (IllegalArgumentException e) {

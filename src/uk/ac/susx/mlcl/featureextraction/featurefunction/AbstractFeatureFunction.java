@@ -2,7 +2,7 @@
  * Copyright (c) 2011, Sussex University.
  * All rights reserverd.
  */
-package uk.ac.susx.mlcl.featureextraction.features;
+package uk.ac.susx.mlcl.featureextraction.featurefunction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +13,7 @@ import uk.ac.susx.mlcl.featureextraction.IndexToken;
 import uk.ac.susx.mlcl.featureextraction.Sentence;
 import uk.ac.susx.mlcl.featureextraction.Token;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotation;
+import uk.ac.susx.mlcl.featureextraction.featureconstraint.FeatureConstraint;
 import uk.ac.susx.mlcl.lib.Checks;
 
 /**

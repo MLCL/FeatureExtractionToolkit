@@ -69,6 +69,9 @@ public class Annotations {
 
     public static class TokenAnnotation extends AbstractAnnotation<CharSequence> {
     }
+    
+    public static class OriginalTokenAnnotation extends AbstractAnnotation<CharSequence> {
+    }
 
     public static class PoSAnnotation extends AbstractAnnotation<String> {
     }
@@ -78,4 +81,32 @@ public class Annotations {
 
     public static class ChunkTagAnnotation extends AbstractAnnotation<String> {
     }
+    
+    // NEW ADDITIONS *************************************************************
+    
+    public static class LeftNounAnnotation extends AbstractAnnotation<String> {
+    }
+    
+    public static class RightNounAnnotation extends AbstractAnnotation<String> {
+    }
+    
+    public static class LeftAdjectiveAnnotation extends AbstractAnnotation<String> {
+    }
+    
+    public static class RightAdjectiveAnnotation extends AbstractAnnotation<String> {
+    }
+    
+    public static class LeftVerbHeadAnnotation extends AbstractAnnotation<String> {
+    }
+    
+    public static class RightVerbHeadAnnotation extends AbstractAnnotation<String> {
+    }
+    
+    public static class LeftPrepositionAnnotation extends AbstractAnnotation<String> {
+    }
+    
+    public static class RightPrepositionAnnotation extends AbstractAnnotation<String> {
+    }
+    
+    //****************************************************************************
 }
