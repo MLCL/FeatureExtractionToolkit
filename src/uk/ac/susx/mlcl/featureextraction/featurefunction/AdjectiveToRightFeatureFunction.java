@@ -18,13 +18,18 @@ import uk.ac.susx.mlcl.util.IntSpan;
  */
 public class AdjectiveToRightFeatureFunction extends AbstractFeatureFunction{
     
+    private final String tag;
+    
+    public AdjectiveToRightFeatureFunction(String tag){
+        this.tag = tag;
+    }
     
     @Override
     public Collection<String> extractFeatures(Sentence sentence, IndexToken<?> index) {
 
         Collection<String> features = new ArrayList<String>();
         
-        if(index.getSpan().left == index.getSpan().right){
+        if(index.getSpan().unitSpan()){
             int idx = index.getSpan().left;
             IntSpan chunkSpan = sentence.get(idx).getAnnotation(Annotations.ChunkSpanAnnotation.class);
             boolean adjFound = false;
@@ -32,7 +37,7 @@ public class AdjectiveToRightFeatureFunction extends AbstractFeatureFunction{
             while(i <= chunkSpan.right && adjFound == false){
                 final StringBuilder sb = new StringBuilder();
                 Token token = sentence.get(i);
-                if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith("JJ")){
+                if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith(tag)){
                     final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
                     sb.insert(0,c);
                     token.setAnnotation(Annotations.RightAdjectiveAnnotation.class, sb.toString());

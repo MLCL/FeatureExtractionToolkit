@@ -19,21 +19,26 @@ import uk.ac.susx.mlcl.util.IntSpan;
  */
 public class NounToRightFeatureFunction extends AbstractFeatureFunction{
     
+    private final String tag;    
+    
+    public NounToRightFeatureFunction(String tag){
+        this.tag = tag;
+    }
     
     @Override
     public Collection<String> extractFeatures(Sentence sentence, IndexToken<?> index) {
 
         Collection<String> features = new ArrayList<String>();
+        int idx = index.getSpan().left;
+        IntSpan chunkSpan = sentence.get(idx).getAnnotation(Annotations.ChunkSpanAnnotation.class);
+        boolean nounFound = false;
         
-        if(index.getSpan().left == index.getSpan().right){
-            int idx = index.getSpan().left;
-            IntSpan chunkSpan = sentence.get(idx).getAnnotation(Annotations.ChunkSpanAnnotation.class);
-            boolean nounFound = false;
+        if(index.getSpan().unitSpan()){
             int i = idx+1;
             while(i <= chunkSpan.right && nounFound == false){
                 final StringBuilder sb = new StringBuilder();
                 Token token = sentence.get(i);
-                if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith("NN")){
+                if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith(tag)){
                     final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
                     sb.insert(0,c);
                     token.setAnnotation(Annotations.RightNounAnnotation.class, sb.toString());
@@ -43,45 +48,7 @@ public class NounToRightFeatureFunction extends AbstractFeatureFunction{
                 i++;
             }
         }
-//        for(int i = 0; i < idx; i++)
-//        {
-//            Token token = sentence.get(i);
-//            IntSpan chunkSpan = token.getAnnotation(Annotations.ChunkSpanAnnotation.class);
-//
-//            final StringBuilder sb = new StringBuilder();
-//            if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith("NN")
-//                    && chunkSpan.intersects(idx)){
-//                
-//                final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
-//                sb.insert(0,c);
-//                token.setAnnotation(Annotations.LeftNounAnnotation.class, sb.toString());
-//                token.addAnnotationToCollection(Annotations.LeftNounAnnotation.class, features, getPrefix());
-//            }
-//        }
         return features;
     }
-    
-//    @Override
-//    public Collection<String> extractFeatures(Sentence sentence, IndexToken<?> index) {
-//        
-//        Collection<String> features = new ArrayList<String>();
-//
-//        int idx = index.getSpan().right;
-//        for(int i = idx+1; i < sentence.size()-1; i++)
-//        {
-//            Token token = sentence.get(i);
-//            IntSpan chunkSpan = token.getAnnotation(Annotations.ChunkSpanAnnotation.class);
-//
-//            final StringBuilder sb = new StringBuilder();
-//            if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith("NN")
-//                    && chunkSpan.intersects(idx)){
-//                
-//                final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
-//                sb.insert(0,c);
-//                token.setAnnotation(Annotations.RightNounAnnotation.class, sb.toString());
-//                token.addAnnotationToCollection(Annotations.LeftNounAnnotation.class, features, getPrefix());
-//            }
-//        }
-//        return features;
-//    }
+
 }

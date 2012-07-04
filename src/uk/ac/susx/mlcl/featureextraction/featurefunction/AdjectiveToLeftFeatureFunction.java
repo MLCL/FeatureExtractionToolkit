@@ -19,21 +19,26 @@ import uk.ac.susx.mlcl.util.IntSpan;
  */
 public class AdjectiveToLeftFeatureFunction extends AbstractFeatureFunction{
     
+    private final String tag;    
+    
+    public AdjectiveToLeftFeatureFunction(String tag){
+        this.tag = tag;
+    }
     
     @Override
     public Collection<String> extractFeatures(Sentence sentence, IndexToken<?> index) {
 
         Collection<String> features = new ArrayList<String>();
+        int idx = index.getSpan().right;
+        IntSpan chunkSpan = sentence.get(idx).getAnnotation(Annotations.ChunkSpanAnnotation.class);
+        boolean adjFound = false;
         
-        if(index.getSpan().left == index.getSpan().right){
-            int idx = index.getSpan().left;
-            IntSpan chunkSpan = sentence.get(idx).getAnnotation(Annotations.ChunkSpanAnnotation.class);
-            boolean adjFound = false;
+        if(index.getSpan().unitSpan()){
             int i = idx-1;
             while(i >= chunkSpan.left && adjFound == false){
                 final StringBuilder sb = new StringBuilder();
                 Token token = sentence.get(i);
-                if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith("JJ")){
+                if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith(tag)){
                     final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
                     sb.insert(0,c);
                     token.setAnnotation(Annotations.LeftAdjectiveAnnotation.class, sb.toString());
@@ -43,46 +48,26 @@ public class AdjectiveToLeftFeatureFunction extends AbstractFeatureFunction{
                 i--;
             }
         }
-//        for(int i = 0; i < idx; i++)
-//        {
-//            Token token = sentence.get(i);
-//            IntSpan chunkSpan = token.getAnnotation(Annotations.ChunkSpanAnnotation.class);
-//
-//            final StringBuilder sb = new StringBuilder();
-//            if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith("NN")
-//                    && chunkSpan.intersects(idx)){
-//                
-//                final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
-//                sb.insert(0,c);
-//                token.setAnnotation(Annotations.LeftNounAnnotation.class, sb.toString());
-//                token.addAnnotationToCollection(Annotations.LeftNounAnnotation.class, features, getPrefix());
-//            }
-//        }
+        else{
+            int i = idx;
+            int nounCount = 0;
+            while(i >= chunkSpan.left && adjFound == false){
+                final StringBuilder sb = new StringBuilder();
+                Token token = sentence.get(i);
+                if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith(tag) && nounCount > 0){
+                    final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
+                    sb.insert(0,c);
+                    token.setAnnotation(Annotations.LeftAdjectiveAnnotation.class, sb.toString());
+                    token.addAnnotationToCollection(Annotations.LeftAdjectiveAnnotation.class, features, getPrefix());
+                    adjFound = true;
+                }
+                if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith("NN")  && nounCount == 0){
+                        nounCount ++;
+                }
+                i--;
+            }
+            
+        }
         return features;
     }
-//    
-//    @Override
-//    public Collection<String> extractFeatures(Sentence sentence, IndexToken<?> index) {
-//    
-//        Collection<String> features = new ArrayList<String>();
-//        
-//        int idx = index.getSpan().left;
-//        for(int i = 0; i < idx; i++)
-//        {
-//            Token token = sentence.get(i);
-//            IntSpan chunkSpan = token.getAnnotation(Annotations.ChunkSpanAnnotation.class);
-//
-//            final StringBuilder sb = new StringBuilder();
-//            if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith("JJ")
-//                    && chunkSpan.intersects(idx)){
-//                
-//                final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
-//                sb.insert(0,c);
-//                token.setAnnotation(Annotations.LeftAdjectiveAnnotation.class, sb.toString());
-//                token.addAnnotationToCollection(Annotations.LeftAdjectiveAnnotation.class, features, getPrefix());
-//            }
-//        }
-//        return features;
-//    }
-    
 }

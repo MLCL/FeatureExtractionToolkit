@@ -16,7 +16,12 @@ import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
  * @author jp242
  */
 public class PrecedingVerbHeadFeatureFunction extends AbstractFeatureFunction{
+    
+    private final String tag;
 
+    public PrecedingVerbHeadFeatureFunction(String tag){
+        this.tag = tag;
+    }
     
     /*
      * @param sentence The entire sentence the specified token is contained within
@@ -33,7 +38,7 @@ public class PrecedingVerbHeadFeatureFunction extends AbstractFeatureFunction{
         if(idx > 0){
             while(idx > 0 && verbHeadFound == false){
                 Token token = sentence.get(idx);
-                if(token.getAnnotation(Annotations.ChunkTagAnnotation.class).contains("V")){
+                if(token.getAnnotation(Annotations.ChunkTagAnnotation.class).startsWith(tag)){
                     verbHeadFound = true;
                     final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
                     sb.insert(0,c);

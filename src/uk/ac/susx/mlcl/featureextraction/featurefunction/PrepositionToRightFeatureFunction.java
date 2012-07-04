@@ -17,7 +17,13 @@ import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
  * @author jp242
  */
 public class PrepositionToRightFeatureFunction extends AbstractFeatureFunction{
+    
+    private final String tag;
 
+    public PrepositionToRightFeatureFunction (String tag){
+        this.tag = tag;
+    }
+    
     @Override
     public Collection<String> extractFeatures(Sentence sentence, IndexToken<?> index) {
         
@@ -30,7 +36,7 @@ public class PrepositionToRightFeatureFunction extends AbstractFeatureFunction{
             {
                 Token token = sentence.get(idx);
                 final StringBuilder sb = new StringBuilder();
-                if(token.getAnnotation(Annotations.ChunkTagAnnotation.class).contains("PREP")){
+                if(token.getAnnotation(Annotations.ChunkTagAnnotation.class).startsWith(tag)){
                     prepFound = true;
                     final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
                     sb.insert(0,c);

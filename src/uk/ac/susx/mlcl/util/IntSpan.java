@@ -118,6 +118,24 @@ public final class IntSpan implements Serializable, Comparable<IntSpan> {
     public boolean equals(final IntSpan other) {
         return this.left == other.left && this.right == other.right;
     }
+    
+    /**
+     * Used to check for features neither being in the same span or being equal to 
+     * the item at other
+     * @param other The location of the other item 
+     * @return true if intersects or equals
+     */
+    public boolean intersectsOrequals(int other){
+        return (this.intersects(other) && !unitSpan())
+                            || (this.left == other && unitSpan());
+    }
+    
+    /**
+     * @return True if spans only one item
+     */
+    public boolean unitSpan(){
+        return left == right;
+    }
 
     @Override
     public int hashCode() {

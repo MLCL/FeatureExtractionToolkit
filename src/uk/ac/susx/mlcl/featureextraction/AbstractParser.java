@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import com.beust.jcommander.Parameter;
-import featureextraction.featureconstraint.NoDeterminersKeyConstraint;
+import uk.ac.susx.mlcl.featureextraction.featureconstraint.NoDeterminersKeyConstraint;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -81,7 +81,7 @@ public abstract class AbstractParser implements Configurable {
 
         @Parameter(names = {"-of", "--outputFormatter"},
         description = "class that specifies the output format.",
-        converter = OutputFormatterConverter.class)
+        converter = FormatterConverter.class)
         private OutputFormatter outputFormatter = new TabOutputFormatter();
 
         @Parameter(names = {"-v", "--verbose"})
@@ -173,7 +173,11 @@ public abstract class AbstractParser implements Configurable {
 
         List<String> files = Files.getFileList(
                 config().getInPath(), config().getInSuffix(),
-                false, config().isRecursive());
+                false, false);
+        
+        for(String file : files){
+            System.err.println(file);
+        }
 
         System.err.println("File list built.");
         
@@ -190,38 +194,51 @@ public abstract class AbstractParser implements Configurable {
         return featureFactory;
     }
 
-    private void parse(String prefix, List<String> files) {
+    private void parse(String prefix, List<String> folders) {
         handleOutputPre();
 
         initThreads();
-
-        for (String fileName : files) {
-
-            if (config().getLimit() > 0 && count.get() > config().getLimit()) {
-                break;
+        
+        for (String folderName : folders){
+            final File folder = new File(folderName);
+            final List<String> files;
+            if(folder.isDirectory()){
+                files = Files.getFileList(
+                folderName, config().getInSuffix(),
+                false, config().isRecursive());
             }
-
-            File file = new File(prefix, fileName);
-            System.err.println("Processing file: " + file);
-
-            try {
-                CharSequence text = Files.getText(file, false, true);
-                parse(text, false);
-            } catch (IOException e) {
-                LOG.log(Level.SEVERE, null, e);
+            else { 
+                files = new ArrayList<String>();
+                files.add(folderName);
             }
+            for (String fileName : files) {
+                
 
-            try {
-                while (!futures.isEmpty()) {
-                    futures.poll().get();
+                if (config().getLimit() > 0 && count.get() > config().getLimit()) {
+                    break;
                 }
-            } catch (InterruptedException e) {
-                LOG.log(Level.SEVERE, null, e);
-            } catch (ExecutionException e) {
-                LOG.log(Level.SEVERE, null, e);
+
+                File file = new File(fileName);
+                System.err.println("Processing file: " + file);
+
+                try {
+                    CharSequence text = Files.getText(file, false, true);
+                    parse(text, false);
+                } catch (IOException e) {
+                    LOG.log(Level.SEVERE, null, e);
+                }
+
+                try {
+                    while (!futures.isEmpty()) {
+                        futures.poll().get();
+                    }
+                } catch (InterruptedException e) {
+                    LOG.log(Level.SEVERE, null, e);
+                } catch (ExecutionException e) {
+                    LOG.log(Level.SEVERE, null, e);
+                }
             }
         }
-
         cleanupThreads();
 
         handleOutputPost();
@@ -257,7 +274,6 @@ public abstract class AbstractParser implements Configurable {
                 public final Void call() throws IOException {
                     try {
                         final CharSequence output = handleEntry(entry);
-
                         handleOutput(output);
 
                     } catch (InvalidEntryException e) {
@@ -328,7 +344,6 @@ public abstract class AbstractParser implements Configurable {
         }
         synchronized (outFile) {
             outFile.append(output);
-//            System.out.println(output);
         }
 
 

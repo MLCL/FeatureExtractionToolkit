@@ -108,5 +108,23 @@ public class Annotations {
     public static class RightPrepositionAnnotation extends AbstractAnnotation<String> {
     }
     
+    public static class HeadNounAnnotation extends AbstractAnnotation<String> {
+    }
+    
+    public static class OntologyEntryAnnotation extends AbstractAnnotation<String>{
+    }
+    
+    public static class PoSTagLeftAnnotation extends AbstractAnnotation<String>{
+    }
+    
+    public static class PoSTagRightAnnotation extends AbstractAnnotation<String>{
+    }   
+    
+    public static class DeterminerLeftAnnotation extends AbstractAnnotation<String>{
+    }
+    
+    public static class NounGroupNounAnnotation extends AbstractAnnotation<String>{
+    }
+    
     //****************************************************************************
 }

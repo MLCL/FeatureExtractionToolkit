@@ -19,7 +19,13 @@ import uk.ac.susx.mlcl.util.IntSpan;
  * @author jp242
  */
 public class PrepositionToLeftFeatureFunction extends AbstractFeatureFunction{
+    
+    private final String tag;
 
+    public PrepositionToLeftFeatureFunction(String tag){
+        this.tag = tag;
+    }
+    
     @Override
     public Collection<String> extractFeatures(Sentence sentence, IndexToken<?> index) {
         
@@ -32,7 +38,7 @@ public class PrepositionToLeftFeatureFunction extends AbstractFeatureFunction{
             {
                 Token token = sentence.get(idx);
                 final StringBuilder sb = new StringBuilder();
-                if(token.getAnnotation(Annotations.ChunkTagAnnotation.class).contains("PREP")){
+                if(token.getAnnotation(Annotations.ChunkTagAnnotation.class).contains(tag)){
                     prepFound = true;
                     final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
                     sb.insert(0,c);

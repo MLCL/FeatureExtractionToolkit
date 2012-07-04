@@ -12,18 +12,18 @@ import java.util.logging.Logger;
  *
  * @author hiam20
  */
-public final class OutputFormatterConverter implements IStringConverter<OutputFormatter> {
+public final class FormatterConverter implements IStringConverter<Formatter> {
 
-    private static final Logger LOG = Logger.getLogger(OutputFormatterConverter.class.getName());
+    private static final Logger LOG = Logger.getLogger(FormatterConverter.class.getName());
 
     @Override
-    public final OutputFormatter convert(final String value) {
+    public final Formatter convert(final String value) {
         OutputFormatter f = null;
         try {
             try {
                 f = ((Class<OutputFormatter>) Class.forName(value)).newInstance();
             } catch (ClassNotFoundException e) {
-                LOG.log(Level.WARNING, "OutputFormatter {0} not found.", value);
+                LOG.log(Level.WARNING, "Formatter: {0} not found.", value);
                 f = new NewlineOutputFormatter();
             }
         } catch (InstantiationException e) {

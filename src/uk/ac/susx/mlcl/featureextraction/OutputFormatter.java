@@ -8,7 +8,7 @@ package uk.ac.susx.mlcl.featureextraction;
  * 
  * @author Simon Wibberley
  */
-public interface OutputFormatter {
+public interface OutputFormatter extends Formatter{
 
     CharSequence getOutput(IndexToken<?> key);
 }

@@ -28,21 +28,24 @@ public abstract class AbstractFeatureFunction implements FeatureFunction {
     private String prefix;
 
     private final List<FeatureConstraint> constraints;
+    
+    private String tag;
 
-    public AbstractFeatureFunction(String prefix, FeatureConstraint... constraints) {
+    public AbstractFeatureFunction(String prefix, String tag, FeatureConstraint... constraints) {
         Checks.checkNotNull("prefix", prefix);
         Checks.checkNotNull("constraints", constraints);
         this.constraints = new ArrayList<FeatureConstraint>();
         if (constraints.length > 0)
             this.constraints.addAll(Arrays.asList(constraints));
         this.prefix = prefix;
+        this.tag = tag;
     }
 
     /*
      * Basic constructor
      */
     public AbstractFeatureFunction(FeatureConstraint... constraints) {
-        this(DEFAULT_PREFIX, constraints);
+        this(DEFAULT_PREFIX, null, constraints);
     }
 
     public final String getPrefix() {

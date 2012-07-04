@@ -6,7 +6,6 @@ package uk.ac.susx.mlcl.featureextraction.featurefunction;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import uk.ac.susx.mlcl.featureextraction.IndexToken;
 import uk.ac.susx.mlcl.featureextraction.Sentence;
 import uk.ac.susx.mlcl.featureextraction.Token;
@@ -14,17 +13,14 @@ import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
 import uk.ac.susx.mlcl.util.IntSpan;
 
 /**
- * Represents the feature function which identifies nouns on the left of another noun 
- * appearing in the same chunk.
- * If the token represents a chunk the left noun is taken represented as the noun 
- * left of the head noun
+ * 
  * @author jp242
  */
-public class NounToLeftFeatureFunction extends AbstractFeatureFunction{
+public class DeterminerLeftFeatureFunction extends AbstractFeatureFunction{
     
     private final String tag;
     
-    public NounToLeftFeatureFunction(String tag){
+    public DeterminerLeftFeatureFunction(String tag){
         this.tag = tag;
     }
 
@@ -33,38 +29,39 @@ public class NounToLeftFeatureFunction extends AbstractFeatureFunction{
         Collection<String> features = new ArrayList<String>();
         int idx = index.getSpan().right;
         IntSpan chunkSpan = sentence.get(idx).getAnnotation(Annotations.ChunkSpanAnnotation.class);
-        boolean nounFound = false;
+        boolean detFound = false;
+        
         if(index.getSpan().unitSpan()){
             int i = idx-1;
-            while(i >= chunkSpan.left && nounFound == false){
+            while(i >= chunkSpan.left && detFound == false){
                 final StringBuilder sb = new StringBuilder();
                 Token token = sentence.get(i);
                 if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith(tag)){
                     final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
                     sb.insert(0,c);
-                    token.setAnnotation(Annotations.LeftNounAnnotation.class, sb.toString());
-                    token.addAnnotationToCollection(Annotations.LeftNounAnnotation.class, features, getPrefix());
-                    nounFound = true;
+                    token.setAnnotation(Annotations.DeterminerLeftAnnotation.class, sb.toString());
+                    token.addAnnotationToCollection(Annotations.DeterminerLeftAnnotation.class, features, getPrefix());
+                    detFound = true;
                 }
                 i--;
             }
         }
         else {
             int i = idx;
-            int nounCount = 0;
-            while(i >= chunkSpan.left && nounFound == false){
+            int detCount = 0;
+            while(i >= chunkSpan.left && detFound == false){
                 final StringBuilder sb = new StringBuilder();
                 Token token = sentence.get(i);
-                if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith(tag)  && nounCount > 0){
+                if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith(tag)  && detCount > 0){
                     final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
                     sb.insert(0,c);
-                    token.setAnnotation(Annotations.LeftNounAnnotation.class, sb.toString());
-                    token.addAnnotationToCollection(Annotations.LeftNounAnnotation.class, features, getPrefix());
-                    nounFound = true;
+                    token.setAnnotation(Annotations.DeterminerLeftAnnotation.class, sb.toString());
+                    token.addAnnotationToCollection(Annotations.DeterminerLeftAnnotation.class, features, getPrefix());
+                    detFound = true;
                 }
                 else{
-                    if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith(tag)  && nounCount == 0){
-                        nounCount ++;
+                    if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith(tag)  && detCount == 0){
+                        detCount ++;
                     }
                 }
                 i--;
@@ -72,4 +69,6 @@ public class NounToLeftFeatureFunction extends AbstractFeatureFunction{
         }
         return features;
     }
+    
+    
 }
