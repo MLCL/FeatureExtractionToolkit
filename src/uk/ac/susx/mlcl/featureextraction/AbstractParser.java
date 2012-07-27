@@ -93,6 +93,38 @@ public abstract class AbstractParser implements Configurable {
 
         @Parameter(names = {"-l", "--limit"}, description = "Maximum number of documents (not files) to process.")
         private int limit = 0;
+        
+        @Parameter (names = {"-nl", "--useNounsOnLeft"},
+        description = "Use nouns on left of another noun as features")
+        private int useNounsOnLeft = 0;
+        
+        @Parameter (names = {"-nr", "--useNounsOnRight"},
+        description = "Use nouns on left of another noun as features")
+        private int useNounsOnRight = 0;
+                
+        @Parameter (names = {"-al","--useAdjectivesLeft"},
+        description = "Use Adjective on left as a feature")
+        private int useAdjectiveLeft =  0;
+        
+        @Parameter (names = {"-ar","--useAdjectivesRight"},
+        description = "Use Adjective on right as a feature")
+        private int useAdjectiveRight =  0;
+        
+        @Parameter (names = {"-pr", "--usePrepositionOnRight"},
+        description = "Use a preposition on the right as a feature if it is immediately to the right")
+        private int usePrepositionOnRight = 0;
+        
+        @Parameter (names = {"-pl", "--usePrepositionOnLeft"},
+        description = "Use a preposition on the left as a feature if it is immediately to the right")
+        private int usePrepositionOnLeft = 0;
+        
+        @Parameter (names = {"-posl", "--usePoSLeft"},
+        description = "Use PoS tag on left as feature")
+        private int usePoSTagLeft = 0;
+        
+        @Parameter (names = {"-posr", "--usePoSRight"},
+        description = "Use PoS tag on the right as feature")
+        private int usePoSTagRight = 0;
 
         public String getEntrySeparator() {
             return entrySeparator;
@@ -129,10 +161,79 @@ public abstract class AbstractParser implements Configurable {
         public int getLimit() {
             return limit;
         }
+        
+        public int getNounsLeft(){
+            return useNounsOnLeft;
+        }
+        
+        public int getNounsRight(){
+            return useNounsOnRight;
+        }
+        
+        public int getAdjectiveLeft(){
+            return useAdjectiveLeft;
+        }
+        
+        public int getAdjectiveRight(){
+            return useAdjectiveRight;
+        }
+        
+        public int getPoSLeft(){
+            return usePoSTagLeft;
+        }
+        
+        public int getPoSRight(){
+            return usePoSTagRight;
+        }
+        
+        public int getPrepositionLeft(){
+            return usePrepositionOnLeft;
+        }
+        
+        public int getPrepositionRight(){
+            return usePrepositionOnRight;
+        }
                
         public String getExPoSCon(){
             return exPoS;
         }
+        
+        public boolean isUseNounsOnRight()
+        {
+            return useNounsOnRight != 0;
+        }
+        
+        public boolean isUseNounsOnLeft()
+        {
+            return useNounsOnLeft != 0;
+        }
+                
+        public boolean isUseAdjectiveLeft(){
+            return useAdjectiveLeft != 0;
+        }
+        
+        public boolean isUseAdjectiveRight(){
+            return useAdjectiveRight != 0;
+        }
+        
+        public boolean isUsePoSLeft(){
+            return usePoSTagLeft != 0;
+        }
+        
+        public boolean isUsePoSRight(){
+            return usePoSTagRight != 0;
+        }
+                
+        public boolean isUsePrepositionLeft()
+        {
+            return usePrepositionOnLeft != 0;
+        }
+        
+        public boolean isUsePrepositionRight()
+        {
+            return usePrepositionOnRight != 0;
+        }
+        
     }
 
     private BufferedWriter outFile;
@@ -165,6 +266,30 @@ public abstract class AbstractParser implements Configurable {
 
     protected String getOutPath() {
         return config().getOutPath();
+    }
+    
+    /*
+     * Used when creating the output file path to prevent already existing 
+     * files from being overwritten.
+     */
+    protected String enumeratePath(String outPath, int enu) {
+        String path = "";
+        if(enu > 0){
+            path = outPath + "-(" + enu + ")";
+        }
+        else{
+            path = outPath;
+        }
+        if(new File(path).exists()){
+            enu++;
+            outPath = enumeratePath(outPath, enu);
+        }
+        else{
+            if(enu > 0){
+                outPath = outPath + "-(" + enu + ")";
+            }
+        }
+        return outPath;
     }
 
     public void parse() {

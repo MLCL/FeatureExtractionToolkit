@@ -33,7 +33,6 @@ public class Token {
     public final void setAnnotation(Annotation<?> a) {
         annotations.put((Class<? extends Annotation<?>>) a.getClass(), a);
     }
-
     
     public final <T> void removeAnnotation(Class<? extends Annotation<T>> a) {
         annotations.remove(a);
