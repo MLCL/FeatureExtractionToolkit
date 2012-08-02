@@ -9,7 +9,8 @@ import javax.naming.OperationNotSupportedException;
 
 /**
  *
- * @param <T> 
+ * @param <T> Abstract provides the functionality and parameters for Annotations
+ * extending it.
  * @author Simon Wibberley
  */
 public abstract class AbstractAnnotation<T> implements Annotation<T> {

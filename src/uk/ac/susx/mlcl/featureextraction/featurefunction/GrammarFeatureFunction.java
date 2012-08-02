@@ -46,36 +46,19 @@ public class GrammarFeatureFunction extends AbstractFeatureFunction{
         }
 
         int tagFound = 0;
-        if(index.getSpan().unitSpan()){
-            i = (depth >= 0) ? i+1: i-1;
-            while((i >= limit && tagFound < (depth - (2*depth))
-                    && depth <= 0) || (i <= limit && tagFound < depth && depth >= 0)){
-                final StringBuilder sb = new StringBuilder();
-                Token token = sentence.get(i);
-                if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith(tag)){
-                    final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
-                    sb.insert(0,c);
-                    token.setAnnotation((Class<? extends Annotation<String>>) anot, sb.toString());
-                    token.addAnnotationToCollection((Class<? extends Annotation<String>>) anot, features, getPrefix());
-                    tagFound++;
-                }
-                i = (depth > 0) ? i+1 : i-1;
+        i = (depth >= 0) ? i+1: i-1;
+        while((i >= limit && tagFound < (depth - (2*depth))
+                && depth <= 0) || (i <= limit && tagFound < depth && depth >= 0)){
+            final StringBuilder sb = new StringBuilder();
+            Token token = sentence.get(i);
+            if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith(tag) || token.getAnnotation(Annotations.ChunkTagAnnotation.class).startsWith(tag)){
+                final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
+                sb.insert(0,c);
+                token.setAnnotation((Class<? extends Annotation<String>>) anot, sb.toString());
+                token.addAnnotationToCollection((Class<? extends Annotation<String>>) anot, features, getPrefix());
+                tagFound++;
             }
-        }
-        else {
-            while((i >= limit && tagFound < (depth - (2*depth))
-                    && depth <= 0) || (i <= limit && tagFound < depth && depth >= 0)){
-                final StringBuilder sb = new StringBuilder();
-                Token token = sentence.get(i);
-                if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith(tag)){
-                    final CharSequence c = token.getAnnotation(Annotations.TokenAnnotation.class);
-                    sb.insert(0,c);
-                    token.setAnnotation((Class<? extends Annotation<String>>) anot, sb.toString());
-                    token.addAnnotationToCollection((Class<? extends Annotation<String>>) anot, features, getPrefix());
-                    tagFound++;
-                }
-                i = (depth > 0) ? i+1 : i-1;
-            } 
+            i = (depth > 0) ? i+1 : i-1;
         }
         return features;
     }

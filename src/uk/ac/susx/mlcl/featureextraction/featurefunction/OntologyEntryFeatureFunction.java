@@ -9,6 +9,7 @@ import java.util.Collection;
 import uk.ac.susx.mlcl.featureextraction.IndexToken;
 import uk.ac.susx.mlcl.featureextraction.Sentence;
 import uk.ac.susx.mlcl.featureextraction.Token;
+import uk.ac.susx.mlcl.featureextraction.annotations.Annotation;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
 import uk.ac.susx.mlcl.util.IntSpan;
 
@@ -22,30 +23,46 @@ public class OntologyEntryFeatureFunction extends AbstractFeatureFunction{
     private final int depth;
     private final String delimOne;
     private final String delimTwo;
+    private final boolean inChunk;
+    private final int ontolDepth;
     
-    public OntologyEntryFeatureFunction(String tag, int depth, String delimOne, String delimTwo){
+    public OntologyEntryFeatureFunction(final String tag, final int ontolDepth, 
+            final String delimOne, final String delimTwo, final int depth, final boolean inChunk) {
         this.tag = tag;
         this.depth = depth;
+        this.ontolDepth = ontolDepth;
         this.delimOne = delimOne;
         this.delimTwo = delimTwo;
+        this.inChunk = inChunk;
+
     }
 
     @Override
     public Collection<String> extractFeatures(Sentence sentence, IndexToken<?> index) {
+        
         Collection<String> features = new ArrayList<String>();
-        int idx = index.getSpan().right;
-        IntSpan chunkSpan = sentence.get(idx).getAnnotation(Annotations.ChunkSpanAnnotation.class);
-        boolean tagFound = false;
-        int i = idx-1;
-        while(i >= chunkSpan.left && tagFound == false){
+        int i = (depth >= 0) ? index.getSpan().left : index.getSpan().right;
+        final int limit;
+        if(inChunk){
+            limit = (depth >= 0) ? sentence.get(index.getSpan().right).getAnnotation(Annotations.ChunkSpanAnnotation.class).right :
+                    sentence.get(index.getSpan().left).getAnnotation(Annotations.ChunkSpanAnnotation.class).left;
+        }
+        else{
+            limit = (depth >= 0) ? sentence.size()-1 : 0;
+        }
+        
+        int tagFound = 0;
+        i = (depth >= 0) ? i+1: i-1;
+        while((i >= limit && tagFound < (depth - (2*depth))
+                && depth <= 0) || (i <= limit && tagFound < depth && depth >= 0)){
             final StringBuilder sb = new StringBuilder();
             Token token = sentence.get(i);
-            if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith(tag)){
+            if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith(tag) || tag == null){
                 final String ontEnt = token.getAnnotation(Annotations.OntologyEntryAnnotation.class);
                 if(ontEnt != null){
                     final String[] ontols = ontEnt.split(delimOne);
                     final StringBuilder sb2 = new StringBuilder();
-                    if(depth <= 0){
+                    if(ontolDepth <= 0){
                         token.addAnnotationToCollection(Annotations.OntologyEntryAnnotation.class, features, getPrefix());
                     }
                     else{
@@ -64,10 +81,10 @@ public class OntologyEntryFeatureFunction extends AbstractFeatureFunction{
                         token.setAnnotation(Annotations.OntologyEntryAnnotation.class, sb2.toString());
                         token.addAnnotationToCollection(Annotations.OntologyEntryAnnotation.class, features, getPrefix());
                     }
-                    tagFound = true;
+                    tagFound ++;
                 }
             }
-            i--;
+            i = (depth > 0) ? i+1 : i-1;
         }
         return features;
     }

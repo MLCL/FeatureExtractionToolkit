@@ -9,12 +9,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
+ * A OutputFormatter using tab separation
  * @author Simon Wibberley
  */
 public class TabOutputFormatter implements OutputFormatter {
 
     @Override
+    /**
+     * Returns a tab separated CharSequence representation of an entry and its features based on 
+     * the given key and its features. 
+     **/
     public CharSequence getOutput(IndexToken<?> key) {
         StringBuilder out = new StringBuilder();
         List<CharSequence> features = key.getFeatures();

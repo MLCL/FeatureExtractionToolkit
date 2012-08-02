@@ -9,13 +9,19 @@ import uk.ac.susx.mlcl.featureextraction.Sentence;
 import uk.ac.susx.mlcl.util.IntSpan;
 
 /**
- *
+ * A Feature constraint which constrains the number of tokens being taken as 
+ * features either side of a given key. 
+ * key 
  * @author Simon Wibberley
  */
 public class ContextWindowsFeatureConstraint implements FeatureConstraint {
 
     private final IntSpan window;
-
+    
+    /**
+     * @param window An IntSpan object describing the size of the window either side
+     * of a given key
+     */
     public ContextWindowsFeatureConstraint(IntSpan window) {
         this.window = window;
     }

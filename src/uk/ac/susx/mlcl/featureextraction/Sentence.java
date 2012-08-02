@@ -16,20 +16,21 @@ import java.util.TreeSet;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
 
 /**
- * 
+ * Class representing an individual sentence holding all relevant parameters and
+ * methods for manipulation.
  * @author Simon Wibberley
  */
 public class Sentence extends ArrayList<Token> {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String DEFAULT_TOKEN_SEPARATOR = "+";
+    private static final String DEFAULT_TOKEN_SEPARATOR = "+"; // Seperates token Strings if there is more than one in the Token object (i.e. a chunk represented as one Token)
 
-    private static final boolean DEFAULT_SORTED_KEYS = false;
+    private static final boolean DEFAULT_SORTED_KEYS = false; 
 
     private final String tokenSeparator;
 
-    private final Collection<IndexToken<?>> keys;
+    private final Collection<IndexToken<?>> keys; // The keys within the sentence - representing indivual tokens or a collection of them (e.g. a chunk)
 
     private final boolean sortedKeys;
 
@@ -64,6 +65,9 @@ public class Sentence extends ArrayList<Token> {
         return tokenSeparator;
     }
 
+    /**
+     * @return Returns all the keys within the sentence. 
+     */
     public Collection<IndexToken<?>> getKeys() {
         return new ArrayList<IndexToken<?>>(keys);
     }

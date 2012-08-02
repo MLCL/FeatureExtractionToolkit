@@ -10,7 +10,8 @@ import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.ChunkSpanAnnotation;
 
 /**
- *
+ * A Constraint which only allows keys which appear as the head token of a 
+ * given pos tag for their element (chunk).
  * @author jp242
  */
 public class PoSHeadOnlyKeyConstraint implements FeatureConstraint{
