@@ -36,6 +36,7 @@ import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
 import uk.ac.susx.mlcl.featureextraction.featurefunction.FeatureFunction;
 import uk.ac.susx.mlcl.featureextraction.featureconstraint.PoSKeyConstraint;
 import uk.ac.susx.mlcl.featureextraction.featureconstraint.ChunkTagKeyConstraint;
+import uk.ac.susx.mlcl.strings.NewlineReader;
 import uk.ac.susx.mlcl.util.IntSpan;
 
 /**
@@ -54,6 +55,22 @@ public abstract class AbstractParser implements Configurable {
     protected abstract static class AbstractParserConfig extends Config {
 
         private static final long serialVersionUID = 1L;
+        
+        @Parameter(names = {"-cb", "--useChunkAsBase"},
+        description = "produce phrases as base-entries")
+        private boolean useChunkAsBase = false;
+
+        @Parameter(names = {"-tb", "--useTokenAsBase"},
+        description = "produce tokens as base-entries")
+        private boolean useTokenAsBase = false;
+
+        @Parameter(names = {"-cf", "--useChunkAsFeature"},
+        description = "produce co-occurent phrases as features")
+        private boolean useChunkAsFeature = false;
+
+        @Parameter(names = {"-tf", "--useTokenAsFeature"},
+        description = "produce co-occurent tokens as features")
+        private boolean useTokenAsFeature = false;
 
         @Parameter(names = {"-es", "--entrySeparator"},
         description = "base term / feature delimiter for the thesaurus output.")
@@ -160,6 +177,23 @@ public abstract class AbstractParser implements Configurable {
 
         public int getLimit() {
             return limit;
+        }
+        
+        
+        public boolean isUseChunkAsBase() {
+            return useChunkAsBase;
+        }
+
+        public boolean isUseTokenAsBase() {
+            return useTokenAsBase;
+        }
+
+        public boolean isUseChunkAsFeature() {
+            return useChunkAsFeature;
+        }
+
+        public boolean isUseTokenAsFeature() {
+            return useTokenAsFeature;
         }
         
         public int getNounsLeft(){
@@ -373,9 +407,12 @@ public abstract class AbstractParser implements Configurable {
         if (prePost) {
             handleOutputPre();
         }
-        final List<String> entries = getSplitter().split(input.toString());
 
-        for (final String entry : entries) {
+        //final List<String> entries = getSplitter().split(input.toString());
+        final NewlineReader reader = new NewlineReader(input);
+        //for (final String entry : entries) {
+        while(reader.hasLine()){
+            final String entry = reader.readLine();
             try {
                 throttle.acquire();
             } catch (InterruptedException e) {
