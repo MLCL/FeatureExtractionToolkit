@@ -2,7 +2,7 @@
  * Copyright (c) 2011, Sussex University.
  * All rights reserved.
  */
-package uk.ac.susx.mlcl.featureextraction;
+package uk.ac.susx.mlcl.parser;
 
 
 import java.io.BufferedWriter;
@@ -25,6 +25,12 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
+import uk.ac.susx.mlcl.featureextraction.FormatterConverter;
+import uk.ac.susx.mlcl.featureextraction.IndexToken;
+import uk.ac.susx.mlcl.featureextraction.InvalidEntryException;
+import uk.ac.susx.mlcl.featureextraction.OutputFormatter;
+import uk.ac.susx.mlcl.featureextraction.Sentence;
+import uk.ac.susx.mlcl.featureextraction.TabOutputFormatter;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
 import uk.ac.susx.mlcl.featureextraction.featureconstraint.FeatureConstraint;
 import uk.ac.susx.mlcl.lib.io.Files;
@@ -47,7 +53,7 @@ import uk.ac.susx.mlcl.util.IntSpan;
  * 
  * @author Simon Wibberley
  */
-public abstract class AbstractParser implements Configurable {
+public abstract class AbstractParser implements Configurable {  
 
     private static final Logger LOG =
             Logger.getLogger(AbstractParser.class.getName());
@@ -142,6 +148,46 @@ public abstract class AbstractParser implements Configurable {
         @Parameter (names = {"-posr", "--usePoSRight"},
         description = "Use PoS tag on the right as feature")
         private int usePoSTagRight = 0;
+        
+        // new
+        
+        @Parameter (names = {"-rt", "--parseRawText"},
+        description = "Parse raw text for PoS tagging, Sentence splitting etc...")
+        private boolean rawText = false;
+        
+        @Parameter(names = {"-mloc", "--modelLocation"},
+        description = "The location of the model needed to parse the input text")
+        private String modelLocation = null;
+        
+        @Parameter(names = {"-tok", "--tokenizeText"},
+        description = "Tokenize text")
+        private boolean tokenText = false;
+        
+        @Parameter(names = {"-posTag", "--posTagSentence"},
+        description = "Fully split tokenize and pos tag")
+        private boolean posTagText = true;
+        
+        @Parameter(names = {"-ss", "--SplitSentence"},
+        description = "Just split sentence")
+        private boolean splitSent = false;
+        
+        public boolean modelLocValid(){
+            return modelLocation == null;
+        }
+        
+        public boolean tokenize(){
+            return tokenText;
+        }
+        
+        public boolean posTag(){
+            return posTagText;
+        }
+        
+        public boolean splitSent(){
+            return splitSent;
+        }
+        
+        /// new
 
         public String getEntrySeparator() {
             return entrySeparator;
@@ -232,6 +278,10 @@ public abstract class AbstractParser implements Configurable {
             return exPoS;
         }
         
+        public String modelLoc(){
+            return modelLocation;
+        }
+        
         public boolean isUseNounsOnRight()
         {
             return useNounsOnRight != 0;
@@ -268,8 +318,17 @@ public abstract class AbstractParser implements Configurable {
             return usePrepositionOnRight != 0;
         }
         
+        public boolean isRawText(){
+            return rawText;
+        }
+        
+        public boolean isValidModel(){
+            File file = new File(modelLocation);
+            return modelLocation != null && file.isFile();
+        }
+        
     }
-
+    
     private BufferedWriter outFile;
 
     private StringSplitter splitter;
@@ -382,7 +441,17 @@ public abstract class AbstractParser implements Configurable {
 
                 try {
                     CharSequence text = Files.getText(file, false, true);
-                    parse(text, false);
+                    if(config().isRawText()){
+                        try {
+                            rawTextParse(text);
+                        } catch (ModelNotValidException ex) {
+                            Logger.getLogger(AbstractParser.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    else{
+                        parse(text, false);
+                    }
+                    
                 } catch (IOException e) {
                     LOG.log(Level.SEVERE, null, e);
                 }
@@ -409,7 +478,7 @@ public abstract class AbstractParser implements Configurable {
         }
 
         //final List<String> entries = getSplitter().split(input.toString());
-        final NewlineReader reader = new NewlineReader(input);
+        final NewlineReader reader = new NewlineReader(input, newLineDelim());
         //for (final String entry : entries) {
         while(reader.hasLine()){
             final String entry = reader.readLine();
@@ -454,6 +523,25 @@ public abstract class AbstractParser implements Configurable {
             handleOutputPost();
         }
     }
+    
+    private void rawTextParse(CharSequence text) throws ModelNotValidException{
+        if(!config().isValidModel() && config().posTag()){
+            throw new ModelNotValidException("The location to the PoStagger model is either invalid or null");
+        }
+        
+        if(config().posTag()){
+            CharSequence posText = preProcessor().posTagText(text);
+            parse(posText, false);
+        }
+        else{
+            if(config().splitSent()){
+                List<CharSequence> sentences = preProcessor().splitSentences(text.toString());
+                for(CharSequence sent : sentences){
+                    parse(sent, false);
+                }
+            }
+        }
+    } 
 
     private void initThreads() {
         if (exec != null || throttle != null || futures != null) {
@@ -573,6 +661,16 @@ public abstract class AbstractParser implements Configurable {
             }
         }
     }
+    
+    public class ModelNotValidException extends Exception{
+        
+        public ModelNotValidException() {
+        }
+ 
+        public ModelNotValidException(String msg) {
+            super(msg);
+        }
+    }
 
     protected abstract Sentence annotate(String entry);
     
@@ -581,5 +679,9 @@ public abstract class AbstractParser implements Configurable {
     protected abstract FeatureFactory buildFeatureFactory();
 
     protected abstract AbstractParserConfig config();
+    
+    protected abstract RawTextPreProcessor preProcessor();
+    
+    protected abstract String newLineDelim();
 
 }

@@ -2,8 +2,9 @@
  * Copyright (c) 2011, Sussex University.
  * All rights reserved.
  */
-package uk.ac.susx.mlcl.featureextraction;
+package uk.ac.susx.mlcl.parser;
 
+import uk.ac.susx.mlcl.parser.AbstractParser;
 import uk.ac.susx.mlcl.strings.NewlineStringSplitter;
 import com.beust.jcommander.Parameter;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.IndexAnnotation;
@@ -15,6 +16,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import uk.ac.susx.mlcl.featureextraction.ContextWindowStringConverter;
+import uk.ac.susx.mlcl.featureextraction.IndexToken;
+import uk.ac.susx.mlcl.featureextraction.Sentence;
+import uk.ac.susx.mlcl.featureextraction.Token;
 import uk.ac.susx.mlcl.featureextraction.featureconstraint.ContextWindowsFeatureConstraint;
 import uk.ac.susx.mlcl.featureextraction.featureconstraint.DisjointFeatureConstraint;
 import uk.ac.susx.mlcl.util.IntSpan;
@@ -28,6 +33,16 @@ public class TokenParser extends AbstractParser {
 
     private static final Logger LOG =
             Logger.getLogger(TokenParser.class.getName());
+
+    @Override
+    protected RawTextPreProcessor preProcessor() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    protected String newLineDelim() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
     public static class TokenConfig extends AbstractParserConfig {
 

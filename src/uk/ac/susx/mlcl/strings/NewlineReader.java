@@ -18,9 +18,9 @@ public class NewlineReader implements LineReader{
     private int start;
     private int end;
     
-    public NewlineReader(CharSequence file){
+    public NewlineReader(CharSequence file, String newLineDelim){
         this.file = file;
-        matcher = Pattern.compile("\\n").matcher(file);
+        matcher = Pattern.compile(newLineDelim).matcher(file);
         start = 0;
         end = 0;
     }
