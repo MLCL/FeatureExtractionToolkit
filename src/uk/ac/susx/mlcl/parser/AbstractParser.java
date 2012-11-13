@@ -713,7 +713,7 @@ public abstract class AbstractParser implements Configurable {
     }
 
     protected FeatureFactory buildFeatureFactory(){
-        FeatureFactory featurefactory = new FeatureFactory();
+        FeatureFactory featureFactory = new FeatureFactory();
         
         if (config().isUseTokenAsFeature()) {
 
@@ -805,7 +805,7 @@ public abstract class AbstractParser implements Configurable {
             featureFactory.addFeature("posTagRightFeature", fn);
         }
         
-        return featurefactory;
+        return featureFactory;
     }
 
     protected abstract AbstractParserConfig config();
