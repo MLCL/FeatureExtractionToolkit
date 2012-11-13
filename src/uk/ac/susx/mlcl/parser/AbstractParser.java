@@ -25,23 +25,16 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
-import uk.ac.susx.mlcl.featureextraction.FormatterConverter;
-import uk.ac.susx.mlcl.featureextraction.IndexToken;
-import uk.ac.susx.mlcl.featureextraction.InvalidEntryException;
-import uk.ac.susx.mlcl.featureextraction.OutputFormatter;
-import uk.ac.susx.mlcl.featureextraction.Sentence;
-import uk.ac.susx.mlcl.featureextraction.TabOutputFormatter;
+import uk.ac.susx.mlcl.featureextraction.*;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
-import uk.ac.susx.mlcl.featureextraction.featureconstraint.FeatureConstraint;
+import uk.ac.susx.mlcl.featureextraction.featureconstraint.*;
 import uk.ac.susx.mlcl.lib.io.Files;
 import uk.ac.susx.mlcl.lib.MiscUtil;
 import uk.ac.susx.mlcl.util.Config;
 import uk.ac.susx.mlcl.util.Configurable;
 import uk.ac.susx.mlcl.strings.StringSplitter;
 import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
-import uk.ac.susx.mlcl.featureextraction.featurefunction.FeatureFunction;
-import uk.ac.susx.mlcl.featureextraction.featureconstraint.PoSKeyConstraint;
-import uk.ac.susx.mlcl.featureextraction.featureconstraint.ChunkTagKeyConstraint;
+import uk.ac.susx.mlcl.featureextraction.featurefunction.*;
 import uk.ac.susx.mlcl.strings.NewlineReader;
 import uk.ac.susx.mlcl.util.IntSpan;
 
@@ -149,46 +142,24 @@ public abstract class AbstractParser implements Configurable {
         description = "Use PoS tag on the right as feature")
         private int usePoSTagRight = 0;
         
-        // new
-        
         @Parameter (names = {"-rt", "--parseRawText"},
         description = "Parse raw text for PoS tagging, Sentence splitting etc...")
         private boolean rawText = false;
+                        
+        @Parameter (names = {"-posKy","--posKeyConstraint"},
+        description = "specify a pos tag as a entry constraint")
+        private String posCon = null;
         
-        @Parameter(names = {"-mloc", "--modelLocation"},
-        description = "The location of the model needed to parse the input text")
-        private String modelLocation = null;
+                
+        @Parameter (names = {"-chnkKy", "--chunkKeyConsraint"},
+        description = "specify a chunk tag as a entry constraint")
+        private String chnkCon = null;
         
-        @Parameter(names = {"-tok", "--tokenizeText"},
-        description = "Tokenize text")
-        private boolean tokenText = false;
+        @Parameter(names = {"-cw", "--contextWindow"},
+        converter = ContextWindowStringConverter.class,
+        description = "in the form \"-LEFT+RIGHT\" for LEFT tokens to the left and RIGHT tokens to the right")
+        private IntSpan contextWindow = new IntSpan(-5,5);
         
-        @Parameter(names = {"-posTag", "--posTagSentence"},
-        description = "Fully split tokenize and pos tag")
-        private boolean posTagText = true;
-        
-        @Parameter(names = {"-ss", "--SplitSentence"},
-        description = "Just split sentence")
-        private boolean splitSent = false;
-        
-        public boolean modelLocValid(){
-            return modelLocation == null;
-        }
-        
-        public boolean tokenize(){
-            return tokenText;
-        }
-        
-        public boolean posTag(){
-            return posTagText;
-        }
-        
-        public boolean splitSent(){
-            return splitSent;
-        }
-        
-        /// new
-
         public String getEntrySeparator() {
             return entrySeparator;
         }
@@ -277,9 +248,21 @@ public abstract class AbstractParser implements Configurable {
         public String getExPoSCon(){
             return exPoS;
         }
+     
+        public IntSpan getContextWindow() {
+            return contextWindow;
+        }
+                
+        public String getPoSConstraint() {
+            return posCon;
+        }
         
-        public String modelLoc(){
-            return modelLocation;
+        public String getChunkConstraint() {
+            return chnkCon;
+        } 
+
+        public void setContextWindow(IntSpan contextWindow) {
+            this.contextWindow = contextWindow;
         }
         
         public boolean isUseNounsOnRight()
@@ -321,12 +304,6 @@ public abstract class AbstractParser implements Configurable {
         public boolean isRawText(){
             return rawText;
         }
-        
-        public boolean isValidModel(){
-            File file = new File(modelLocation);
-            return modelLocation != null && file.isFile();
-        }
-        
     }
     
     private BufferedWriter outFile;
@@ -344,6 +321,43 @@ public abstract class AbstractParser implements Configurable {
     private Queue<Future<Void>> futures;
     
     private List<FeatureConstraint> constraints;
+    
+    
+    private static final String TERM_FEAT_PREFIX = "T:";
+
+    private static final String CHUNK_FEAT_PREFIX = "C:";
+    
+    // NEW ADDITIONS ************PREFIXES*********************************
+    
+    private static final String NOUN_LEFT_PREFIX = "NL:";
+    
+    private static final String NOUN_RIGHT_PREFIX = "NR:";
+    
+    private static final String VERB_LEFT_PREFIX = "VHL:";
+    
+    private static final String VERB_RIGHT_PREFIX = "VHR:";
+    
+    private static final String PREPOS_LEFT_PREFIX = "PL:";
+    
+    private static final String PREPOS_RIGHT_PREFIX = "PR:";
+    
+    private static final String ADJEC_RIGHT_PREFIX = "AR:";
+    
+    private static final String ADJEC_LEFT_PREFIX = "AL:";
+    
+    private static final String POS_LEFT_PREFIX = "POSL:";
+    
+    private static final String POS_RIGHT_PREFIX = "POSR:";
+    
+    private static final String HEAD_NOUN_PREFIX = "HN:";
+    
+    private static final String ONTOLOGY_PREFIX_LEFT = "OML:";
+    
+    private static final String ONTOLOGY_PREFIX_RIGHT = "OMR:";
+    
+    private static final String DET_LEFT_PREFIX = "DL:";
+    
+    private static final String NOUN_GROUP_NOUN_PREFIX = "NGN:";
 
     public StringSplitter getSplitter() {
         return splitter;
@@ -358,7 +372,40 @@ public abstract class AbstractParser implements Configurable {
     }
 
     protected String getOutPath() {
-        return config().getOutPath();
+        
+        String outPath = config().getOutPath();
+        
+        outPath += (config().isUseTokenAsFeature()) ? "-tf" : "";
+        
+        outPath += (config().isUseChunkAsFeature()) ? "-cf" : "";
+        
+        outPath += (config().isUseTokenAsBase()) ? "-tb" : "";
+        
+        outPath += (config().isUseChunkAsBase()) ? "-cb" : "";
+        
+        outPath += (config().isUsePrepositionRight()) ? "-pr" : "";
+        
+        outPath += (config().isUsePrepositionLeft()) ? "-pl" : "";
+        
+        outPath += (config().isUsePoSRight()) ? "-posr" : "";
+        
+        outPath += (config().isUsePoSLeft()) ? "-posl" : "";
+        
+        outPath += (config().isUseNounsOnRight()) ? "-nr" : ""; 
+        
+        outPath += (config().isUseNounsOnLeft()) ? "-nl" : "";
+        
+        outPath += (config().isUseAdjectiveRight()) ? "-ar" : "";
+        
+        outPath += (config().isUseAdjectiveLeft()) ? "-al" : "";
+        
+        outPath += (config().isRawText()) ? "-rt" : "";
+        
+        outPath += (config().getPoSConstraint() == null) ? "" : "-posKy-" + config().getPoSConstraint();
+        
+        outPath += (config().getChunkConstraint() == null) ? "" : "-chnkKy-" + config().getChunkConstraint();
+        
+        return outPath;
     }
     
     /*
@@ -443,7 +490,7 @@ public abstract class AbstractParser implements Configurable {
                     CharSequence text = Files.getText(file, false, true);
                     if(config().isRawText()){
                         try {
-                            rawTextParse(text);
+                            parse(rawTextParse(text), false);
                         } catch (ModelNotValidException ex) {
                             Logger.getLogger(AbstractParser.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -472,11 +519,11 @@ public abstract class AbstractParser implements Configurable {
         handleOutputPost();
     }
 
-    private void parse(final CharSequence input, final boolean prePost) {
+    protected void parse(final CharSequence input, final boolean prePost) {
         if (prePost) {
             handleOutputPre();
         }
-
+        
         //final List<String> entries = getSplitter().split(input.toString());
         final NewlineReader reader = new NewlineReader(input, newLineDelim());
         //for (final String entry : entries) {
@@ -523,25 +570,6 @@ public abstract class AbstractParser implements Configurable {
             handleOutputPost();
         }
     }
-    
-    private void rawTextParse(CharSequence text) throws ModelNotValidException{
-        if(!config().isValidModel() && config().posTag()){
-            throw new ModelNotValidException("The location to the PoStagger model is either invalid or null");
-        }
-        
-        if(config().posTag()){
-            CharSequence posText = preProcessor().posTagText(text);
-            parse(posText, false);
-        }
-        else{
-            if(config().splitSent()){
-                List<CharSequence> sentences = preProcessor().splitSentences(text.toString());
-                for(CharSequence sent : sentences){
-                    parse(sent, false);
-                }
-            }
-        }
-    } 
 
     private void initThreads() {
         if (exec != null || throttle != null || futures != null) {
@@ -567,6 +595,7 @@ public abstract class AbstractParser implements Configurable {
 
     private void handleOutputPre() {
         String outPath = getOutPath();
+        System.err.println("this" + outPath);
         try {
 
             outFile = new BufferedWriter(new FileWriter(outPath));
@@ -595,8 +624,6 @@ public abstract class AbstractParser implements Configurable {
         synchronized (outFile) {
             outFile.append(output);
         }
-
-
     }
 
     /**
@@ -674,14 +701,119 @@ public abstract class AbstractParser implements Configurable {
 
     protected abstract Sentence annotate(String entry);
     
-    protected abstract void setKeyConstraints();
+    protected void setKeyConstraints(){
+        
+        if(config().getPoSConstraint() != null){
+            getConstraints().add(new PoSKeyConstraint(config().getPoSConstraint()));
+        }
+        
+        if(config().getChunkConstraint() != null){
+            getConstraints().add(new ChunkTagKeyConstraint(config().getChunkConstraint()));
+        }
+    }
 
-    protected abstract FeatureFactory buildFeatureFactory();
+    protected FeatureFactory buildFeatureFactory(){
+        FeatureFactory featurefactory = new FeatureFactory();
+        
+        if (config().isUseTokenAsFeature()) {
+
+            TokenFeatureFunction fn = new TokenFeatureFunction();
+            fn.addConstraint(new ContextWindowsFeatureConstraint(config().getContextWindow()));
+            fn.addConstraint(new DisjointFeatureConstraint());
+            fn.setPrefix(TERM_FEAT_PREFIX);
+
+            featureFactory.addFeature("tokenFeature", fn);
+        }
+
+        if (config().isUseChunkAsFeature()) {
+            ChunkFeatureFunction fn = new ChunkFeatureFunction();
+            fn.addConstraint(new ContextWindowsFeatureConstraint(config().getContextWindow()));
+            if (config().isUseTokenAsFeature()) {
+                fn.addConstraint(new MinChunkLengthFeatureConstraint(2));
+            }
+
+            fn.addConstraint(new TheNonIntersectingChunkTokenThingFeatureConstraintTingDem());
+            fn.setPrefix(CHUNK_FEAT_PREFIX);
+
+            featureFactory.addFeature("chunkFeature", fn);
+        }
+
+        // NEW ADDITIONS ***********FEATURE*FUNCTIONS********************
+        
+        if(config().isUseNounsOnLeft())
+        {
+            GrammarFeatureFunction fn = new GrammarFeatureFunction("NN", -config().getNounsLeft(), Annotations.LeftNounAnnotation.class, true);
+            fn.setPrefix(NOUN_LEFT_PREFIX);
+            
+            featureFactory.addFeature("leftNounFeature", fn);
+        }
+        
+        if(config().isUseNounsOnRight())
+        {
+            //NounToRightFeatureFunction fn = new NounToRightFeatureFunction("NN");
+            GrammarFeatureFunction fn = new GrammarFeatureFunction("NN", config().getNounsRight(), Annotations.RightNounAnnotation.class, true);
+            fn.setPrefix(NOUN_RIGHT_PREFIX);
+            
+            featureFactory.addFeature("rightNounFeature", fn);
+        }
+        
+        if(config().isUsePrepositionLeft())
+        {
+            GrammarFeatureFunction fn = new GrammarFeatureFunction("PREP", -config().getPrepositionLeft(), Annotations.LeftPrepositionAnnotation.class, false);
+            fn.setPrefix(PREPOS_LEFT_PREFIX);
+            
+            featureFactory.addFeature("leftPrepositionFeature",fn);
+        }
+        
+        if(config().isUsePrepositionRight())
+        {
+            GrammarFeatureFunction fn = new GrammarFeatureFunction("PREP", config().getPrepositionRight(), Annotations.RightPrepositionAnnotation.class, false);
+            fn.setPrefix(PREPOS_RIGHT_PREFIX);
+            
+            featureFactory.addFeature("rightPrepositionFeature",fn);
+        }
+        
+        if(config().isUseAdjectiveRight())
+        {
+            GrammarFeatureFunction fn = new GrammarFeatureFunction("JJ", config().getAdjectiveRight(), Annotations.RightAdjectiveAnnotation.class, true);
+            fn.setPrefix(ADJEC_RIGHT_PREFIX);
+            
+            featureFactory.addFeature("rightAdjectiveFeature", fn);
+        }
+        
+        if(config().isUseAdjectiveLeft())
+        {
+            GrammarFeatureFunction fn = new GrammarFeatureFunction("JJ", -config().getAdjectiveLeft(), Annotations.LeftAdjectiveAnnotation.class, true);
+            fn.setPrefix(ADJEC_LEFT_PREFIX);
+            
+            featureFactory.addFeature("leftAdjectiveFeature", fn);
+        }
+        
+        if(config().isUsePoSLeft())
+        {
+            PoSTagLeftFeatureFunction fn = new PoSTagLeftFeatureFunction("NN");
+            fn.setPrefix(POS_LEFT_PREFIX);
+            
+            featureFactory.addFeature("posTagLeftFeature", fn);
+        }
+        
+        if(config().isUsePoSRight())
+        {
+            PoSTagRightFeatureFunction fn = new PoSTagRightFeatureFunction("NN");
+            fn.setPrefix(POS_RIGHT_PREFIX);
+            
+            featureFactory.addFeature("posTagRightFeature", fn);
+        }
+        
+        return featurefactory;
+    }
 
     protected abstract AbstractParserConfig config();
     
-    protected abstract RawTextPreProcessor preProcessor();
+    protected abstract RawTextPreProcessorInterface preProcessor();
     
     protected abstract String newLineDelim();
+    
+    protected abstract CharSequence rawTextParse(CharSequence text) throws ModelNotValidException;
 
 }

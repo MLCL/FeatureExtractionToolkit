@@ -11,7 +11,7 @@ import java.util.List;
  * PoS tags and groups raw text.
  * @author jp242
  */
-public interface RawTextPreProcessor {
+public interface RawTextPreProcessorInterface {
     
     // Takes a file path or text as input and outputs List of sentences
     public List splitSentences(CharSequence doc);
@@ -28,7 +28,9 @@ public interface RawTextPreProcessor {
     public List tokenizeSentence(CharSequence sentence);
     
     public List tokenizeSentence(List sentence);
+    
+    public CharSequence tokenizeText(CharSequence text);
         
     // Takes a PoS tagged sentence as input and outputs the sentence grouped.
-    public void groupSentence();
+    public CharSequence groupSentence(CharSequence text);
 }

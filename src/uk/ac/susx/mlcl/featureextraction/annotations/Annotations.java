@@ -4,13 +4,13 @@
  */
 package uk.ac.susx.mlcl.featureextraction.annotations;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.OperationNotSupportedException;
 import uk.ac.susx.mlcl.util.IntSpan;
+import uk.ac.susx.mlcl.util.Tuple;
 
 /**
  * Static utility class for handling Annotation objects.
@@ -28,7 +28,6 @@ public class Annotations {
 
     public static <T> Annotation<T> createAnnotation(Class<? extends Annotation<T>> cls,
                                                      T value) {
-
         Annotation<T> a = null;
         try {
             a = cls.newInstance();
@@ -53,6 +52,15 @@ public class Annotations {
             throw new OperationNotSupportedException();
         }
 
+    }
+    
+    public static class DependencyHeadListAnnotation extends AbstractDictionaryAnnotation<HashMap<String,ArrayList<String>>> {
+    }
+    
+    public static class DependencyListAnnotation extends AbstractDictionaryAnnotation<HashMap<String,ArrayList<String>>> {   
+    }
+    
+    public static class DependencyAnnotation extends AbstractAnnotation<String>{
     }
 
     public static class NgramAnnotation extends AbstractListAnnotation<CharSequence> {
@@ -125,6 +133,5 @@ public class Annotations {
     
     public static class NounGroupNounAnnotation extends AbstractAnnotation<String>{
     }
-    
     //****************************************************************************
 }

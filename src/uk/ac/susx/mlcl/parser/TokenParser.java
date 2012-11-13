@@ -35,12 +35,17 @@ public class TokenParser extends AbstractParser {
             Logger.getLogger(TokenParser.class.getName());
 
     @Override
-    protected RawTextPreProcessor preProcessor() {
+    protected RawTextPreProcessorInterface preProcessor() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     protected String newLineDelim() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    protected CharSequence rawTextParse(CharSequence text) throws ModelNotValidException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

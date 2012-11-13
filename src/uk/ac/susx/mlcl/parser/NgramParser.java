@@ -32,7 +32,7 @@ import uk.ac.susx.mlcl.featureextraction.featurefunction.NGramFeatureFunction;
 public class NgramParser extends AbstractParser {
 
     @Override
-    protected RawTextPreProcessor preProcessor() {
+    protected RawTextPreProcessorInterface preProcessor() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -185,6 +185,11 @@ public class NgramParser extends AbstractParser {
     
     @Override
     protected void setKeyConstraints() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    @Override
+    protected CharSequence rawTextParse(CharSequence text) throws ModelNotValidException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

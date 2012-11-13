@@ -15,6 +15,7 @@ import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,15 +25,18 @@ import java.util.logging.Logger;
  * An implementation of a parser using the Standford Tagger.
  * @author jp242
  */
-public class StanfordRawTextPreProcessor implements RawTextPreProcessor{
+public class StanfordRawTextPreProcessor implements RawTextPreProcessorInterface{
     
     
     
     private MaxentTagger tagger;
-    private String newLineDelim;
+    private String sentDelim;
+    private final String tokDelim;
     
-    public StanfordRawTextPreProcessor(String posTaggerModelLocation, String newLineDelim) throws ClassNotFoundException, IOException{
-        tagger = new MaxentTagger(posTaggerModelLocation); 
+    public StanfordRawTextPreProcessor(String posTaggerModelLocation, String sentDelim,String tokDelim) throws ClassNotFoundException, IOException{
+        tagger = new MaxentTagger(posTaggerModelLocation);
+        this.sentDelim = sentDelim;
+        this.tokDelim = tokDelim;
     }
     
     /**
@@ -41,8 +45,9 @@ public class StanfordRawTextPreProcessor implements RawTextPreProcessor{
      * @return Outputs DocumentPreprocessor object containing split sentences.
      */
     @Override
-    public List<List<HasWord>> splitSentences(CharSequence docLoc){
-        DocumentPreprocessor dp = new DocumentPreprocessor(docLoc.toString());
+    public List<List<HasWord>> splitSentences(CharSequence text){
+        StringReader sr = new StringReader(text.toString());
+        DocumentPreprocessor dp = new DocumentPreprocessor(sr);
         return (List<List<HasWord>>) dp;
     }
 
@@ -56,11 +61,6 @@ public class StanfordRawTextPreProcessor implements RawTextPreProcessor{
     
     public String posTagString(String sentence){
         return tagger.tagString(sentence);
-    }
-
-    @Override
-    public void groupSentence() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -83,7 +83,33 @@ public class StanfordRawTextPreProcessor implements RawTextPreProcessor{
     }
 
     @Override
-    public String posTagText(CharSequence text) {
+    public CharSequence posTagText(CharSequence text) {
+        StringReader sr = new StringReader(text.toString());
+        List<List<HasWord>> sentences = MaxentTagger.tokenizeText(sr);
+        List<ArrayList<TaggedWord>> taggSents = tagger.process(sentences);
+        String taggedText = "";
+        for(ArrayList<TaggedWord> sent : taggSents){
+            taggedText += toString(sent) + sentDelim;
+        }
+        return taggedText;
+    }
+
+    @Override
+    public CharSequence tokenizeText(CharSequence text) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public CharSequence groupSentence(CharSequence text) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    private String toString(ArrayList<TaggedWord> sent) {
+        Iterator it = sent.iterator();
+        String stringSent = "";
+        while(it.hasNext()){
+            stringSent += it.next().toString() + tokDelim;
+        }
+        return stringSent;
     }
 }
