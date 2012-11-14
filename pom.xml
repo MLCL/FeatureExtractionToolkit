@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>uk.ac.susx.mlcl</groupId>
-    <artifactId>FeatureExtractorMaven</artifactId>
+    <artifactId>FeatureExtractionToolkit</artifactId>
     <version>0.1</version>
 
     <repositories>
@@ -34,6 +34,23 @@
             <artifactId>mlcl-lib</artifactId>
             <version>0.2.1</version>
             <type>jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.maltparser</groupId>
+            <artifactId>maltparser</artifactId>
+            <version>1.7.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.washington.cs.knowitall.stanford-corenlp</groupId>
+            <artifactId>stanford-postag-models</artifactId>
+            <version>1.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <version>1.3.2</version>
         </dependency>
     </dependencies>
 
@@ -227,23 +244,23 @@
                     </plugin>
 
                     <!--<plugin>-->
-                        <!--<artifactId>maven-assembly-plugin</artifactId>-->
-                        <!--<version>2.3</version>-->
+                    <!--<artifactId>maven-assembly-plugin</artifactId>-->
+                    <!--<version>2.3</version>-->
 
-                        <!--<configuration>-->
-                            <!--<descriptorSourceDirectory>${project.basedir}/src/assemble</descriptorSourceDirectory>-->
-                        <!--</configuration>-->
+                    <!--<configuration>-->
+                    <!--<descriptorSourceDirectory>${project.basedir}/src/assemble</descriptorSourceDirectory>-->
+                    <!--</configuration>-->
 
-                        <!--&lt;!&ndash;                        Automatically execute the assembly goal during package phase&ndash;&gt;-->
-                        <!--<executions>-->
-                            <!--<execution>-->
-                                <!--<id>make-assembly</id>-->
-                                <!--<phase>package</phase>-->
-                                <!--<goals>-->
-                                    <!--<goal>single</goal>-->
-                                <!--</goals>-->
-                            <!--</execution>-->
-                        <!--</executions>-->
+                    <!--&lt;!&ndash;                        Automatically execute the assembly goal during package phase&ndash;&gt;-->
+                    <!--<executions>-->
+                    <!--<execution>-->
+                    <!--<id>make-assembly</id>-->
+                    <!--<phase>package</phase>-->
+                    <!--<goals>-->
+                    <!--<goal>single</goal>-->
+                    <!--</goals>-->
+                    <!--</execution>-->
+                    <!--</executions>-->
                     <!--</plugin>-->
 
                     <plugin>
@@ -267,5 +284,5 @@
         </profile>
 
     </profiles>
-    
+
 </project>
