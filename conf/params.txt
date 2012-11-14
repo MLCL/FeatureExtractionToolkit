@@ -5,7 +5,7 @@
 -is 
 .txt
 -ip 
-/Volumes/LocalScratchHD/scratch/data/rcv/test/
+/Volumes/LocalScratchHD/scratch/data/rcv/test1/
 -op 
 ./feoutput-deppars/test
 -modN

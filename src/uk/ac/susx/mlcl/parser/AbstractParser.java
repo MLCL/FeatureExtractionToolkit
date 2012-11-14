@@ -29,6 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static edu.stanford.nlp.util.StringUtils.join;
+
 /**
  * Change Log 07-03-2012
  * ==============================
@@ -577,16 +579,20 @@ public abstract class AbstractParser implements Configurable {
 
 	private void handleOutputPre() {
 		String outPath = getOutPath();
-		System.err.println("this" + outPath);
+		String[] tokens = outPath.split(File.separator);
+		String[] subArray = Arrays.copyOfRange(tokens, 0, tokens.length - 1);
+		String outDir = join(subArray, File.separator);
+
+		File outDirFile = new File(outDir);
+		if(!outDirFile.exists()){
+			LOG.warning("Output file does not exist, creating...");
+			outDirFile.mkdirs();
+		}
 		try {
-
 			outFile = new BufferedWriter(new FileWriter(outPath));
-
-
 		} catch (IOException e) {
 			System.err.println(e);
 		}
-		System.err.println("opening " + outPath);
 	}
 
 	private void handleOutputPost() {
