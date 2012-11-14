@@ -1,13 +1,13 @@
 -tb
 -rt
 -mloc
-/Volumes/LocalScratchHD/LocalHome/NetBeansProjects/StanPosMaltDepParser/models/wsj-0-18-left3words-distsim.tagger 
+models/wsj-0-18-left3words-distsim.tagger
 -is 
 .txt
 -ip 
 /Volumes/LocalScratchHD/scratch/data/rcv/test1/
 -op 
-./feoutput-deppars/test
+feoutput-deppars/test
 -modN
 engmalt.linear-1.7.mco
 -wd

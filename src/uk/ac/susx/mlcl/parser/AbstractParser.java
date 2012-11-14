@@ -588,6 +588,8 @@ public abstract class AbstractParser implements Configurable {
 			LOG.warning("Output file does not exist, creating...");
 			outDirFile.mkdirs();
 		}
+		if(!outPath.endsWith(".txt"))
+			outPath += ".txt";
 		try {
 			outFile = new BufferedWriter(new FileWriter(outPath));
 		} catch (IOException e) {
