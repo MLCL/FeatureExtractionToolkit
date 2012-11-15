@@ -6,12 +6,14 @@ models/wsj-0-18-left3words-distsim.tagger
 .txt
 -ip 
 /Volumes/LocalScratchHD/scratch/data/rcv/test1/
--op 
+-op
 feoutput-deppars/test
+--numCores
+4
 -modN
 engmalt.linear-1.7.mco
 -wd
-./models/
+models
 -hdr
 amod
 -hdr
