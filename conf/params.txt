@@ -17,6 +17,8 @@ models
 -hdr
 amod
 -hdr
-nsubj
--posKy
-NN
+dr
+-dr
+amod
+-dr
+dr
