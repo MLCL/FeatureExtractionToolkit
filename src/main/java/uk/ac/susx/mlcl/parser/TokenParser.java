@@ -4,26 +4,24 @@
  */
 package uk.ac.susx.mlcl.parser;
 
-import uk.ac.susx.mlcl.parser.AbstractParser;
-import uk.ac.susx.mlcl.strings.NewlineStringSplitter;
 import com.beust.jcommander.Parameter;
+import uk.ac.susx.mlcl.featureextraction.ContextWindowStringConverter;
+import uk.ac.susx.mlcl.featureextraction.IndexToken;
+import uk.ac.susx.mlcl.featureextraction.Sentence;
+import uk.ac.susx.mlcl.featureextraction.Token;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.IndexAnnotation;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.TokenAnnotation;
+import uk.ac.susx.mlcl.featureextraction.featureconstraint.ContextWindowsFeatureConstraint;
+import uk.ac.susx.mlcl.featureextraction.featureconstraint.DisjointFeatureConstraint;
 import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
-
+import uk.ac.susx.mlcl.featureextraction.featurefunction.TokenFeatureFunction;
+import uk.ac.susx.mlcl.strings.NewlineStringSplitter;
+import uk.ac.susx.mlcl.util.IntSpan;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import uk.ac.susx.mlcl.featureextraction.ContextWindowStringConverter;
-import uk.ac.susx.mlcl.featureextraction.IndexToken;
-import uk.ac.susx.mlcl.featureextraction.Sentence;
-import uk.ac.susx.mlcl.featureextraction.Token;
-import uk.ac.susx.mlcl.featureextraction.featureconstraint.ContextWindowsFeatureConstraint;
-import uk.ac.susx.mlcl.featureextraction.featureconstraint.DisjointFeatureConstraint;
-import uk.ac.susx.mlcl.util.IntSpan;
-import uk.ac.susx.mlcl.featureextraction.featurefunction.TokenFeatureFunction;
 
 /**
  * 
@@ -35,7 +33,7 @@ public class TokenParser extends AbstractParser {
             Logger.getLogger(TokenParser.class.getName());
 
     @Override
-    protected RawTextPreProcessorInterface preProcessor() {
+    protected RawTextPreProcessorInterface getPreprocessor() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -160,6 +158,7 @@ public class TokenParser extends AbstractParser {
                     String token = entry.substring(tokenStart, tokenEnd);
 
                     if (config.isUseLowercase())
+	                    System.out.println("Lower-casing");
                         token = token.toLowerCase();
 
                     if (config.isUseNormalisedNumbers()) {

@@ -155,6 +155,10 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	public String getOutPath() {
 		String outpath = super.getOutPath();
 
+		if (config.isUseLowercase()) {
+			outpath += "-lc";
+		}
+
 		if (config().depList() != null) {
 			for (Iterator<String> it = config.depList.iterator(); it.hasNext(); ) {
 				String dep = it.next();

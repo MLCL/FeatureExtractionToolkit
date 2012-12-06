@@ -793,7 +793,7 @@ public abstract class AbstractParser implements Configurable {
 
 	protected abstract AbstractParserConfig config();
 
-	protected abstract RawTextPreProcessorInterface preProcessor();
+	protected abstract RawTextPreProcessorInterface getPreprocessor();
 
 	protected abstract String newLineDelim();
 

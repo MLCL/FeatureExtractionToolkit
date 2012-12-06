@@ -5,15 +5,13 @@
 package uk.ac.susx.mlcl.parser;
 
 import com.beust.jcommander.Parameter;
+import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import uk.ac.susx.mlcl.featureextraction.Sentence;
-import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
-import uk.ac.susx.mlcl.strings.NewlineStringSplitter;
-import uk.ac.susx.mlcl.strings.StringSplitter;
 
 /**
  *
@@ -44,6 +42,14 @@ public abstract class StanfordParser extends AbstractParser{
         @Parameter(names = {"-ss", "--SplitSentence"},
         description = "Just split sentence")
         private boolean splitSent = false;
+
+	    @Parameter(names = {"-lc", "--useLowercase"},
+	    description = "convert all strings to lower-case")
+	    private boolean useLowercase = false;
+
+	    public boolean isUseLowercase() {
+		    return useLowercase;
+	    }
         
         public boolean modelLocValid(){
             return modelLocation == null;
@@ -102,7 +108,7 @@ public abstract class StanfordParser extends AbstractParser{
 
     public void initPreProcessor() {
         try {
-            preprocessor = new StanfordRawTextPreProcessor(config().modelLoc(), newLineDelim(), getTokenDelim());
+            preprocessor = new StanfordRawTextPreProcessor(config().modelLoc(), newLineDelim(), getTokenDelim(), config().isUseLowercase());
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(StanfordParser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -111,7 +117,7 @@ public abstract class StanfordParser extends AbstractParser{
     }
     
     @Override
-    protected RawTextPreProcessorInterface preProcessor() {
+    protected RawTextPreProcessorInterface getPreprocessor() {
         return preprocessor;
     }
     
@@ -123,12 +129,12 @@ public abstract class StanfordParser extends AbstractParser{
         
         String procText = null;
         if(config().posTag()){
-            procText = (String) preProcessor().posTagText(text);
+            procText = (String) getPreprocessor().posTagText(text);
             return procText;
         }
         
         if(config().splitSent()){
-            List<CharSequence> sentences = preProcessor().splitSentences(text.toString());
+            List<CharSequence> sentences = getPreprocessor().splitSentences(text.toString());
             for(CharSequence sent : sentences){
                     procText += sent + NEW_LINE_DELIM;
             }
@@ -136,7 +142,7 @@ public abstract class StanfordParser extends AbstractParser{
         }
         
         if(config().tokenize()){
-            procText = (String) preProcessor().tokenizeText(text);
+            procText = (String) getPreprocessor().tokenizeText(text);
             return procText;
         }
         
