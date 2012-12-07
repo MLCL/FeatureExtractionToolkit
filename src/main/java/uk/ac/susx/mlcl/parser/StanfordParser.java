@@ -62,19 +62,6 @@ public abstract class StanfordParser extends AbstractParser {
             return useLemma;
         }
 
-//        public boolean modelLocValid() {
-//            return modelLocation == null;
-//        }
-//
-//        public String modelLoc() {
-//            return modelLocation;
-//        }
-
-//        public boolean isValidModel() {
-//            File file = new File(modelLocation);
-//            return file.isFile();
-//        }
-
         public boolean tokenize() {
             return tokenText;
         }
@@ -100,8 +87,6 @@ public abstract class StanfordParser extends AbstractParser {
 
     private static final String POS_PREFIX = "POS:";
 
-    private static final String LEMMA_PREFIX = "LEM:";
-
     public String getPosDelim() {
         return POS_DELIMITER;
     }
@@ -124,7 +109,6 @@ public abstract class StanfordParser extends AbstractParser {
         Properties props = new Properties();
         props.put("annotators", "tokenize, ssplit, pos, lemma");
         this.pipeline = new StanfordCoreNLP(props);
-        System.out.println("initialised");
     }
 
     @Override
@@ -142,15 +126,6 @@ public abstract class StanfordParser extends AbstractParser {
                 String word = token.get(CoreAnnotations.TextAnnotation.class);
                 String lemma = token.get(CoreAnnotations.LemmaAnnotation.class);
                 String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-
-//                todo this must happen after parsing is done
-//                if(config().isUseLowercase()){
-//                    word = word.toLowerCase();
-//                    lemma = lemma.toLowerCase();
-//                }
-//                if(config().isUseLemma()){
-//                    word = lemma;
-//                }
                 processedText.append(word).append(POS_DELIMITER).append(lemma).append(POS_DELIMITER).append(pos).append(TOKEN_DELIM);
             }
             processedText.append(NEW_LINE_DELIM);

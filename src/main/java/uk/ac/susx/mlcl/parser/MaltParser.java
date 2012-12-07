@@ -95,7 +95,6 @@ public class MaltParser implements DependencyParserInterface {
 			System.err.println("Initialising the dependency parser model...");
 			service = new MaltParserService();
 			// Inititalize the parser model 'model0' and sets the working directory to '.' and sets the logging file to 'parser.log'
-			System.out.println("******** -c " + (new File(".")).getAbsolutePath() + "  src/main/resources/   " + modName);
 			service.initializeParserModel("-c " + modName + " -m parse -w src/main/resources" + " -lfi parser.log");
 			System.err.println("Model initialised");
 		} catch (MaltChainedException e) {

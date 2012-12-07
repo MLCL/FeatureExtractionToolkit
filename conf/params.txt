@@ -1,13 +1,13 @@
 -tb
 -rt
---useLemma
---useLowercase
 -is
 .txt
 -ip
 ./data/
 -op
 feoutput-deppars/test
+--useLemma
+--useLowercase
 --numCores
 4
 -modN

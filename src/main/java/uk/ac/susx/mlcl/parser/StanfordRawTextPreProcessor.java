@@ -28,13 +28,11 @@ public class StanfordRawTextPreProcessor implements RawTextPreProcessorInterface
 	private MaxentTagger tagger;
 	private String sentDelim;
 	private final String tokDelim;
-	private final boolean lowercase;
 
-	public StanfordRawTextPreProcessor(String posTaggerModelLocation, String sentDelim, String tokDelim, boolean lowercase) throws ClassNotFoundException, IOException {
+	public StanfordRawTextPreProcessor(String posTaggerModelLocation, String sentDelim, String tokDelim) throws ClassNotFoundException, IOException {
 		tagger = new MaxentTagger(posTaggerModelLocation);
 		this.sentDelim = sentDelim;
 		this.tokDelim = tokDelim;
-		this.lowercase = lowercase;
 	}
 
 	/**
@@ -105,18 +103,7 @@ public class StanfordRawTextPreProcessor implements RawTextPreProcessorInterface
 	private String convertToString(ArrayList<TaggedWord> sent) {
 		StringBuilder stringSent = new StringBuilder();
 		for (TaggedWord tw : sent) {
-			if (this.lowercase) {
-				String[] taggedWord = tw.toString().split("/");
-				int len = taggedWord.length;
-				String[] word = ArrayUtils.subarray(taggedWord, len - 2, len - 1);
-
-				for (int i = 0; i < word.length; i++) {
-					word[i] = word[i].toLowerCase();
-				}
-				stringSent.append(StringUtils.join(word, "/")).append("/").append(taggedWord[len - 1]).append(tokDelim);
-			} else {
 				stringSent.append(tw.toString()).append(tokDelim);
-			}
 		}
 		return stringSent.toString();
 	}
