@@ -151,7 +151,12 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		return config;
 	}
 
-	@Override
+    @Override
+    protected RawTextPreProcessorInterface getPreprocessor() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
 	public String getOutPath() {
 		String outpath = super.getOutPath();
 
@@ -232,23 +237,24 @@ public class StanPoSMaltDepParser extends StanfordParser {
 
 	@Override
 	protected CharSequence rawTextParse(final CharSequence text) throws ModelNotValidException {
-		CharSequence posTagged = super.rawTextParse(text);
+		//sentence segment, tokenize, lemmatize and PoS tag
+        CharSequence processedText = super.rawTextParse(text);
 
 		//TODO: Re-Factor Pre-processing.
 
-		NewlineReader nr = new NewlineReader(posTagged, newLineDelim());
-		String preProcText = "";
+		NewlineReader nr = new NewlineReader(processedText, newLineDelim());
+		StringBuffer preProcText = new StringBuffer();
 		while (nr.hasLine()) {
 			final String line = nr.readLine();
-			String[] sentence = maltPar.preParseSentence(line.split(getTokenDelim()));
+			String[] sentence = maltPar.formatSentenceForMaltParser(line.split(getTokenDelim()));
 			try {
-				String[] mpSent = maltPar.parseTokens(sentence);
-				preProcText += buildString(mpSent);
+				String[] parserSent = maltPar.parseTokens(sentence);
+				preProcText.append(buildString(parserSent));
 			} catch (MaltChainedException ex) {
 				Logger.getLogger(StanPoSMaltDepParser.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-		return preProcText;
+		return preProcText.toString();
 	}
 
 	private String buildString(String[] tokens) {

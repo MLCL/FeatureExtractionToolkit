@@ -1,11 +1,13 @@
 -tb
 -rt
+--useLemma
+--useLowercase
 -mloc
 models/wsj-0-18-left3words-distsim.tagger
 -is 
 .txt
 -ip 
-/Volumes/LocalScratchHD/scratch/data/rcv/test1/
+./data/
 -op
 feoutput-deppars/test
 --numCores

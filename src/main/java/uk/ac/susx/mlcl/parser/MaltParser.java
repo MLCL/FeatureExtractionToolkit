@@ -105,7 +105,7 @@ public class MaltParser implements DependencyParserInterface {
 		}
 	}
 
-	public String[] preParseSentence(String[] sentence) {
+	public String[] formatSentenceForMaltParser(String[] sentence) {
 		ArrayList<String> preSent = new ArrayList<String>(sentence.length);
 
 		for (int i = 0; i < sentence.length; i++) {
@@ -114,7 +114,7 @@ public class MaltParser implements DependencyParserInterface {
 
 			//ignore empty tokens or ones without a PoS tag
 			if (sentence[i].length() > 0 && tokpos[0].length() > 0 && tokpos[1].length() > 0) {
-				String token = (i + 1) + CONLL_DELIM + sentence[i] + CONLL_DELIM + "_" + CONLL_DELIM + tokpos[1] + CONLL_DELIM + tokpos[1] + CONLL_DELIM + "_";
+				String token = (i + 1) + CONLL_DELIM + tokpos[0] + CONLL_DELIM + tokpos[1] + CONLL_DELIM + tokpos[2] + CONLL_DELIM + tokpos[2] + CONLL_DELIM + "_";
 				preSent.add(token);
 			}
 		}

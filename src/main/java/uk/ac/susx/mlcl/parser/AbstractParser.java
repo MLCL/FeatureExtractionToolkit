@@ -6,6 +6,7 @@ package uk.ac.susx.mlcl.parser;
 
 
 import com.beust.jcommander.Parameter;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import uk.ac.susx.mlcl.featureextraction.*;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
 import uk.ac.susx.mlcl.featureextraction.featureconstraint.*;

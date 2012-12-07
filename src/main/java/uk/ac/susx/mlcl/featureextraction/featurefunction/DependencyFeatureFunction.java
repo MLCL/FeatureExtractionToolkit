@@ -4,14 +4,12 @@
  */
 package uk.ac.susx.mlcl.featureextraction.featurefunction;
 
-import com.sun.tools.internal.ws.processor.model.jaxb.RpcLitMember;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import uk.ac.susx.mlcl.featureextraction.IndexToken;
 import uk.ac.susx.mlcl.featureextraction.Sentence;
 import uk.ac.susx.mlcl.featureextraction.Token;
-import uk.ac.susx.mlcl.featureextraction.annotations.Annotation;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
 
 /**
