@@ -52,21 +52,12 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		description = "Name of the dependancy parser model")
 		private String modN = null;
 
-		@Parameter(names = {"-wd", "--workDir"},
-		required = true,
-		description = "Working directory (model location)")
-		private String workDir = null;
-
 		public List depList() {
 			return depList;
 		}
 
 		public List hDepList() {
 			return hDepList;
-		}
-
-		public String workingDir() {
-			return workDir;
 		}
 
 		public String modeName() {
@@ -143,7 +134,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		config = new StanMaltConfig();
 		config.load(args);
 		super.initPreProcessor();
-		maltPar = new uk.ac.susx.mlcl.parser.MaltParser(super.getPosDelim(), config.modeName(), config.workingDir());
+		maltPar = new uk.ac.susx.mlcl.parser.MaltParser(super.getPosDelim(), config.modeName());
 		maltPar.initialiseModel();
 	}
 

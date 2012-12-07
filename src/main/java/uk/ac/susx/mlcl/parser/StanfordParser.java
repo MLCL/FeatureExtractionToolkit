@@ -29,10 +29,10 @@ public abstract class StanfordParser extends AbstractParser {
 
         private static final long serialVersionUID = 1L;
 
-        @Parameter(names = {"-mloc", "--modelLocation"},
-                required = true,
-                description = "The location of the model needed to parse the input text")
-        private String modelLocation;
+//        @Parameter(names = {"-mloc", "--modelLocation"},
+//                required = true,
+//                description = "The location of the model needed to parse the input text")
+//        private String modelLocation;
 
         @Parameter(names = {"-tok", "--tokenizeText"},
                 description = "Tokenize text")
@@ -62,18 +62,18 @@ public abstract class StanfordParser extends AbstractParser {
             return useLemma;
         }
 
-        public boolean modelLocValid() {
-            return modelLocation == null;
-        }
+//        public boolean modelLocValid() {
+//            return modelLocation == null;
+//        }
+//
+//        public String modelLoc() {
+//            return modelLocation;
+//        }
 
-        public String modelLoc() {
-            return modelLocation;
-        }
-
-        public boolean isValidModel() {
-            File file = new File(modelLocation);
-            return file.isFile();
-        }
+//        public boolean isValidModel() {
+//            File file = new File(modelLocation);
+//            return file.isFile();
+//        }
 
         public boolean tokenize() {
             return tokenText;
@@ -124,14 +124,11 @@ public abstract class StanfordParser extends AbstractParser {
         Properties props = new Properties();
         props.put("annotators", "tokenize, ssplit, pos, lemma");
         this.pipeline = new StanfordCoreNLP(props);
+        System.out.println("initialised");
     }
 
     @Override
     protected CharSequence rawTextParse(CharSequence text) throws ModelNotValidException {
-        if (!config().isValidModel() && config().posTag()) {
-            throw new ModelNotValidException("The location to the PoS-tagger model is either invalid or null");
-        }
-
         StringBuilder processedText = new StringBuilder();
 
         Annotation document = new Annotation(text.toString());

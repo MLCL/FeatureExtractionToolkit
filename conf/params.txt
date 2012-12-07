@@ -2,11 +2,9 @@
 -rt
 --useLemma
 --useLowercase
--mloc
-models/wsj-0-18-left3words-distsim.tagger
--is 
+-is
 .txt
--ip 
+-ip
 ./data/
 -op
 feoutput-deppars/test
@@ -14,8 +12,6 @@ feoutput-deppars/test
 4
 -modN
 engmalt.linear-1.7.mco
--wd
-models
 -hdr
 amod
 -hdr

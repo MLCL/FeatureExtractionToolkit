@@ -21,7 +21,6 @@ public class MaltParser implements DependencyParserInterface {
 	private String posDelim;
 	private String tokDelim;
 	private String modName;
-	private String workDir;
 	private DependencyStructure currGraph;
 	private MaltParserService service;
 
@@ -30,9 +29,8 @@ public class MaltParser implements DependencyParserInterface {
 	private static final String TOK_TAB_NAME = "FORM"; // Name of table containing token strings
 
 
-	public MaltParser(final String posDelim, final String modName, final String workDir) {
+	public MaltParser(final String posDelim, final String modName) {
 		this.posDelim = posDelim;
-		this.workDir = workDir;
 		this.modName = modName;
 	}
 
@@ -97,8 +95,8 @@ public class MaltParser implements DependencyParserInterface {
 			System.err.println("Initialising the dependency parser model...");
 			service = new MaltParserService();
 			// Inititalize the parser model 'model0' and sets the working directory to '.' and sets the logging file to 'parser.log'
-			System.out.println("******** -c " + (new File(".")).getAbsolutePath() + "  " + workDir + "   " + modName);
-			service.initializeParserModel("-c " + modName + " -m parse -w " + workDir + " -lfi parser.log");
+			System.out.println("******** -c " + (new File(".")).getAbsolutePath() + "  src/main/resources/   " + modName);
+			service.initializeParserModel("-c " + modName + " -m parse -w src/main/resources" + " -lfi parser.log");
 			System.err.println("Model initialised");
 		} catch (MaltChainedException e) {
 			System.err.println("MaltParser exception: " + e.getMessage());
