@@ -14,4 +14,8 @@ feoutput-deppars/test
 4
 -modN
 engmalt.linear-1.7.mco
+--headDepRels
+amod
+--depRels
+amod
 
