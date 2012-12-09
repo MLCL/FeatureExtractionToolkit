@@ -1,5 +1,7 @@
--tb
--rt
+--useTokenAsBase
+--useTokenAsFeature
+--parseRawText
+--useCoarsePoS
 --useLemma
 --useLowercaseEntries
 -is

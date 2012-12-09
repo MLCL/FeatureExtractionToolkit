@@ -10,9 +10,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
-import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
 
-import java.io.File;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -46,11 +44,20 @@ public abstract class StanfordParser extends AbstractParser {
                 description = "Just split sentence")
         private boolean splitSent = false;
 
-        @Parameter(names = {"-lem", "--useLemma"},
-                description = "Lemmatize")
-        private boolean useLemma = false;
 
-        public boolean isUseLemma() {
+	    @Parameter(names = {"-lem", "--useLemma"},
+	    description = "Lemmatize")
+	    private boolean useLemma = false;
+
+	    @Parameter(names = {"-cpos", "--useCoarsePoS"},
+	    description = "Lemmatize")
+	    private boolean useCoarsePos = false;
+
+	    public boolean isUseCoarsePos() {
+		    return useCoarsePos;
+	    }
+
+	    public boolean isUseLemma() {
             return useLemma;
         }
 
@@ -118,8 +125,7 @@ public abstract class StanfordParser extends AbstractParser {
                 String word = token.get(CoreAnnotations.TextAnnotation.class);
                 String lemma = token.get(CoreAnnotations.LemmaAnnotation.class);
                 String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-                    System.out.println(word+"/"+lemma+"/"+pos);
-
+//                    System.out.println(word+"/"+lemma+"/"+pos);
 //todo this should really happen after parsing is done, because using lemmas might confuse the parser
                 if(config().isUseLowercaseEntries()){
                     word = word.toLowerCase();
@@ -133,12 +139,6 @@ public abstract class StanfordParser extends AbstractParser {
             processedText.append(NEW_LINE_DELIM);
         }
         return processedText;
-    }
-
-    @Override
-    protected FeatureFactory buildFeatureFactory() {
-        FeatureFactory featurefactory = super.buildFeatureFactory();
-        return featurefactory;
     }
 
     @Override

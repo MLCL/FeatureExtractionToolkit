@@ -2,7 +2,6 @@ package uk.ac.susx.mlcl.parser;
 
 
 import com.beust.jcommander.Parameter;
-import org.apache.commons.lang3.StringUtils;
 import org.maltparser.core.exception.MaltChainedException;
 import org.maltparser.core.symbol.SymbolException;
 import org.maltparser.core.syntaxgraph.DependencyStructure;
@@ -199,7 +198,8 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		for (int i = 0; i < splitSent.length; i++) {
 			Token t = new Token();
 			String[] tokPos = splitSent[i].split("\t");
-			t.setAnnotation(Annotations.TokenAnnotation.class, tokPos[1]);
+			String pos = config.isUseCoarsePos() ? Token.coarsifyPoSTag(tokPos[3]) : tokPos[3];
+			t.setAnnotation(Annotations.TokenAnnotation.class, tokPos[1] + getPosDelim() + pos);
 			t.setAnnotation(Annotations.PoSAnnotation.class, tokPos[3]);
 			if (config.depList() != null) {
 				t.setAnnotation(Annotations.DependencyListAnnotation.class, new HashMap<String, ArrayList<String>>());
@@ -215,22 +215,28 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		if (graph != null) {
 			for (Edge edge : maltPar.getEdges(graph)) {
 				if (maltPar.getHeadIndex(edge) - 1 >= 0 && maltPar.getDependantIndex(edge) - 1 >= 0) {
-					ArrayList<String> feats = (ArrayList<String>) annotated.get(maltPar.getHeadIndex(edge) - 1).getAnnotation(Annotations.DependencyHeadListAnnotation.class).get(maltPar.getDepRel(edge, graph));
+					ArrayList<String> feats = (ArrayList<String>) annotated.get(maltPar.getHeadIndex(edge) - 1).
+					getAnnotation(Annotations.DependencyHeadListAnnotation.class).get(maltPar.getDepRel(edge, graph));
 					if (config.hDepList() != null) {
 						if (feats == null) {
 							feats = new ArrayList<String>();
 							feats.add(maltPar.getDependant(edge, graph));
-							annotated.get(maltPar.getHeadIndex(edge) - 1).getAnnotation(Annotations.DependencyHeadListAnnotation.class).put(maltPar.getDepRel(edge, graph), feats);
+							annotated.get(maltPar.getHeadIndex(edge) - 1).
+							getAnnotation(Annotations.DependencyHeadListAnnotation.class).
+							put(maltPar.getDepRel(edge, graph), feats);
 						} else {
 							feats.add(maltPar.getDependant(edge, graph));
 						}
 					}
 					if (config.depList() != null) {
-						feats = (ArrayList<String>) annotated.get(maltPar.getDependantIndex(edge) - 1).getAnnotation(Annotations.DependencyListAnnotation.class).get(maltPar.getDepRel(edge, graph));
+						feats = (ArrayList<String>) annotated.get(maltPar.getDependantIndex(edge) - 1).
+						getAnnotation(Annotations.DependencyListAnnotation.class).get(maltPar.getDepRel(edge, graph));
 						if (feats == null) {
 							feats = new ArrayList<String>();
 							feats.add(maltPar.getHead(edge, graph));
-							annotated.get(maltPar.getDependantIndex(edge) - 1).getAnnotation(Annotations.DependencyListAnnotation.class).put(maltPar.getDepRel(edge, graph), feats);
+							annotated.get(maltPar.getDependantIndex(edge) - 1).
+							getAnnotation(Annotations.DependencyListAnnotation.class).
+							put(maltPar.getDepRel(edge, graph), feats);
 						} else {
 							feats.add(maltPar.getDependant(edge, graph));
 						}
@@ -269,24 +275,13 @@ public class StanPoSMaltDepParser extends StanfordParser {
 
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < tokens.length; i++) {
-			String[] tokenComponents = tokens[i].split("\t");
-			if (config().isUseLowercaseEntries()) {
-				tokenComponents[1] = tokenComponents[1].toLowerCase();
-				tokenComponents[2] = tokenComponents[2].toLowerCase();
-			}
-			if (config().isUseLemma()) {
-				tokenComponents[1] = tokenComponents[2];
-			}
-//            tokenComponents[1] += getPosDelim();
-//            tokenComponents[1] += tokenComponents[3];
-			sb.append(StringUtils.join(tokenComponents, "\t"));
-
+			sb.append(tokens[i]);
 			if (i < (tokens.length - 1)) {
 				sb.append(PARSED_DELIM);
 			}
 		}
 		sb.append(newLineDelim());
 
-		return config().isUseLowercaseEntries() ? sb.toString().toLowerCase() : sb.toString();
+		return sb.toString();
 	}
 }
