@@ -33,11 +33,11 @@ public class Token {
     public final void setAnnotation(Annotation<?> a) {
         annotations.put((Class<? extends Annotation<?>>) a.getClass(), a);
     }
-    
+
     public final <T> void removeAnnotation(Class<? extends Annotation<T>> a) {
         annotations.remove(a);
     }
-    
+
     public final <T> T getAnnotation(Class<? extends Annotation<T>> k) {
         @SuppressWarnings("unchecked")
         final Annotation<T> a = (Annotation<T>) annotations.get(k);
@@ -80,11 +80,14 @@ public class Token {
             String prefix) {
         try {
             if(!annotations.containsKey(k))
-                    throw new IllegalArgumentException("No such element " + k);    
+                    throw new IllegalArgumentException("No such element " + k);
             annotations.get(k).addToCollection(list, prefix);
         } catch (OperationNotSupportedException e) {
         }catch (IllegalArgumentException e) {
         }
     }
 
+    public static String coarsifyPoSTag(String in){
+        return "NN";//todo add logic here
+    }
 }

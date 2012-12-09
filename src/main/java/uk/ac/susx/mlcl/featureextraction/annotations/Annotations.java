@@ -14,7 +14,7 @@ import uk.ac.susx.mlcl.util.Tuple;
 
 /**
  * Static utility class for handling Annotation objects.
- * 
+ *
  * @author Simon Wibberley
  */
 public class Annotations {
@@ -53,13 +53,13 @@ public class Annotations {
         }
 
     }
-    
+
     public static class DependencyHeadListAnnotation extends AbstractDictionaryAnnotation<HashMap<String,ArrayList<String>>> {
     }
-    
-    public static class DependencyListAnnotation extends AbstractDictionaryAnnotation<HashMap<String,ArrayList<String>>> {   
+
+    public static class DependencyListAnnotation extends AbstractDictionaryAnnotation<HashMap<String,ArrayList<String>>> {
     }
-    
+
     public static class DependencyAnnotation extends AbstractAnnotation<String>{
     }
 
@@ -77,7 +77,7 @@ public class Annotations {
 
     public static class TokenAnnotation extends AbstractAnnotation<CharSequence> {
     }
-    
+
     public static class OriginalTokenAnnotation extends AbstractAnnotation<CharSequence> {
     }
 
@@ -89,48 +89,48 @@ public class Annotations {
 
     public static class ChunkTagAnnotation extends AbstractAnnotation<String> {
     }
-    
+
     // NEW ADDITIONS *************************************************************
-    
+
     public static class LeftNounAnnotation extends AbstractAnnotation<String> {
     }
-    
+
     public static class RightNounAnnotation extends AbstractAnnotation<String> {
     }
-    
+
     public static class LeftAdjectiveAnnotation extends AbstractAnnotation<String> {
     }
-    
+
     public static class RightAdjectiveAnnotation extends AbstractAnnotation<String> {
     }
-    
+
     public static class LeftVerbHeadAnnotation extends AbstractAnnotation<String> {
     }
-    
+
     public static class RightVerbHeadAnnotation extends AbstractAnnotation<String> {
     }
-    
+
     public static class LeftPrepositionAnnotation extends AbstractAnnotation<String> {
     }
-    
+
     public static class RightPrepositionAnnotation extends AbstractAnnotation<String> {
     }
-    
+
     public static class HeadNounAnnotation extends AbstractAnnotation<String> {
     }
-    
+
     public static class OntologyEntryAnnotation extends AbstractAnnotation<String>{
     }
-    
+
     public static class PoSTagLeftAnnotation extends AbstractAnnotation<String>{
     }
-    
+
     public static class PoSTagRightAnnotation extends AbstractAnnotation<String>{
-    }   
-    
+    }
+
     public static class DeterminerLeftAnnotation extends AbstractAnnotation<String>{
     }
-    
+
     public static class NounGroupNounAnnotation extends AbstractAnnotation<String>{
     }
     //****************************************************************************

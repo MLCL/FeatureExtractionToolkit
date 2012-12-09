@@ -46,17 +46,9 @@ public abstract class StanfordParser extends AbstractParser {
                 description = "Just split sentence")
         private boolean splitSent = false;
 
-        @Parameter(names = {"-lc", "--useLowercase"},
-                description = "convert all strings to lower-case")
-        private boolean useLowercase = false;
-
         @Parameter(names = {"-lem", "--useLemma"},
                 description = "Lemmatize")
         private boolean useLemma = false;
-
-        public boolean isUseLowercase() {
-            return useLowercase;
-        }
 
         public boolean isUseLemma() {
             return useLemma;
@@ -126,6 +118,16 @@ public abstract class StanfordParser extends AbstractParser {
                 String word = token.get(CoreAnnotations.TextAnnotation.class);
                 String lemma = token.get(CoreAnnotations.LemmaAnnotation.class);
                 String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
+                    System.out.println(word+"/"+lemma+"/"+pos);
+
+//todo this should really happen after parsing is done, because using lemmas might confuse the parser
+                if(config().isUseLowercaseEntries()){
+                    word = word.toLowerCase();
+                    lemma = lemma.toLowerCase();
+                }
+                if(config().isUseLemma()){
+                    word = lemma;
+                }
                 processedText.append(word).append(POS_DELIMITER).append(lemma).append(POS_DELIMITER).append(pos).append(TOKEN_DELIM);
             }
             processedText.append(NEW_LINE_DELIM);

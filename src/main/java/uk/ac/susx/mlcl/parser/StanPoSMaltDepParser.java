@@ -149,8 +149,17 @@ public class StanPoSMaltDepParser extends StanfordParser {
     public String getOutPath() {
         String outpath = super.getOutPath();
 
-        if (config.isUseLowercase()) {
-            outpath += "-lc";
+        if (config().depList() != null) {
+            for (Iterator<String> it = config.depList.iterator(); it.hasNext(); ) {
+                String dep = it.next();
+                outpath += "-" + dep;
+            }
+        }
+        if (config().hDepList() != null) {
+            for (Iterator<String> it = config.hDepList.iterator(); it.hasNext(); ) {
+                String dep = it.next();
+                outpath += "-" + dep;
+            }
         }
 
         if (config().depList() != null) {
@@ -165,8 +174,6 @@ public class StanPoSMaltDepParser extends StanfordParser {
                 outpath += "-" + dep;
             }
         }
-
-        outpath = enumeratePath(outpath, 0);
 
         return outpath;
     }
@@ -250,24 +257,13 @@ public class StanPoSMaltDepParser extends StanfordParser {
     private String buildString(String[] tokens) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < tokens.length; i++) {
-            String[] tokenComponents = tokens[i].split("\t");
-            if (config().isUseLowercase()) {
-                tokenComponents[1] = tokenComponents[1].toLowerCase();
-                tokenComponents[2] = tokenComponents[2].toLowerCase();
-            }
-            if (config().isUseLemma()) {
-                tokenComponents[1] = tokenComponents[2];
-            }
-//            tokenComponents[1] += getPosDelim();
-//            tokenComponents[1] += tokenComponents[3];
-            sb.append(StringUtils.join(tokenComponents, "\t"));
-
+            sb.append(tokens[i]);
             if (i < (tokens.length - 1)) {
                 sb.append(PARSED_DELIM);
             }
-
-            sb.append(newLineDelim());
         }
-        return sb.toString();
+        sb.append(newLineDelim());
+
+        return config().isUseLowercaseEntries() ? sb.toString().toLowerCase() : sb.toString();
     }
 }

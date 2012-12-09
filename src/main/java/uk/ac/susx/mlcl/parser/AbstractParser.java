@@ -6,7 +6,6 @@ package uk.ac.susx.mlcl.parser;
 
 
 import com.beust.jcommander.Parameter;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import uk.ac.susx.mlcl.featureextraction.*;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
 import uk.ac.susx.mlcl.featureextraction.featureconstraint.*;
@@ -153,6 +152,15 @@ public abstract class AbstractParser implements Configurable {
 		converter = ContextWindowStringConverter.class,
 		description = "in the form \"-LEFT+RIGHT\" for LEFT tokens to the left and RIGHT tokens to the right")
 		private IntSpan contextWindow = new IntSpan(-5, 5);
+
+
+        @Parameter(names = {"-lce", "--useLowercaseEntries"},
+                description = "convert all entries and their token features to lower-case")
+        private boolean useLowercaseEntries = false;
+
+        public boolean isUseLowercaseEntries(){
+            return useLowercaseEntries;
+        }
 
 		public String getEntrySeparator() {
 			return entrySeparator;
