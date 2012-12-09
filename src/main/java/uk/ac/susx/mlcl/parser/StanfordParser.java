@@ -111,7 +111,7 @@ public abstract class StanfordParser extends AbstractParser {
     }
 
     @Override
-    protected CharSequence rawTextParse(CharSequence text) throws ModelNotValidException {
+    protected Object[] rawTextParse(CharSequence text) throws ModelNotValidException {
         StringBuilder processedText = new StringBuilder();
 
         Annotation document = new Annotation(text.toString());
@@ -138,7 +138,7 @@ public abstract class StanfordParser extends AbstractParser {
             }
             processedText.append(NEW_LINE_DELIM);
         }
-        return processedText;
+        return new Object[]{processedText, pipeline};
     }
 
     @Override

@@ -43,7 +43,7 @@ public class TokenParser extends AbstractParser {
     }
 
     @Override
-    protected CharSequence rawTextParse(CharSequence text) throws ModelNotValidException {
+    protected Object[] rawTextParse(CharSequence text) throws ModelNotValidException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -131,7 +131,7 @@ public class TokenParser extends AbstractParser {
     }
 
     @Override
-    protected Sentence annotate(final String entry) {
+    protected Sentence annotate(final String entry, Object preprocessor) {
         final Sentence annotated = new Sentence();
         try {
 

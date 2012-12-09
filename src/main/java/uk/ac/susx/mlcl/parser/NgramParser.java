@@ -4,24 +4,24 @@
  */
 package uk.ac.susx.mlcl.parser;
 
-import uk.ac.susx.mlcl.parser.AbstractParser;
-import uk.ac.susx.mlcl.strings.NewlineStringSplitter;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.beust.jcommander.Parameter;
 import uk.ac.susx.mlcl.featureextraction.ContextWindowStringConverter;
 import uk.ac.susx.mlcl.featureextraction.IndexToken;
 import uk.ac.susx.mlcl.featureextraction.Sentence;
 import uk.ac.susx.mlcl.featureextraction.Token;
-
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.CharAnnotation;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.IndexAnnotation;
-import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
-import uk.ac.susx.mlcl.util.IntSpan;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.NgramAnnotation;
-import uk.ac.susx.mlcl.featureextraction.featureconstraint.*;
+import uk.ac.susx.mlcl.featureextraction.featureconstraint.ContextWindowsFeatureConstraint;
+import uk.ac.susx.mlcl.featureextraction.featureconstraint.DisjointFeatureConstraint;
+import uk.ac.susx.mlcl.featureextraction.featureconstraint.HasAnnotationFeatureConstraint;
+import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
 import uk.ac.susx.mlcl.featureextraction.featurefunction.NGramFeatureFunction;
+import uk.ac.susx.mlcl.strings.NewlineStringSplitter;
+import uk.ac.susx.mlcl.util.IntSpan;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -159,7 +159,7 @@ public class NgramParser extends AbstractParser {
     }
 
     @Override
-    protected Sentence annotate(String entry) {
+    protected Sentence annotate(String entry, Object preprocessor) {
         final Sentence annotated = new Sentence("");
 
         final char[] chars = entry.toCharArray();
@@ -189,7 +189,7 @@ public class NgramParser extends AbstractParser {
     }
     
     @Override
-    protected CharSequence rawTextParse(CharSequence text) throws ModelNotValidException {
+    protected Object[] rawTextParse(CharSequence text) throws ModelNotValidException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

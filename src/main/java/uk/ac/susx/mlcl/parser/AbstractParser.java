@@ -154,13 +154,13 @@ public abstract class AbstractParser implements Configurable {
 		private IntSpan contextWindow = new IntSpan(-5, 5);
 
 
-        @Parameter(names = {"-lce", "--useLowercaseEntries"},
-                description = "convert all entries and their token features to lower-case")
-        private boolean useLowercaseEntries = false;
+		@Parameter(names = {"-lce", "--useLowercaseEntries"},
+		description = "convert all entries and their token features to lower-case")
+		private boolean useLowercaseEntries = false;
 
-        public boolean isUseLowercaseEntries(){
-            return useLowercaseEntries;
-        }
+		public boolean isUseLowercaseEntries() {
+			return useLowercaseEntries;
+		}
 
 		public String getEntrySeparator() {
 			return entrySeparator;
@@ -482,16 +482,7 @@ public abstract class AbstractParser implements Configurable {
 				System.err.println("Processing file: " + file);
 				try {
 					CharSequence text = Files.getText(prefix + File.separator + file, false, true);
-					if (config().isRawText()) {
-						try {
-							parse(rawTextParse(text), false);
-						} catch (ModelNotValidException ex) {
-							Logger.getLogger(AbstractParser.class.getName()).log(Level.SEVERE, null, ex);
-						}
-					} else {
-						parse(text, false);
-					}
-
+					parse(text, false);
 				} catch (IOException e) {
 					LOG.log(Level.SEVERE, null, e);
 				}
@@ -544,11 +535,20 @@ public abstract class AbstractParser implements Configurable {
 				@Override
 				public final Void call() throws IOException {
 					try {
-						final CharSequence output = handleEntry(entry);
+						CharSequence preprocessedEntry = entry;
+						Object[] ret = null;
+						if (config().isRawText()) {
+							try {
+								ret = rawTextParse(entry);
+								preprocessedEntry = (CharSequence) ret[0];
+							} catch (ModelNotValidException e) {
+								e.printStackTrace();
+							}
+						}
+						final CharSequence output = handleEntry(preprocessedEntry.toString(), ret[1]);
 						handleOutput(output);
-
 					} catch (InvalidEntryException e) {
-						// just ignore singlton or empty sentences
+						// just ignore singleton or empty sentences
 					} finally {
 						throttle.release();
 					}
@@ -593,11 +593,11 @@ public abstract class AbstractParser implements Configurable {
 		String outDir = join(subArray, File.separator);
 
 		File outDirFile = new File(outDir);
-		if(!outDirFile.exists()){
+		if (!outDirFile.exists()) {
 			LOG.warning("Output file does not exist, creating...");
 			outDirFile.mkdirs();
 		}
-		if(!outPath.endsWith(".txt"))
+		if (!outPath.endsWith(".txt"))
 			outPath += ".txt";
 		try {
 			outFile = new BufferedWriter(new FileWriter(outPath));
@@ -631,9 +631,9 @@ public abstract class AbstractParser implements Configurable {
 	 * @param entry
 	 * @return
 	 */
-	private CharSequence handleEntry(String entry) {
+	private CharSequence handleEntry(String entry, Object preprocessor) {
 
-		Sentence annotated = annotate(entry);
+		Sentence annotated = annotate(entry, preprocessor);
 
 		if (annotated.isEmpty()) {
 			throw new InvalidEntryException("empty sentence!");
@@ -699,7 +699,7 @@ public abstract class AbstractParser implements Configurable {
 		}
 	}
 
-	protected abstract Sentence annotate(String entry);
+	protected abstract Sentence annotate(String entry, Object preprocessor);
 
 	protected void setKeyConstraints() {
 
@@ -806,6 +806,12 @@ public abstract class AbstractParser implements Configurable {
 
 	protected abstract String newLineDelim();
 
-	protected abstract CharSequence rawTextParse(CharSequence text) throws ModelNotValidException;
+	/**
+	 * Return the preprocessed text and the preprocessor object that was use to do that
+	 * @param text
+	 * @return
+	 * @throws ModelNotValidException
+	 */
+	protected abstract Object[] rawTextParse(CharSequence text) throws ModelNotValidException;
 
 }

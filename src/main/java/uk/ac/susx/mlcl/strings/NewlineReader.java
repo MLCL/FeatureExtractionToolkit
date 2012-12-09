@@ -35,6 +35,7 @@ public class NewlineReader implements LineReader{
 
     @Override
     public Boolean hasLine() {
+	    //todo this returns false if the text is all on one line
         return matcher.find();
     }
     

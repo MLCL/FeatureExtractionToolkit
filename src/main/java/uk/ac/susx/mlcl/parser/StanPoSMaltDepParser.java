@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -67,12 +69,13 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	}
 
 	private StanMaltConfig config;
-	private uk.ac.susx.mlcl.parser.MaltParser maltPar;
+	//	private ConcurrentHashMap<String, MaltParser> parsersForString;// maltPar;
+	private BlockingQueue<MaltParser> parsers = new LinkedBlockingQueue<MaltParser>();// maltPar;
 
 	private static final String PARSED_DELIM = "-]";
 
 	@Override
-	protected Sentence annotate(String entry) {
+	protected Sentence annotate(String entry, Object preprocessor) {
 
 		final Sentence annotated = new Sentence();
 
@@ -87,7 +90,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		}
 
 		try {
-			processEntry(entry, annotated);
+			processEntry(entry, annotated, (MaltParser) preprocessor);
 		} catch (Exception e) {
 			LOG.log(Level.SEVERE, null, e);
 		}
@@ -107,7 +110,9 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	public static void main(String[] args) {
 		StanPoSMaltDepParser sp = new StanPoSMaltDepParser();
 		sp.init(args);
+		long start = System.currentTimeMillis();
 		sp.parse();
+		System.out.println("Time (ms) = " + (System.currentTimeMillis() - start));
 	}
 
 	@Override
@@ -135,8 +140,12 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		config = new StanMaltConfig();
 		config.load(args);
 		super.initPreProcessor();
-		maltPar = new uk.ac.susx.mlcl.parser.MaltParser(super.getPosDelim(), config.modeName());
-		maltPar.initialiseModel();
+		int n = config.getNumCores();
+		for (int i = 0; i < n; i++) {
+			MaltParser maltPar = new MaltParser(super.getPosDelim(), config.modeName());
+			maltPar.initialiseModel();
+			parsers.add(maltPar);
+		}
 	}
 
 	protected StanMaltConfig config() {
@@ -181,7 +190,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		return outpath;
 	}
 
-	private void processEntry(String entry, Sentence annotated) throws MaltChainedException {
+	private void processEntry(String entry, Sentence annotated, MaltParser maltPar) throws MaltChainedException {
 		String[] splitSent = entry.split(PARSED_DELIM);
 		DependencyStructure graph = null;
 		if (config.depList() != null || config().hDepList() != null) {
@@ -246,12 +255,17 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		} else {
 			System.err.println("Dependency graph is null");
 		}
+		parsers.offer(maltPar);
 	}
 
 	@Override
-	protected CharSequence rawTextParse(final CharSequence text) throws ModelNotValidException {
+	protected Object[] rawTextParse(final CharSequence text) throws ModelNotValidException {
 		//sentence segment, tokenize, lemmatize and PoS tag
-		CharSequence processedText = super.rawTextParse(text);
+		Object[] ret = super.rawTextParse(text);
+		CharSequence processedText = (CharSequence) ret[0];
+		//ret[1] is the stanford PoS tagger
+		MaltParser maltPar = parsers.poll();
+
 
 		//TODO: Re-Factor Pre-processing.
 
@@ -267,7 +281,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 				Logger.getLogger(StanPoSMaltDepParser.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-		return preProcText.toString();
+		return new Object[] {preProcText.toString(), maltPar};
 	}
 
 	private String buildString(String[] tokens) {
