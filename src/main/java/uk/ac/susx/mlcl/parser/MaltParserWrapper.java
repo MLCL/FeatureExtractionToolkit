@@ -10,17 +10,17 @@ import org.maltparser.core.symbol.SymbolTable;
 import org.maltparser.core.syntaxgraph.DependencyStructure;
 import org.maltparser.core.syntaxgraph.edge.Edge;
 
-import java.io.File;
 import java.util.ArrayList;
 
 /**
+ * A thin wrapper around a MaltParserService that allows multiple instances of the  service to be created
+ *
  * @author jackpay
+ * @author Miroslav Batchkarov
  */
-public class MaltParser implements DependencyParserInterface {
+public class MaltParserWrapper {
 
 	private String posDelim;
-	private String tokDelim;
-	private String modName;
 	private DependencyStructure currGraph;
 	private MaltParserService service;
 
@@ -29,36 +29,19 @@ public class MaltParser implements DependencyParserInterface {
 	private static final String TOK_TAB_NAME = "FORM"; // Name of table containing token strings
 
 
-	public MaltParser(final String posDelim, final String modName) {
+	public MaltParserWrapper(final String posDelim, final String modName, int id) {
 		this.posDelim = posDelim;
-		this.modName = modName;
-	}
 
-	public DependencyStructure parseSentence(final String[] tokens, boolean setGraph) throws MaltChainedException {
-		DependencyStructure graph = null;
-		;
-		for (String tok : tokens) {
-			if (tok == "") {
-				System.err.println(tokens);
-			}
-		}
 		try {
-			graph = service.parse(tokens);
-
+			System.err.println("Initialising the dependency parser model...");
+			service = new MaltParserService(id);
+			// Inititalize the parser model 'model0' and sets the working directory to '.' and sets the logging file to 'parser.log'
+			service.initializeParserModel("-c " + modName + " -m parse -w src/main/resources" + " -lfi parser.log");
+			System.err.println("Model initialised");
 		} catch (MaltChainedException e) {
-			for (String tok : tokens) {
-				System.err.println(tok);
-			}
-			System.err.println(e.getLocalizedMessage());
-			System.err.println(e.getMessageChain());
-			System.err.println();
-			System.err.println("length: " + tokens.length + "last index: " + tokens[tokens.length - 1]);
+			System.err.println("MaltParser exception: " + e.getMessage());
 
 		}
-		if (setGraph) {
-			setGraph(graph);
-		}
-		return graph;
 	}
 
 	public DependencyStructure toDependencyStructure(String[] tokens, boolean setGraph) throws MaltChainedException {
@@ -70,14 +53,6 @@ public class MaltParser implements DependencyParserInterface {
 	}
 
 	public String[] parseTokens(String[] sentence) throws MaltChainedException {
-//		String[] toReturn = null;
-//		try {
-//			toReturn = service.parseTokens(sentence);
-//		} catch (org.maltparser.core.symbol.SymbolException ex) {
-//			/* Symbol table error: empty string cannot be added to the symbol table
-//			occurs when attempting to parse an empty token */
-//		}
-//		return toReturn;
 		return service.parseTokens(sentence);
 	}
 
@@ -89,19 +64,6 @@ public class MaltParser implements DependencyParserInterface {
 		currGraph = graph;
 	}
 
-	@Override
-	public void initialiseModel() {
-		try {
-			System.err.println("Initialising the dependency parser model...");
-			service = new MaltParserService();
-			// Inititalize the parser model 'model0' and sets the working directory to '.' and sets the logging file to 'parser.log'
-			service.initializeParserModel("-c " + modName + " -m parse -w src/main/resources" + " -lfi parser.log");
-			System.err.println("Model initialised");
-		} catch (MaltChainedException e) {
-			System.err.println("MaltParser exception: " + e.getMessage());
-		}
-	}
-
 	public String[] formatSentenceForMaltParser(String[] sentence) {
 		ArrayList<String> preSent = new ArrayList<String>(sentence.length);
 
@@ -111,7 +73,8 @@ public class MaltParser implements DependencyParserInterface {
 
 			//ignore empty tokens or ones without a PoS tag
 			if (sentence[i].length() > 0 && tokpos[0].length() > 0 && tokpos[1].length() > 0) {
-				String token = (i + 1) + CONLL_DELIM + tokpos[0] + CONLL_DELIM + tokpos[1] + CONLL_DELIM + tokpos[2] + CONLL_DELIM + tokpos[2] + CONLL_DELIM + "_";
+				String token = (i + 1) + CONLL_DELIM + tokpos[0] + CONLL_DELIM + tokpos[1] + CONLL_DELIM +
+				tokpos[2] + CONLL_DELIM + tokpos[2] + CONLL_DELIM + "_";
 				preSent.add(token);
 			}
 		}

@@ -69,8 +69,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	}
 
 	private StanMaltConfig config;
-	//	private ConcurrentHashMap<String, MaltParser> parsersForString;// maltPar;
-	private BlockingQueue<MaltParser> parsers = new LinkedBlockingQueue<MaltParser>();// maltPar;
+	private BlockingQueue<MaltParserWrapper> parsers = new LinkedBlockingQueue<MaltParserWrapper>();// maltPar;
 
 	private static final String PARSED_DELIM = "-]";
 
@@ -90,7 +89,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		}
 
 		try {
-			processEntry(entry, annotated, (MaltParser) preprocessor);
+			processEntry(entry, annotated, (MaltParserWrapper) preprocessor);
 		} catch (Exception e) {
 			LOG.log(Level.SEVERE, null, e);
 		}
@@ -142,8 +141,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		super.initPreProcessor();
 		int n = config.getNumCores();
 		for (int i = 0; i < n; i++) {
-			MaltParser maltPar = new MaltParser(super.getPosDelim(), config.modeName());
-			maltPar.initialiseModel();
+			MaltParserWrapper maltPar = new MaltParserWrapper(super.getPosDelim(), config.modeName(), i);
 			parsers.add(maltPar);
 		}
 	}
@@ -190,7 +188,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		return outpath;
 	}
 
-	private void processEntry(String entry, Sentence annotated, MaltParser maltPar) throws MaltChainedException {
+	private void processEntry(String entry, Sentence annotated, MaltParserWrapper maltPar) throws MaltChainedException {
 		String[] splitSent = entry.split(PARSED_DELIM);
 		DependencyStructure graph = null;
 		if (config.depList() != null || config().hDepList() != null) {
@@ -264,7 +262,12 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		Object[] ret = super.rawTextParse(text);
 		CharSequence processedText = (CharSequence) ret[0];
 		//ret[1] is the stanford PoS tagger
-		MaltParser maltPar = parsers.poll();
+		MaltParserWrapper maltPar = null;
+		try {
+			maltPar = parsers.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
 
 		//TODO: Re-Factor Pre-processing.
