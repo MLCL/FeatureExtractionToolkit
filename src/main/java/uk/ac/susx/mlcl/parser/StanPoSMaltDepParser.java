@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -69,7 +69,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	}
 
 	private StanMaltConfig config;
-	private BlockingQueue<MaltParserWrapper> parsers = new LinkedBlockingQueue<MaltParserWrapper>();// maltPar;
+	private BlockingQueue<MaltParserWrapper> parsers;// maltPar;
 
 	private static final String PARSED_DELIM = "-]";
 
@@ -140,6 +140,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		config.load(args);
 		super.initPreProcessor();
 		int n = config.getNumCores();
+		this.parsers = new LinkedBlockingDeque<MaltParserWrapper>(n);
 		for (int i = 0; i < n; i++) {
 			MaltParserWrapper maltPar = new MaltParserWrapper(super.getPosDelim(), config.modeName(), i);
 			parsers.add(maltPar);
@@ -256,8 +257,15 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		parsers.offer(maltPar);
 	}
 
+	/**
+	 * Returns the pre-processed text and the preprocessor object as an object array
+	 *
+	 * @param text
+	 * @return
+	 * @throws ModelNotValidException
+	 */
 	@Override
-	protected Object[] rawTextParse(final CharSequence text) throws ModelNotValidException {
+	protected Object[] rawTextParse(final CharSequence text) {
 		//sentence segment, tokenize, lemmatize and PoS tag
 		Object[] ret = super.rawTextParse(text);
 		CharSequence processedText = (CharSequence) ret[0];
@@ -284,6 +292,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 				Logger.getLogger(StanPoSMaltDepParser.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+		//return the MaltParserWrapper used by this method because it contains all dependencies
 		return new Object[] {preProcText.toString(), maltPar};
 	}
 

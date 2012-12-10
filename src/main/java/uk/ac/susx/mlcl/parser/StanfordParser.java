@@ -13,6 +13,8 @@ import edu.stanford.nlp.util.CoreMap;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Logger;
 
 /**
@@ -20,142 +22,157 @@ import java.util.logging.Logger;
  */
 public abstract class StanfordParser extends AbstractParser {
 
-    private static final Logger LOG =
-            Logger.getLogger(AbstractParser.class.getName());
-
-    protected abstract static class StanConfig extends AbstractParserConfig {
-
-        private static final long serialVersionUID = 1L;
-
-//        @Parameter(names = {"-mloc", "--modelLocation"},
-//                required = true,
-//                description = "The location of the model needed to parse the input text")
-//        private String modelLocation;
-
-        @Parameter(names = {"-tok", "--tokenizeText"},
-                description = "Tokenize text")
-        private boolean tokenText = false;
-
-        @Parameter(names = {"-posTag", "--posTagSentence"},
-                description = "Fully split tokenize and pos tag")
-        private boolean posTagText = true;
-
-        @Parameter(names = {"-ss", "--SplitSentence"},
-                description = "Just split sentence")
-        private boolean splitSent = false;
+	private static final Logger LOG =
+	Logger.getLogger(AbstractParser.class.getName());
 
 
-	    @Parameter(names = {"-lem", "--useLemma"},
-	    description = "Lemmatize")
-	    private boolean useLemma = false;
 
-	    @Parameter(names = {"-cpos", "--useCoarsePoS"},
-	    description = "Lemmatize")
-	    private boolean useCoarsePos = false;
+	protected abstract static class StanConfig extends AbstractParserConfig {
 
-	    public boolean isUseCoarsePos() {
-		    return useCoarsePos;
-	    }
+		private static final long serialVersionUID = 1L;
 
-	    public boolean isUseLemma() {
-            return useLemma;
-        }
+		@Parameter(names = {"-tok", "--tokenizeText"},
+		description = "Tokenize text")
+		private boolean tokenText = false;
 
-        public boolean tokenize() {
-            return tokenText;
-        }
+		@Parameter(names = {"-posTag", "--posTagSentence"},
+		description = "Fully split tokenize and pos tag")
+		private boolean posTagText = true;
 
-        public boolean posTag() {
-            return posTagText;
-        }
-
-        public boolean splitSent() {
-            return splitSent;
-        }
-
-    }
-
-    //    private StanfordRawTextPreProcessor preprocessor;
-    private StanfordCoreNLP pipeline;
-
-    private static final String POS_DELIMITER = "/";
-
-    private static final String NEW_LINE_DELIM = "\n";
-
-    private static final String TOKEN_DELIM = " ";
-
-    private static final String POS_PREFIX = "POS:";
-
-    public String getPosDelim() {
-        return POS_DELIMITER;
-    }
-
-    public String getTokenDelim() {
-        return TOKEN_DELIM;
-    }
-
-    public String getPosPrefix() {
-        return POS_PREFIX;
-    }
+		@Parameter(names = {"-ss", "--SplitSentence"},
+		description = "Just split sentence")
+		private boolean splitSent = false;
 
 
-    @Override
-    protected String newLineDelim() {
-        return NEW_LINE_DELIM;
-    }
+		@Parameter(names = {"-lem", "--useLemma"},
+		description = "Lemmatize")
+		private boolean useLemma = false;
 
-    public void initPreProcessor() {
-        Properties props = new Properties();
-        props.put("annotators", "tokenize, ssplit, pos, lemma");
-        this.pipeline = new StanfordCoreNLP(props);
-    }
+		@Parameter(names = {"-cpos", "--useCoarsePoS"},
+		description = "Lemmatize")
+		private boolean useCoarsePos = false;
 
-    @Override
-    protected Object[] rawTextParse(CharSequence text) throws ModelNotValidException {
-        StringBuilder processedText = new StringBuilder();
+		public boolean isUseCoarsePos() {
+			return useCoarsePos;
+		}
 
-        Annotation document = new Annotation(text.toString());
-        pipeline.annotate(document);
-        List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
+		public boolean isUseLemma() {
+			return useLemma;
+		}
 
-        for (CoreMap sentence : sentences) {
-            // traversing the words in the current sentence
-            // a CoreLabel is a CoreMap with additional token-specific methods
-            for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
-                String word = token.get(CoreAnnotations.TextAnnotation.class);
-                String lemma = token.get(CoreAnnotations.LemmaAnnotation.class);
-                String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
+		public boolean tokenize() {
+			return tokenText;
+		}
+
+		public boolean posTag() {
+			return posTagText;
+		}
+
+		public boolean splitSent() {
+			return splitSent;
+		}
+
+	}
+
+	//    private StanfordRawTextPreProcessor preprocessor;
+	private BlockingQueue<StanfordCoreNLP> pipelines;
+
+	private static final String POS_DELIMITER = "/";
+
+	private static final String NEW_LINE_DELIM = "\n";
+
+	private static final String TOKEN_DELIM = " ";
+
+	private static final String POS_PREFIX = "POS:";
+
+	public String getPosDelim() {
+		return POS_DELIMITER;
+	}
+
+	public String getTokenDelim() {
+		return TOKEN_DELIM;
+	}
+
+	public String getPosPrefix() {
+		return POS_PREFIX;
+	}
+
+
+	@Override
+	protected String newLineDelim() {
+		return NEW_LINE_DELIM;
+	}
+
+	public void initPreProcessor() {
+		Properties props = new Properties();
+		props.put("annotators", "tokenize, ssplit, pos, lemma");
+		this.pipelines = new LinkedBlockingDeque<StanfordCoreNLP>();
+		for (int i = 0; i < config().getNumCores(); i++) {
+			try {
+				this.pipelines.put(new StanfordCoreNLP(props));
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	protected Object[] rawTextParse(CharSequence text) {
+		StringBuilder processedText = new StringBuilder();
+		StanfordCoreNLP pipeline = null;
+		try {
+			pipeline = pipelines.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		Annotation document = new Annotation(text.toString());
+		pipeline.annotate(document);
+		List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
+
+		for (CoreMap sentence : sentences) {
+			// traversing the words in the current sentence
+			// a CoreLabel is a CoreMap with additional token-specific methods
+			for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+				String word = token.get(CoreAnnotations.TextAnnotation.class);
+				String lemma = token.get(CoreAnnotations.LemmaAnnotation.class);
+				String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
 //                    System.out.println(word+"/"+lemma+"/"+pos);
 //todo this should really happen after parsing is done, because using lemmas might confuse the parser
-                if(config().isUseLowercaseEntries()){
-                    word = word.toLowerCase();
-                    lemma = lemma.toLowerCase();
-                }
-                if(config().isUseLemma()){
-                    word = lemma;
-                }
-                processedText.append(word).append(POS_DELIMITER).append(lemma).append(POS_DELIMITER).append(pos).append(TOKEN_DELIM);
-            }
-            processedText.append(NEW_LINE_DELIM);
-        }
-        return new Object[]{processedText, pipeline};
-    }
+				if (config().isUseLowercaseEntries()) {
+					word = word.toLowerCase();
+					lemma = lemma.toLowerCase();
+				}
+				if (config().isUseLemma()) {
+					word = lemma;
+				}
+				processedText.append(word).append(POS_DELIMITER).append(lemma).append(POS_DELIMITER).append(pos).append(TOKEN_DELIM);
+			}
+			processedText.append(NEW_LINE_DELIM);
+		}
+		try {
+			pipelines.put(pipeline);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		// the Stanford object is not really needed anymore--- all lemmas and PoS tags are embedded into processedText
+		return new Object[] {processedText, null};
+	}
 
-    @Override
-    public String getOutPath() {
+	@Override
+	public String getOutPath() {
 
-        String outPath = super.getOutPath();
+		String outPath = super.getOutPath();
 
-        outPath += (config().posTag()) ? "-pos" : "";
+		outPath += (config().posTag()) ? "-pos" : "";
 
-        outPath += (config().tokenize()) ? "-tok" : "";
+		outPath += (config().tokenize()) ? "-tok" : "";
 
-        outPath += (config().splitSent()) ? "-ss" : "";
+		outPath += (config().splitSent()) ? "-ss" : "";
 
-        return outPath;
-    }
+		return outPath;
+	}
 
-    @Override
-    protected abstract StanConfig config();
+	@Override
+	protected abstract StanConfig config();
 
 }
