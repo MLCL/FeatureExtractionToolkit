@@ -6,7 +6,7 @@
 
     <groupId>uk.ac.susx.mlcl</groupId>
     <artifactId>FeatureExtractionToolkit</artifactId>
-    <version>0.2</version>
+    <version>0.3</version>
     <packaging>pom</packaging>
 
     <name>FeatureExtractionToolkit</name>
