@@ -208,6 +208,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 			String[] tokPos = splitSent[i].split("\t");
 			String pos = config.isUseCoarsePos() ? Token.coarsifyPoSTag(tokPos[3]) : tokPos[3];
 			t.setAnnotation(Annotations.TokenAnnotation.class, tokPos[1] + getPosDelim() + pos);
+			t.setAnnotation(Annotations.OriginalTokenAnnotation.class, tokPos[1]);
 			t.setAnnotation(Annotations.PoSAnnotation.class, tokPos[3]);
 			if (config.depList() != null) {
 				t.setAnnotation(Annotations.DependencyListAnnotation.class, new HashMap<String, ArrayList<String>>());

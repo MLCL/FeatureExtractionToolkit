@@ -10,10 +10,12 @@
 ./data/
 -op
 feoutput-deppars/test
+--outputFormatter
+uk.ac.susx.mlcl.featureextraction.featurefunction.TabOutputFormatterNoPoS
 --contextWindow
--0+0
+-1+1
 --numCores
-3
+4
 -modN
 engmalt.linear-1.7.mco
 --headDepRels
