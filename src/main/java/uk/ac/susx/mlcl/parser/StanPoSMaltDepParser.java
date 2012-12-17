@@ -88,10 +88,11 @@ public class StanPoSMaltDepParser extends StanfordParser {
 			"No dependancy relations specified!");
 		}
 
+
 		try {
 			processEntry(entry, annotated, (MaltParserWrapper) preprocessor);
-		} catch (Exception e) {
-			LOG.log(Level.SEVERE, null, e);
+		} catch (MaltChainedException e) {
+			e.printStackTrace();
 		}
 
 		if (annotated.size() <= 1) {

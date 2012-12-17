@@ -582,6 +582,7 @@ public abstract class AbstractParser implements Configurable {
 			LOG.log(Level.SEVERE, null, e);
 			exec.shutdownNow();
 		} catch (Exception e) {
+			e.printStackTrace();
 			LOG.log(Level.SEVERE, null, e);
 		}
 	}
