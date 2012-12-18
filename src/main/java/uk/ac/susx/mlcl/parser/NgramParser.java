@@ -159,7 +159,7 @@ public class NgramParser extends AbstractParser {
     }
 
     @Override
-    protected Sentence annotate(String entry, Object preprocessor) {
+    protected List<Sentence> annotate(String entry, Object preprocessor) {
         final Sentence annotated = new Sentence("");
 
         final char[] chars = entry.toCharArray();
@@ -174,7 +174,9 @@ public class NgramParser extends AbstractParser {
         annotated.addAllKey(getKeyNgrams(chars.length));
 
         applyFeatureFactory(getFeatureFactory(),annotated);
-        return annotated;
+	    List<Sentence> ret = new ArrayList<Sentence>();
+	    ret.add(annotated);
+	    return ret;
     }
 
     @Override

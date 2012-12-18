@@ -130,6 +130,7 @@ public abstract class StanfordParser extends AbstractParser {
 		List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
 
 		for (CoreMap sentence : sentences) {
+//			System.out.println("Stanford sent: " + sentence);
 			// traversing the words in the current sentence
 			// a CoreLabel is a CoreMap with additional token-specific methods
 			for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {

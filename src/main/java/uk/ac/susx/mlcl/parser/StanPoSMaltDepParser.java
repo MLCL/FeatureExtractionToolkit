@@ -74,9 +74,9 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	private static final String PARSED_DELIM = "-]";
 
 	@Override
-	protected Sentence annotate(String entry, Object preprocessor) {
-
-		final Sentence annotated = new Sentence();
+	protected List<Sentence> annotate(String entry, Object preprocessor) {
+		//entry must represent document, consisting of a set of sentences, separated by newLineDelim()
+		List<Sentence> annotatedSentences = new ArrayList<Sentence>();
 
 		if (!config().isUseTokenAsBase() && !config().isUseChunkAsBase()) {
 			throw new RuntimeException(
@@ -90,18 +90,21 @@ public class StanPoSMaltDepParser extends StanfordParser {
 
 
 		try {
-			processEntry(entry, annotated, (MaltParserWrapper) preprocessor);
+			String[] sentences = entry.split(newLineDelim());
+			for (int i = 0; i < sentences.length; i++) {
+				Sentence thisSent = new Sentence();
+				processEntry(sentences[i], thisSent, (MaltParserWrapper) preprocessor);
+				if (thisSent.size() <= 1) {
+					throw new InvalidEntryException("single entry sentence!");
+				}
+				applyFeatureFactory(getFeatureFactory(), thisSent);
+				annotatedSentences.add(thisSent);
+			}
 		} catch (MaltChainedException e) {
 			e.printStackTrace();
 		}
 
-		if (annotated.size() <= 1) {
-			throw new InvalidEntryException("single entry sentence!");
-		}
-
-		applyFeatureFactory(getFeatureFactory(), annotated);
-
-		return annotated;
+		return annotatedSentences;
 	}
 
 	/**
@@ -191,7 +194,11 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	}
 
 	private void processEntry(String entry, Sentence annotated, MaltParserWrapper maltPar) throws MaltChainedException {
+		//entry must be a single sentence
+
 		String[] splitSent = entry.split(PARSED_DELIM);
+//		System.out.println("Entry: " + entry);
+//		System.out.println("Sentence: " + annotated);
 		DependencyStructure graph = null;
 		if (config.depList() != null || config().hDepList() != null) {
 			//only parse if dependency relations have been requested

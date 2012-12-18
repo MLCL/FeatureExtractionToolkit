@@ -634,7 +634,7 @@ public abstract class AbstractParser implements Configurable {
 	 */
 	private CharSequence handleEntry(String entry, Object preprocessor) {
 
-		Sentence annotated = annotate(entry, preprocessor);
+		List<Sentence> annotated = annotate(entry, preprocessor);
 
 		if (annotated.isEmpty()) {
 			throw new InvalidEntryException("empty sentence!");
@@ -647,19 +647,20 @@ public abstract class AbstractParser implements Configurable {
 		return lines;
 	}
 
-	protected CharSequence getLines(Sentence sentence) {
+	protected CharSequence getLines(List<Sentence> sentences) {
 
 		StringBuilder out = new StringBuilder();
 
-		for (IndexToken<?> t : sentence.getKeys()) {
-			CharSequence output = "";
-			if (t.getKey() != null) {
-				output = config().getOutputFormatter().getOutput(t);
+		for (Sentence sentence : sentences) {
+			for (IndexToken<?> t : sentence.getKeys()) {
+				CharSequence output = "";
+				if (t.getKey() != null) {
+					output = config().getOutputFormatter().getOutput(t);
+				}
+
+				out.append(output);
 			}
-
-			out.append(output);
 		}
-
 		return out;
 	}
 
@@ -700,7 +701,7 @@ public abstract class AbstractParser implements Configurable {
 		}
 	}
 
-	protected abstract Sentence annotate(String entry, Object preprocessor);
+	protected abstract List<Sentence> annotate(String entry, Object preprocessor);
 
 	protected void setKeyConstraints() {
 
@@ -809,6 +810,7 @@ public abstract class AbstractParser implements Configurable {
 
 	/**
 	 * Return the preprocessed text and the preprocessor object that was use to do that
+	 *
 	 * @param text
 	 * @return
 	 * @throws ModelNotValidException

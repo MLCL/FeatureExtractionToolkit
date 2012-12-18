@@ -18,6 +18,8 @@ import uk.ac.susx.mlcl.featureextraction.featurefunction.TokenFeatureFunction;
 import uk.ac.susx.mlcl.strings.NewlineStringSplitter;
 import uk.ac.susx.mlcl.util.IntSpan;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -130,7 +132,7 @@ public class TokenParser extends AbstractParser {
 	}
 
 	@Override
-	protected Sentence annotate(final String entry, Object preprocessor) {
+	protected List<Sentence> annotate(final String entry, Object preprocessor) {
 		final Sentence annotated = new Sentence();
 		try {
 
@@ -205,7 +207,9 @@ public class TokenParser extends AbstractParser {
 
 		applyFeatureFactory(getFeatureFactory(), annotated);
 
-		return annotated;
+		List<Sentence> ret = new ArrayList<Sentence>();
+		ret.add(annotated);
+		return ret;
 	}
 
 	@Override
