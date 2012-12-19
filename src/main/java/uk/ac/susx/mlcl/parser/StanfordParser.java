@@ -11,7 +11,7 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -133,7 +133,7 @@ public abstract class StanfordParser extends AbstractParser {
 		}
 		Annotation document = new Annotation(text.toString());
 		pipeline.annotate(document);
-		HashMap<Object, Object> sentencesMap = new HashMap<Object, Object>();
+		Map<Object, Object> sentencesMap = new LinkedHashMap<Object, Object>();//maintain sentence order
 		int id = 0;
 		List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
 

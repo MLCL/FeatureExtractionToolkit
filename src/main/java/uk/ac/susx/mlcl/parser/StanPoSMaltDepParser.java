@@ -260,7 +260,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		HashMap<Object, Object> parseTrees = new HashMap<Object, Object>();
+		Map<Object, Object> parseTrees = new LinkedHashMap<Object, Object>();//maintain sentence order
 
 		for (Object intID : ret.keySet()) {
 			String line = (String) ret.get(intID);
