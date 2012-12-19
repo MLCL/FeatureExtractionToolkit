@@ -545,9 +545,7 @@ public abstract class AbstractParser implements Configurable {
 						}
 						final CharSequence output = handleEntry(preprocessedEntry);
 						handleOutput(output);
-					} catch (InvalidEntryException e) {
-						// just ignore singleton or empty sentences
-					} finally {
+					}  finally {
 						throttle.release();
 					}
 					return null;
@@ -650,9 +648,10 @@ public abstract class AbstractParser implements Configurable {
 
 		if (annotated.isEmpty()) {
 			throw new InvalidEntryException("empty sentence!");
-		} else if (annotated.size() <= 1) {
-			throw new InvalidEntryException("single entry sentence!");
 		}
+//		else if (annotated.size() < 1) {
+//			throw new InvalidEntryException("single entry sentence!");
+//		}
 
 		CharSequence lines = getLines(annotated);
 
