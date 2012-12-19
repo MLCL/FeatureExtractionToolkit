@@ -11,7 +11,9 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -24,7 +26,6 @@ public abstract class StanfordParser extends AbstractParser {
 
 	private static final Logger LOG =
 	Logger.getLogger(AbstractParser.class.getName());
-
 
 
 	protected abstract static class StanConfig extends AbstractParserConfig {
@@ -116,9 +117,14 @@ public abstract class StanfordParser extends AbstractParser {
 		}
 	}
 
+	/**
+	 * Returns a map between sentence id's and their tokenized, lowercased, and lemmatized text
+	 * @param text A raw document
+	 * @return
+	 */
 	@Override
-	protected Object[] rawTextParse(CharSequence text) {
-		StringBuilder processedText = new StringBuilder();
+	protected Map<Object, Object> rawTextParse(CharSequence text) {
+
 		StanfordCoreNLP pipeline = null;
 		try {
 			pipeline = pipelines.take();
@@ -127,18 +133,17 @@ public abstract class StanfordParser extends AbstractParser {
 		}
 		Annotation document = new Annotation(text.toString());
 		pipeline.annotate(document);
+		HashMap<Object, Object> sentencesMap = new HashMap<Object, Object>();
+		int id = 0;
 		List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
 
 		for (CoreMap sentence : sentences) {
-//			System.out.println("Stanford sent: " + sentence);
-			// traversing the words in the current sentence
-			// a CoreLabel is a CoreMap with additional token-specific methods
+			StringBuilder processedText = new StringBuilder();
 			for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
 				String word = token.get(CoreAnnotations.TextAnnotation.class);
 				String lemma = token.get(CoreAnnotations.LemmaAnnotation.class);
 				String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-//                    System.out.println(word+"/"+lemma+"/"+pos);
-//todo this should really happen after parsing is done, because using lemmas might confuse the parser
+				//todo this should really happen after parsing is done, because using lemmas might confuse the parser
 				if (config().isUseLowercaseEntries()) {
 					word = word.toLowerCase();
 					lemma = lemma.toLowerCase();
@@ -148,15 +153,15 @@ public abstract class StanfordParser extends AbstractParser {
 				}
 				processedText.append(word).append(POS_DELIMITER).append(lemma).append(POS_DELIMITER).append(pos).append(TOKEN_DELIM);
 			}
-			processedText.append(NEW_LINE_DELIM);
+			sentencesMap.put(id, processedText.toString());
+			id++;
 		}
 		try {
 			pipelines.put(pipeline);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		// the Stanford object is not really needed anymore--- all lemmas and PoS tags are embedded into processedText
-		return new Object[] {processedText, null};
+		return sentencesMap;
 	}
 
 	@Override

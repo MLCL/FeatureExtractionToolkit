@@ -9,8 +9,7 @@ import uk.ac.susx.mlcl.featureextraction.ContextWindowStringConverter;
 import uk.ac.susx.mlcl.featureextraction.IndexToken;
 import uk.ac.susx.mlcl.featureextraction.Sentence;
 import uk.ac.susx.mlcl.featureextraction.Token;
-import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.IndexAnnotation;
-import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.TokenAnnotation;
+import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
 import uk.ac.susx.mlcl.featureextraction.featureconstraint.ContextWindowsFeatureConstraint;
 import uk.ac.susx.mlcl.featureextraction.featureconstraint.DisjointFeatureConstraint;
 import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
@@ -20,6 +19,7 @@ import uk.ac.susx.mlcl.util.IntSpan;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -34,17 +34,12 @@ public class TokenParser extends AbstractParser {
 	Logger.getLogger(TokenParser.class.getName());
 
 	@Override
-	protected RawTextPreProcessorInterface getPreprocessor() {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	@Override
 	protected String newLineDelim() {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	@Override
-	protected Object[] rawTextParse(CharSequence text) throws ModelNotValidException {
+	protected Map<Object, Object> rawTextParse(CharSequence text) throws ModelNotValidException {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
@@ -132,7 +127,9 @@ public class TokenParser extends AbstractParser {
 	}
 
 	@Override
-	protected List<Sentence> annotate(final String entry, Object preprocessor) {
+	protected List<Sentence> annotate(Map<Object, Object> map){
+		//todo assumes the map contains a single string as a value
+		String entry = (String) new ArrayList<Object>(map.values()).get(0);
 		final Sentence annotated = new Sentence();
 		try {
 
@@ -168,11 +165,11 @@ public class TokenParser extends AbstractParser {
 						NORMALISED_NUMBER_STR);
 					}
 					final Token t = new Token();
-					t.setAnnotation(TokenAnnotation.class, token);
-					t.setAnnotation(IndexAnnotation.class, index);
+					t.setAnnotation(Annotations.TokenAnnotation.class, token);
+					t.setAnnotation(Annotations.IndexAnnotation.class, index);
 
 					IndexToken<CharSequence> key = new IndexToken<CharSequence>(
-					new IntSpan(index, index), TokenAnnotation.class);
+					new IntSpan(index, index), Annotations.TokenAnnotation.class);
 					annotated.add(t);
 					annotated.addKey(key);
 
@@ -185,11 +182,11 @@ public class TokenParser extends AbstractParser {
 
 					if (!delim.trim().isEmpty()) {
 						final Token t = new Token();
-						t.setAnnotation(TokenAnnotation.class, delim);
-						t.setAnnotation(IndexAnnotation.class, index);
+						t.setAnnotation(Annotations.TokenAnnotation.class, delim);
+						t.setAnnotation(Annotations.IndexAnnotation.class, index);
 
 						IndexToken<CharSequence> key = new IndexToken<CharSequence>(
-						new IntSpan(index, index), TokenAnnotation.class);
+						new IntSpan(index, index), Annotations.TokenAnnotation.class);
 						annotated.add(t);
 						annotated.addKey(key);
 

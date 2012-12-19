@@ -535,17 +535,15 @@ public abstract class AbstractParser implements Configurable {
 				@Override
 				public final Void call() throws IOException {
 					try {
-						CharSequence preprocessedEntry = entry;
-						Object[] ret = null;
+						Map<Object, Object> preprocessedEntry = null;
 						if (config().isRawText()) {
 							try {
-								ret = rawTextParse(entry);
-								preprocessedEntry = (CharSequence) ret[0];
+								preprocessedEntry = rawTextParse(entry);
 							} catch (ModelNotValidException e) {
 								e.printStackTrace();
 							}
 						}
-						final CharSequence output = handleEntry(preprocessedEntry.toString(), ret[1]);
+						final CharSequence output = handleEntry(preprocessedEntry);
 						handleOutput(output);
 					} catch (InvalidEntryException e) {
 						// just ignore singleton or empty sentences
@@ -626,15 +624,29 @@ public abstract class AbstractParser implements Configurable {
 		}
 	}
 
-	/**
-	 * Process one entry. An Entry is the scope of the context.
-	 *
-	 * @param entry
-	 * @return
-	 */
-	private CharSequence handleEntry(String entry, Object preprocessor) {
+//	/**
+//	 * Process one entry. An Entry is the scope of the context.
+//	 *
+//	 * @param entry
+//	 * @return
+//	 */
+//	private CharSequence handleEntry(String entry, Object preprocessor) {
+//
+//		List<Sentence> annotated = annotate(entry, preprocessor);
+//
+//		if (annotated.isEmpty()) {
+//			throw new InvalidEntryException("empty sentence!");
+//		} else if (annotated.size() <= 1) {
+//			throw new InvalidEntryException("single entry sentence!");
+//		}
+//
+//		CharSequence lines = getLines(annotated);
+//
+//		return lines;
+//	}
 
-		List<Sentence> annotated = annotate(entry, preprocessor);
+	private CharSequence handleEntry(Map<Object, Object> map) {
+		List<Sentence> annotated = annotate(map);
 
 		if (annotated.isEmpty()) {
 			throw new InvalidEntryException("empty sentence!");
@@ -701,7 +713,7 @@ public abstract class AbstractParser implements Configurable {
 		}
 	}
 
-	protected abstract List<Sentence> annotate(String entry, Object preprocessor);
+	protected abstract List<Sentence> annotate(Map<Object, Object> map);
 
 	protected void setKeyConstraints() {
 
@@ -804,17 +816,15 @@ public abstract class AbstractParser implements Configurable {
 
 	protected abstract AbstractParserConfig config();
 
-	protected abstract RawTextPreProcessorInterface getPreprocessor();
-
 	protected abstract String newLineDelim();
 
 	/**
-	 * Return the preprocessed text and the preprocessor object that was use to do that
-	 *
+	 * Return the original text and the information the preprocessor object attached to it. Each subclasses can map
+	 * objects of different types--- see the implementing class' method
 	 * @param text
 	 * @return
 	 * @throws ModelNotValidException
 	 */
-	protected abstract Object[] rawTextParse(CharSequence text) throws ModelNotValidException;
+	protected abstract Map<Object, Object> rawTextParse(CharSequence text) throws ModelNotValidException;
 
 }

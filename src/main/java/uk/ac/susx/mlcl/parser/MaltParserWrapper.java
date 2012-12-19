@@ -52,6 +52,10 @@ public class MaltParserWrapper {
 		return service.parseTokens(sentence);
 	}
 
+	public DependencyStructure parse(String[] sentence) throws MaltChainedException {
+		return service.parse(sentence);
+	}
+
 	public String[] formatSentenceForMaltParser(String[] sentence) {
 		ArrayList<String> preSent = new ArrayList<String>(sentence.length);
 
@@ -69,31 +73,27 @@ public class MaltParserWrapper {
 		return preSent.toArray(new String[preSent.size()]);
 	}
 
-	public Iterable<Edge> getEdges(DependencyStructure graph) {
-		return graph.getEdges();
-	}
-
-	public int getHeadIndex(Edge edge) {
+	public static int getHeadIndex(Edge edge) {
 		return edge.getSource().getIndex();
 	}
 
-	public int getDependantIndex(Edge edge) {
+	public static int getDependantIndex(Edge edge) {
 		return edge.getTarget().getIndex();
 	}
 
-	public String getDepRel(Edge edge, DependencyStructure graph) throws MaltChainedException {
+	public static String getDepRel(Edge edge, DependencyStructure graph) throws MaltChainedException {
 		return edge.getLabelSymbol(getSymbolTable(DEP_REL_NAME, graph));
 	}
 
-	public String getDependant(Edge edge, DependencyStructure graph) throws MaltChainedException {
+	public static String getDependant(Edge edge, DependencyStructure graph) throws MaltChainedException {
 		return edge.getTarget().getLabelSymbol(getSymbolTable(TOK_TAB_NAME, graph));
 	}
 
-	public String getHead(Edge edge, DependencyStructure graph) throws MaltChainedException {
+	public static String getHead(Edge edge, DependencyStructure graph) throws MaltChainedException {
 		return edge.getSource().getLabelSymbol(getSymbolTable(TOK_TAB_NAME, graph));
 	}
 
-	public SymbolTable getSymbolTable(String table, DependencyStructure graph) throws MaltChainedException {
+	public static SymbolTable getSymbolTable(String table, DependencyStructure graph) throws MaltChainedException {
 		return graph.getSymbolTables().getSymbolTable(table);
 	}
 

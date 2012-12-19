@@ -9,8 +9,8 @@ import uk.ac.susx.mlcl.featureextraction.ContextWindowStringConverter;
 import uk.ac.susx.mlcl.featureextraction.IndexToken;
 import uk.ac.susx.mlcl.featureextraction.Sentence;
 import uk.ac.susx.mlcl.featureextraction.Token;
+import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.CharAnnotation;
-import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.IndexAnnotation;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations.NgramAnnotation;
 import uk.ac.susx.mlcl.featureextraction.featureconstraint.ContextWindowsFeatureConstraint;
 import uk.ac.susx.mlcl.featureextraction.featureconstraint.DisjointFeatureConstraint;
@@ -22,6 +22,7 @@ import uk.ac.susx.mlcl.util.IntSpan;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -30,11 +31,6 @@ import java.util.List;
  * @author Simon Wibberley
  */
 public class NgramParser extends AbstractParser {
-
-    @Override
-    protected RawTextPreProcessorInterface getPreprocessor() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 
     @Override
     protected String newLineDelim() {
@@ -107,7 +103,7 @@ public class NgramParser extends AbstractParser {
         return outPath;
     }
 
-    public static void main(String[] args) {
+	public static void main(String[] args) {
 
         NgramParser tp = new NgramParser();
 
@@ -159,7 +155,9 @@ public class NgramParser extends AbstractParser {
     }
 
     @Override
-    protected List<Sentence> annotate(String entry, Object preprocessor) {
+    protected List<Sentence> annotate(Map<Object, Object> map) {
+	    //todo assumes the map contains a single string as a value
+	    String entry = (String) new ArrayList<Object>(map.values()).get(0);
         final Sentence annotated = new Sentence("");
 
         final char[] chars = entry.toCharArray();
@@ -167,7 +165,7 @@ public class NgramParser extends AbstractParser {
         for (int i = 0; i < chars.length; ++i) {
             final Token token = new Token();
             token.setAnnotation(CharAnnotation.class, chars[i]);
-            token.setAnnotation(IndexAnnotation.class, i);
+            token.setAnnotation(Annotations.IndexAnnotation.class, i);
             annotated.add(token);
         }
 
@@ -191,7 +189,7 @@ public class NgramParser extends AbstractParser {
     }
     
     @Override
-    protected Object[] rawTextParse(CharSequence text) throws ModelNotValidException {
+    protected Map<Object, Object> rawTextParse(CharSequence text) throws ModelNotValidException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

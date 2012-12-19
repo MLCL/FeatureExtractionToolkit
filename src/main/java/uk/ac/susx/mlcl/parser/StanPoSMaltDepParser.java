@@ -3,7 +3,6 @@ package uk.ac.susx.mlcl.parser;
 
 import com.beust.jcommander.Parameter;
 import org.maltparser.core.exception.MaltChainedException;
-import org.maltparser.core.symbol.SymbolException;
 import org.maltparser.core.syntaxgraph.DependencyStructure;
 import org.maltparser.core.syntaxgraph.edge.Edge;
 import uk.ac.susx.mlcl.featureextraction.IndexToken;
@@ -13,13 +12,9 @@ import uk.ac.susx.mlcl.featureextraction.Token;
 import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
 import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
 import uk.ac.susx.mlcl.featureextraction.featurefunction.DependencyFeatureFunction;
-import uk.ac.susx.mlcl.strings.NewlineReader;
 import uk.ac.susx.mlcl.util.IntSpan;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
@@ -74,7 +69,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	private static final String PARSED_DELIM = "-]";
 
 	@Override
-	protected List<Sentence> annotate(String entry, Object preprocessor) {
+	protected List<Sentence> annotate(Map<Object, Object> map) {
 		//entry must represent document, consisting of a set of sentences, separated by newLineDelim()
 		List<Sentence> annotatedSentences = new ArrayList<Sentence>();
 
@@ -90,15 +85,14 @@ public class StanPoSMaltDepParser extends StanfordParser {
 
 
 		try {
-			String[] sentences = entry.split(newLineDelim());
-			for (int i = 0; i < sentences.length; i++) {
-				Sentence thisSent = new Sentence();
-				processEntry(sentences[i], thisSent, (MaltParserWrapper) preprocessor);
-				if (thisSent.size() <= 1) {
+			for (Object sentString : map.keySet()) {
+				Sentence sentObject = new Sentence();
+				processEntry((String)sentString, sentObject, (DependencyStructure) map.get(sentString));
+				if (sentObject.size() <= 1) {
 					throw new InvalidEntryException("single entry sentence!");
 				}
-				applyFeatureFactory(getFeatureFactory(), thisSent);
-				annotatedSentences.add(thisSent);
+				applyFeatureFactory(getFeatureFactory(), sentObject);
+				annotatedSentences.add(sentObject);
 			}
 		} catch (MaltChainedException e) {
 			e.printStackTrace();
@@ -156,11 +150,6 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	}
 
 	@Override
-	protected RawTextPreProcessorInterface getPreprocessor() {
-		return null;  //To change body of implemented methods use File | Settings | File Templates.
-	}
-
-	@Override
 	public String getOutPath() {
 		String outpath = super.getOutPath();
 
@@ -193,69 +182,55 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		return outpath;
 	}
 
-	private void processEntry(String entry, Sentence annotated, MaltParserWrapper maltPar) throws MaltChainedException {
-		//entry must be a single sentence
+	private void processEntry(String sentenceStr, Sentence annotatedSent, DependencyStructure graph) throws MaltChainedException {
+		//sentenceStr must be a single sentence
 
-		String[] splitSent = entry.split(PARSED_DELIM);
-//		System.out.println("Entry: " + entry);
-//		System.out.println("Sentence: " + annotated);
-		DependencyStructure graph = null;
-		if (config.depList() != null || config().hDepList() != null) {
-			//only parse if dependency relations have been requested
-//			System.out.println("Parsing in thread " + Thread.currentThread());
-			try {
-				graph = maltPar.toDependencyStructure(splitSent);
-			} catch (SymbolException ex) {
-				//for some reason malt parser sometimes tries to lookup PoS tags instead of tokens in its table and dies
-			}
-		}
-
-
+		String[] splitSent = sentenceStr.split(getTokenDelim());
 		for (int i = 0; i < splitSent.length; i++) {
 			Token t = new Token();
-			String[] tokPos = splitSent[i].split("\t");
-			String pos = config.isUseCoarsePos() ? Token.coarsifyPoSTag(tokPos[3]) : tokPos[3];
+			String[] tokPos = splitSent[i].split(getPosDelim());
+			String pos = config.isUseCoarsePos() ? Token.coarsifyPoSTag(tokPos[2]) : tokPos[2];
 			t.setAnnotation(Annotations.TokenAnnotation.class, tokPos[1] + getPosDelim() + pos);
-			t.setAnnotation(Annotations.OriginalTokenAnnotation.class, tokPos[1]);
-			t.setAnnotation(Annotations.PoSAnnotation.class, tokPos[3]);
+			t.setAnnotation(Annotations.OriginalTokenAnnotation.class, tokPos[0]);
+			t.setAnnotation(Annotations.PoSAnnotation.class, pos);
 			if (config.depList() != null) {
 				t.setAnnotation(Annotations.DependencyListAnnotation.class, new HashMap<String, ArrayList<String>>());
 			}
 			if (config.hDepList() != null) {
 				t.setAnnotation(Annotations.DependencyHeadListAnnotation.class, new HashMap<String, ArrayList<String>>());
 			}
-			annotated.add(t);
+			annotatedSent.add(t);
 			IndexToken<CharSequence> key = new IndexToken<CharSequence>(new IntSpan(i, i), Annotations.TokenAnnotation.class);
-			annotated.addKey(key);
+			annotatedSent.addKey(key);
 		}
 
 		if (graph != null) {
-			for (Edge edge : maltPar.getEdges(graph)) {
-				if (maltPar.getHeadIndex(edge) - 1 >= 0 && maltPar.getDependantIndex(edge) - 1 >= 0) {
-					ArrayList<String> feats = (ArrayList<String>) annotated.get(maltPar.getHeadIndex(edge) - 1).
-					getAnnotation(Annotations.DependencyHeadListAnnotation.class).get(maltPar.getDepRel(edge, graph));
+			for (Edge edge : graph.getEdges()) {
+				if (MaltParserWrapper.getHeadIndex(edge) - 1 >= 0 && MaltParserWrapper.getDependantIndex(edge) - 1 >= 0) {
+					ArrayList<String> feats = (ArrayList<String>) annotatedSent.get(MaltParserWrapper.getHeadIndex(edge) - 1).
+					getAnnotation(Annotations.DependencyHeadListAnnotation.class).get(MaltParserWrapper.getDepRel(edge, graph));
 					if (config.hDepList() != null) {
 						if (feats == null) {
 							feats = new ArrayList<String>();
-							feats.add(maltPar.getDependant(edge, graph));
-							annotated.get(maltPar.getHeadIndex(edge) - 1).
+							feats.add(MaltParserWrapper.getDependant(edge, graph));
+							annotatedSent.get(MaltParserWrapper.getHeadIndex(edge) - 1).
 							getAnnotation(Annotations.DependencyHeadListAnnotation.class).
-							put(maltPar.getDepRel(edge, graph), feats);
+							put(MaltParserWrapper.getDepRel(edge, graph), feats);
 						} else {
-							feats.add(maltPar.getDependant(edge, graph));
+							feats.add(MaltParserWrapper.getDependant(edge, graph));
 						}
 					}
 					if (config.depList() != null) {
-						feats = (ArrayList<String>) annotated.get(maltPar.getDependantIndex(edge) - 1).
-						getAnnotation(Annotations.DependencyListAnnotation.class).get(maltPar.getDepRel(edge, graph));
+						feats = (ArrayList<String>) annotatedSent.get(MaltParserWrapper.getDependantIndex(edge) - 1).
+						getAnnotation(Annotations.DependencyListAnnotation.class).get(MaltParserWrapper.getDepRel(edge, graph));
 						if (feats == null) {
 							feats = new ArrayList<String>();
-							feats.add(maltPar.getHead(edge, graph));
-							annotated.get(maltPar.getDependantIndex(edge) - 1).
+							feats.add(MaltParserWrapper.getHead(edge, graph));
+							annotatedSent.get(MaltParserWrapper.getDependantIndex(edge) - 1).
 							getAnnotation(Annotations.DependencyListAnnotation.class).
-							put(maltPar.getDepRel(edge, graph), feats);
+							put(MaltParserWrapper.getDepRel(edge, graph), feats);
 						} else {
-							feats.add(maltPar.getDependant(edge, graph));
+							feats.add(MaltParserWrapper.getDependant(edge, graph));
 						}
 					}
 				}
@@ -263,60 +238,42 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		} else {
 			System.err.println("Dependency graph is null");
 		}
-		parsers.offer(maltPar);
 	}
 
 	/**
-	 * Returns the pre-processed text and the preprocessor object as an object array
+	 * Returns a map between PoS tagged, tokenized, lemmatized sentences and their corresponding parse trees
 	 *
 	 * @param text
 	 * @return
 	 * @throws ModelNotValidException
 	 */
 	@Override
-	protected Object[] rawTextParse(final CharSequence text) {
+	protected Map<Object, Object> rawTextParse(final CharSequence text) {
 		//sentence segment, tokenize, lemmatize and PoS tag
-		Object[] ret = super.rawTextParse(text);
-		CharSequence processedText = (CharSequence) ret[0];
-		//ret[1] is the stanford PoS tagger
+		//returns a map of id to PoS tagged, tokenized, lemmatized sentences
+		Map<Object, Object> ret = super.rawTextParse(text);
+
+
 		MaltParserWrapper maltPar = null;
 		try {
 			maltPar = parsers.take();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		HashMap<Object, Object> parseTrees = new HashMap<Object, Object>();
 
-
-		//TODO: Re-Factor Pre-processing.
-
-		NewlineReader nr = new NewlineReader(processedText, newLineDelim());
-		StringBuffer preProcText = new StringBuffer();
-		while (nr.hasLine()) {
-			final String line = nr.readLine();
+		for (Object intID : ret.keySet()) {
+			String line = (String) ret.get(intID);
 			String[] sentence = maltPar.formatSentenceForMaltParser(line.split(getTokenDelim()));
 			try {
-				String[] parsedSent = maltPar.parseTokens(sentence);
-				preProcText.append(buildString(parsedSent));
+				DependencyStructure graph = maltPar.parse(sentence);
+				parseTrees.put(line, graph);
 			} catch (MaltChainedException ex) {
 				Logger.getLogger(StanPoSMaltDepParser.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-		//return the MaltParserWrapper used by this method because it contains all dependencies
-		return new Object[] {preProcText.toString(), maltPar};
-	}
 
-	private String buildString(String[] tokens) {
-
-
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < tokens.length; i++) {
-			sb.append(tokens[i]);
-			if (i < (tokens.length - 1)) {
-				sb.append(PARSED_DELIM);
-			}
-		}
-		sb.append(newLineDelim());
-
-		return sb.toString();
+		parsers.offer(maltPar); //free up the parser, it is no longer required
+		return parseTrees;
 	}
 }
