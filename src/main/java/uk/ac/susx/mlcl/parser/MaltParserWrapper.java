@@ -21,7 +21,6 @@ import java.util.ArrayList;
 public class MaltParserWrapper {
 
 	private String posDelim;
-	private DependencyStructure currGraph;
 	private MaltParserService service;
 
 	private static final String CONLL_DELIM = "\t";
@@ -44,24 +43,13 @@ public class MaltParserWrapper {
 		}
 	}
 
-	public DependencyStructure toDependencyStructure(String[] tokens, boolean setGraph) throws MaltChainedException {
+	public DependencyStructure toDependencyStructure(String[] tokens) throws MaltChainedException {
 		DependencyStructure graph = service.toDependencyStructure(tokens);
-		if (setGraph) {
-			currGraph = graph;
-		}
 		return graph;
 	}
 
 	public String[] parseTokens(String[] sentence) throws MaltChainedException {
 		return service.parseTokens(sentence);
-	}
-
-	public DependencyStructure getGraph() {
-		return currGraph;
-	}
-
-	public void setGraph(DependencyStructure graph) {
-		currGraph = graph;
 	}
 
 	public String[] formatSentenceForMaltParser(String[] sentence) {

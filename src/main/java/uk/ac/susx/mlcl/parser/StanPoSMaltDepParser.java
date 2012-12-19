@@ -204,7 +204,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 			//only parse if dependency relations have been requested
 //			System.out.println("Parsing in thread " + Thread.currentThread());
 			try {
-				graph = maltPar.toDependencyStructure(splitSent, false);
+				graph = maltPar.toDependencyStructure(splitSent);
 			} catch (SymbolException ex) {
 				//for some reason malt parser sometimes tries to lookup PoS tags instead of tokens in its table and dies
 			}
