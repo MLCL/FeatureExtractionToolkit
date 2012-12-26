@@ -76,7 +76,7 @@ public abstract class StanfordParser extends AbstractParser {
 	}
 
 	//    private StanfordRawTextPreProcessor preprocessor;
-	private BlockingQueue<StanfordCoreNLP> pipelines;
+	protected BlockingQueue<StanfordCoreNLP> pipelines; //exposed for testing
 
 	private static final String POS_DELIMITER = "/";
 
@@ -152,8 +152,9 @@ public abstract class StanfordParser extends AbstractParser {
 					word = lemma;
 				}
 				processedText.append(word).append(POS_DELIMITER).append(lemma).append(POS_DELIMITER).append(pos).append(TOKEN_DELIM);
+                //inserts a TOKEN_DELIM at the end too
 			}
-			sentencesMap.put(id, processedText.toString());
+			sentencesMap.put(id, processedText.toString().trim());//remove the single trailing space
 			id++;
 		}
 		try {

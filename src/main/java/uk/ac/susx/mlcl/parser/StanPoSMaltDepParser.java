@@ -64,9 +64,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	}
 
 	private StanMaltConfig config;
-	private BlockingQueue<MaltParserWrapper> parsers;// maltPar;
-
-	private static final String PARSED_DELIM = "-]";
+	protected BlockingQueue<MaltParserWrapper> parsers;// protected for testing
 
 	@Override
 	protected List<Sentence> annotate(Map<Object, Object> map) {
@@ -115,19 +113,17 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	@Override
 	protected FeatureFactory buildFeatureFactory() {
 		FeatureFactory featurefactory = super.buildFeatureFactory();
-		for (Iterator<String> it = config.depList.iterator(); it.hasNext(); ) {
-			String dep = it.next();
-			DependencyFeatureFunction fn = new DependencyFeatureFunction(dep, true);
-			fn.setPrefix(dep + "-DEP:");
-			featurefactory.addFeature("Dependency feature function (dep)" + dep, fn);
-		}
+        for (String dep : config.depList) {
+            DependencyFeatureFunction fn = new DependencyFeatureFunction(dep, true);
+            fn.setPrefix(dep + "-DEP:");
+            featurefactory.addFeature("Dependency feature function (dep)" + dep, fn);
+        }
 
-		for (Iterator<String> it = config.hDepList.iterator(); it.hasNext(); ) {
-			String dep = it.next();
-			DependencyFeatureFunction fn = new DependencyFeatureFunction(dep, false);
-			fn.setPrefix(dep + "-HEAD:");
-			featurefactory.addFeature("Dependency feature function (head)" + dep, fn);
-		}
+        for (String dep : config.hDepList) {
+            DependencyFeatureFunction fn = new DependencyFeatureFunction(dep, false);
+            fn.setPrefix(dep + "-HEAD:");
+            featurefactory.addFeature("Dependency feature function (head)" + dep, fn);
+        }
 
 		return featurefactory;
 	}
@@ -154,29 +150,25 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		String outpath = super.getOutPath();
 
 		if (config().depList() != null) {
-			for (Iterator<String> it = config.depList.iterator(); it.hasNext(); ) {
-				String dep = it.next();
-				outpath += "-" + dep;
-			}
+            for (String dep : config.depList) {
+                outpath += "-" + dep;
+            }
 		}
 		if (config().hDepList() != null) {
-			for (Iterator<String> it = config.hDepList.iterator(); it.hasNext(); ) {
-				String dep = it.next();
-				outpath += "-" + dep;
-			}
+            for (String dep : config.hDepList) {
+                outpath += "-" + dep;
+            }
 		}
 
 		if (config().depList() != null) {
-			for (Iterator<String> it = config.depList.iterator(); it.hasNext(); ) {
-				String dep = it.next();
-				outpath += "-" + dep;
-			}
+            for (String dep : config.depList) {
+                outpath += "-" + dep;
+            }
 		}
 		if (config().hDepList() != null) {
-			for (Iterator<String> it = config.hDepList.iterator(); it.hasNext(); ) {
-				String dep = it.next();
-				outpath += "-" + dep;
-			}
+            for (String dep : config.hDepList) {
+                outpath += "-" + dep;
+            }
 		}
 
 		return outpath;
@@ -244,7 +236,6 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	 * Returns a map between PoS tagged, tokenized, lemmatized sentences and their corresponding parse trees
 	 *
 	 * @param text
-	 * @return
 	 * @throws ModelNotValidException
 	 */
 	@Override
