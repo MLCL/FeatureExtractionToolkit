@@ -30,89 +30,89 @@ import java.util.logging.Logger;
  */
 public class StanPoSMaltDepParser extends StanfordParser {
 
-	private static final Logger LOG =
-	Logger.getLogger(AbstractParser.class.getName());
+    private static final Logger LOG =
+            Logger.getLogger(AbstractParser.class.getName());
 
-	public static class StanMaltConfig extends StanConfig {
+    public static class StanMaltConfig extends StanConfig {
 
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-		@Parameter(names = {"-dr", "--depRels"},
-		description = "Array of dependancy relations to extract.")
-		private List<String> depList = new ArrayList<String>();
+        @Parameter(names = {"-dr", "--depRels"},
+                description = "Array of dependancy relations to extract.")
+        private List<String> depList = new ArrayList<String>();
 
-		@Parameter(names = {"-hdr", "--headDepRels"},
-		description = "Array of head dependancy relations to extract.")
-		private List<String> hDepList = new ArrayList<String>();
+        @Parameter(names = {"-hdr", "--headDepRels"},
+                description = "Array of head dependancy relations to extract.")
+        private List<String> hDepList = new ArrayList<String>();
 
-		@Parameter(names = {"-modN", "--modelName"},
-		required = true,
-		description = "Name of the dependancy parser model")
-		private String modN = null;
+        @Parameter(names = {"-modN", "--modelName"},
+                required = true,
+                description = "Name of the dependancy parser model")
+        private String modN = null;
 
-		public List depList() {
-			return depList;
-		}
+        public List depList() {
+            return depList;
+        }
 
-		public List hDepList() {
-			return hDepList;
-		}
+        public List hDepList() {
+            return hDepList;
+        }
 
-		public String modeName() {
-			return modN;
-		}
-	}
+        public String modeName() {
+            return modN;
+        }
+    }
 
-	private StanMaltConfig config;
-	protected BlockingQueue<MaltParserWrapper> parsers;// protected for testing
+    private StanMaltConfig config;
+    protected BlockingQueue<MaltParserWrapper> parsers;// protected for testing
 
-	@Override
-	protected List<Sentence> annotate(Map<Object, Object> map) {
-		//entry must represent document, consisting of a set of sentences, separated by newLineDelim()
-		List<Sentence> annotatedSentences = new ArrayList<Sentence>();
+    @Override
+    protected List<Sentence> annotate(Map<Object, Object> map) {
+        //entry must represent document, consisting of a set of sentences, separated by newLineDelim()
+        List<Sentence> annotatedSentences = new ArrayList<Sentence>();
 
-		if (!config().isUseTokenAsBase() && !config().isUseChunkAsBase()) {
-			throw new RuntimeException(
-			"useTokenAsBase is off, there must be base entries!");
-		}
+        if (!config().isUseTokenAsBase() && !config().isUseChunkAsBase()) {
+            throw new RuntimeException(
+                    "useTokenAsBase is off, there must be base entries!");
+        }
 
-		if (config.depList == null && config().hDepList == null) {
-			throw new RuntimeException(
-			"No dependancy relations specified!");
-		}
+        if (config.depList == null && config().hDepList == null) {
+            throw new RuntimeException(
+                    "No dependancy relations specified!");
+        }
 
 
-		try {
-			for (Object sentString : map.keySet()) {
-				Sentence sentObject = new Sentence();
-				processEntry((String)sentString, sentObject, (DependencyStructure) map.get(sentString));
-				if (sentObject.size() <= 1) {
-					throw new InvalidEntryException("single entry sentence!");
-				}
-				applyFeatureFactory(getFeatureFactory(), sentObject);
-				annotatedSentences.add(sentObject);
-			}
-		} catch (MaltChainedException e) {
-			e.printStackTrace();
-		}
+        try {
+            for (Object sentString : map.keySet()) {
+                Sentence sentObject = new Sentence();
+                processEntry((String) sentString, sentObject, (DependencyStructure) map.get(sentString));
+                if (sentObject.size() <= 1) {
+                    throw new InvalidEntryException("single entry sentence!");
+                }
+                applyFeatureFactory(getFeatureFactory(), sentObject);
+                annotatedSentences.add(sentObject);
+            }
+        } catch (MaltChainedException e) {
+            e.printStackTrace();
+        }
 
-		return annotatedSentences;
-	}
+        return annotatedSentences;
+    }
 
-	/**
-	 * @param args the command line arguments
-	 */
-	public static void main(String[] args) {
-		StanPoSMaltDepParser sp = new StanPoSMaltDepParser();
-		sp.init(args);
-		long start = System.currentTimeMillis();
-		sp.parse();
-		System.out.println("Time (ms) = " + (System.currentTimeMillis() - start));
-	}
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        StanPoSMaltDepParser sp = new StanPoSMaltDepParser();
+        sp.init(args);
+        long start = System.currentTimeMillis();
+        sp.parse();
+        System.out.println("Time (ms) = " + (System.currentTimeMillis() - start));
+    }
 
-	@Override
-	protected FeatureFactory buildFeatureFactory() {
-		FeatureFactory featurefactory = super.buildFeatureFactory();
+    @Override
+    protected FeatureFactory buildFeatureFactory() {
+        FeatureFactory featurefactory = super.buildFeatureFactory();
         for (String dep : config.depList) {
             DependencyFeatureFunction fn = new DependencyFeatureFunction(dep, true);
             fn.setPrefix(dep + "-DEP:");
@@ -125,146 +125,153 @@ public class StanPoSMaltDepParser extends StanfordParser {
             featurefactory.addFeature("Dependency feature function (head)" + dep, fn);
         }
 
-		return featurefactory;
-	}
+        return featurefactory;
+    }
 
-	@Override
-	public void init(String[] args) {
-		config = new StanMaltConfig();
-		config.load(args);
-		super.initPreProcessor();
-		int n = config.getNumCores();
-		this.parsers = new LinkedBlockingDeque<MaltParserWrapper>(n);
-		for (int i = 0; i < n; i++) {
-			MaltParserWrapper maltPar = new MaltParserWrapper(super.getPosDelim(), config.modeName(), i);
-			parsers.add(maltPar);
-		}
-	}
+    @Override
+    public void init(String[] args) {
+        config = new StanMaltConfig();
+        config.load(args);
+        super.initPreProcessor();
+        int n = config.getNumCores();
+        this.parsers = new LinkedBlockingDeque<MaltParserWrapper>(n);
+        for (int i = 0; i < n; i++) {
+            MaltParserWrapper maltPar = new MaltParserWrapper(super.getPosDelim(), config.modeName(), i);
+            parsers.add(maltPar);
+        }
+    }
 
-	protected StanMaltConfig config() {
-		return config;
-	}
+    protected StanMaltConfig config() {
+        return config;
+    }
 
-	@Override
-	public String getOutPath() {
-		String outpath = super.getOutPath();
+    @Override
+    public String getOutPath() {
+        String outpath = super.getOutPath();
 
-		if (config().depList() != null) {
+        if (config().depList() != null) {
             for (String dep : config.depList) {
                 outpath += "-" + dep;
             }
-		}
-		if (config().hDepList() != null) {
+        }
+        if (config().hDepList() != null) {
             for (String dep : config.hDepList) {
                 outpath += "-" + dep;
             }
-		}
+        }
 
-		if (config().depList() != null) {
+        if (config().depList() != null) {
             for (String dep : config.depList) {
                 outpath += "-" + dep;
             }
-		}
-		if (config().hDepList() != null) {
+        }
+        if (config().hDepList() != null) {
             for (String dep : config.hDepList) {
                 outpath += "-" + dep;
             }
-		}
+        }
 
-		return outpath;
-	}
+        return outpath;
+    }
 
-	private void processEntry(String sentenceStr, Sentence annotatedSent, DependencyStructure graph) throws MaltChainedException {
-		//sentenceStr must be a single sentence
+    private void processEntry(String sentenceStr, Sentence annotatedSent, DependencyStructure graph) throws MaltChainedException {
+        //sentenceStr must be a single sentence
 
-		String[] splitSent = sentenceStr.split(getTokenDelim());
-		for (int i = 0; i < splitSent.length; i++) {
-			Token t = new Token();
-			String[] tokPos = splitSent[i].split(getPosDelim());
-			String pos = config.isUseCoarsePos() ? Token.coarsifyPoSTag(tokPos[2]) : tokPos[2];
-			t.setAnnotation(Annotations.TokenAnnotation.class, tokPos[1] + getPosDelim() + pos);
-			t.setAnnotation(Annotations.OriginalTokenAnnotation.class, tokPos[0]);
-			t.setAnnotation(Annotations.PoSAnnotation.class, pos);
-			if (config.depList() != null) {
-				t.setAnnotation(Annotations.DependencyListAnnotation.class, new HashMap<String, ArrayList<String>>());
-			}
-			if (config.hDepList() != null) {
-				t.setAnnotation(Annotations.DependencyHeadListAnnotation.class, new HashMap<String, ArrayList<String>>());
-			}
-			annotatedSent.add(t);
-			IndexToken<CharSequence> key = new IndexToken<CharSequence>(new IntSpan(i, i), Annotations.TokenAnnotation.class);
-			annotatedSent.addKey(key);
-		}
+        String[] splitSent = sentenceStr.split(getTokenDelim());
+        for (int i = 0; i < splitSent.length; i++) {
+            Token t = new Token();
+            String[] tokPos = splitSent[i].split(getPosDelim());
+            String pos = config.isUseCoarsePos() ? Token.coarsifyPoSTag(tokPos[2]) : tokPos[2];
+            t.setAnnotation(Annotations.TokenAnnotation.class, tokPos[1] + getPosDelim() + pos);
+            t.setAnnotation(Annotations.OriginalTokenAnnotation.class, tokPos[0]);
+            t.setAnnotation(Annotations.PoSAnnotation.class, pos);
+            if (config.depList() != null) {
+                t.setAnnotation(Annotations.DependencyListAnnotation.class, new HashMap<String, ArrayList<String>>());
+            }
+            if (config.hDepList() != null) {
+                t.setAnnotation(Annotations.DependencyHeadListAnnotation.class, new HashMap<String, ArrayList<String>>());
+            }
+            annotatedSent.add(t);
+            IndexToken<CharSequence> key = new IndexToken<CharSequence>(new IntSpan(i, i), Annotations.TokenAnnotation.class);
+            annotatedSent.addKey(key);
+        }
 
-		if (graph != null) {
-			for (Edge edge : graph.getEdges()) {
-				if (MaltParserWrapper.getHeadIndex(edge) - 1 >= 0 && MaltParserWrapper.getDependantIndex(edge) - 1 >= 0) {
-					ArrayList<String> feats = (ArrayList<String>) annotatedSent.get(MaltParserWrapper.getHeadIndex(edge) - 1).
-					getAnnotation(Annotations.DependencyHeadListAnnotation.class).get(MaltParserWrapper.getDepRel(edge, graph));
-					if (config.hDepList() != null) {
-						if (feats == null) {
-							feats = new ArrayList<String>();
-							feats.add(MaltParserWrapper.getDependant(edge, graph));
-							annotatedSent.get(MaltParserWrapper.getHeadIndex(edge) - 1).
-							getAnnotation(Annotations.DependencyHeadListAnnotation.class).
-							put(MaltParserWrapper.getDepRel(edge, graph), feats);
-						} else {
-							feats.add(MaltParserWrapper.getDependant(edge, graph));
-						}
-					}
-					if (config.depList() != null) {
-						feats = (ArrayList<String>) annotatedSent.get(MaltParserWrapper.getDependantIndex(edge) - 1).
-						getAnnotation(Annotations.DependencyListAnnotation.class).get(MaltParserWrapper.getDepRel(edge, graph));
-						if (feats == null) {
-							feats = new ArrayList<String>();
-							feats.add(MaltParserWrapper.getHead(edge, graph));
-							annotatedSent.get(MaltParserWrapper.getDependantIndex(edge) - 1).
-							getAnnotation(Annotations.DependencyListAnnotation.class).
-							put(MaltParserWrapper.getDepRel(edge, graph), feats);
-						} else {
-							feats.add(MaltParserWrapper.getDependant(edge, graph));
-						}
-					}
-				}
-			}
-		} else {
-			System.err.println("Dependency graph is null");
-		}
-	}
+        if (graph != null) {
+            for (Edge edge : graph.getEdges()) {
+                if (MaltParserWrapper.getHeadIndex(edge) - 1 >= 0 && MaltParserWrapper.getDependantIndex(edge) - 1 >= 0) {
+                    ArrayList<String> feats = (ArrayList<String>) annotatedSent.get(MaltParserWrapper.getHeadIndex(edge) - 1).
+                            getAnnotation(Annotations.DependencyHeadListAnnotation.class).get(MaltParserWrapper.getDepRel(edge, graph));
+                    if (config.hDepList() != null) {
+                        if (feats == null) {
+                            feats = new ArrayList<String>();
+                            feats.add(MaltParserWrapper.getDependant(edge, graph));
+                            annotatedSent.get(MaltParserWrapper.getHeadIndex(edge) - 1).
+                                    getAnnotation(Annotations.DependencyHeadListAnnotation.class).
+                                    put(MaltParserWrapper.getDepRel(edge, graph), feats);
+                        } else {
+                            feats.add(MaltParserWrapper.getDependant(edge, graph));
+                        }
+                    }
+                    if (config.depList() != null) {
+                        feats = (ArrayList<String>) annotatedSent.get(MaltParserWrapper.getDependantIndex(edge) - 1).
+                                getAnnotation(Annotations.DependencyListAnnotation.class).get(MaltParserWrapper.getDepRel(edge, graph));
+                        if (feats == null) {
+                            feats = new ArrayList<String>();
+                            feats.add(MaltParserWrapper.getHead(edge, graph));
+                            annotatedSent.get(MaltParserWrapper.getDependantIndex(edge) - 1).
+                                    getAnnotation(Annotations.DependencyListAnnotation.class).
+                                    put(MaltParserWrapper.getDepRel(edge, graph), feats);
+                        } else {
+                            feats.add(MaltParserWrapper.getDependant(edge, graph));
+                        }
+                    }
+                }
+            }
+        } else {
+            System.err.println("Dependency graph is null");
+        }
+    }
 
-	/**
-	 * Returns a map between PoS tagged, tokenized, lemmatized sentences and their corresponding parse trees
-	 *
-	 * @param text
-	 * @throws ModelNotValidException
-	 */
-	@Override
-	protected Map<Object, Object> rawTextParse(final CharSequence text) {
-		//sentence segment, tokenize, lemmatize and PoS tag
-		//returns a map of id to PoS tagged, tokenized, lemmatized sentences
-		Map<Object, Object> ret = super.rawTextParse(text);
+    /**
+     * Returns a map between PoS tagged, tokenized, lemmatized sentences and their corresponding parse trees
+     *
+     * @param text
+     * @throws ModelNotValidException
+     */
+    @Override
+    protected Map<Object, Object> rawTextParse(final CharSequence text) {
+        //sentence segment, tokenize, lemmatize and PoS tag
+        //returns a map of id to PoS tagged, tokenized, lemmatized sentences
+        Map<Object, Object> ret = super.rawTextParse(text);
 
 
-		MaltParserWrapper maltPar = null;
-		try {
-			maltPar = parsers.take();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		Map<Object, Object> parseTrees = new LinkedHashMap<Object, Object>();//maintain sentence order
+        MaltParserWrapper maltPar = null;
+        try {
+            maltPar = parsers.take();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Map<Object, Object> parseTrees = new LinkedHashMap<Object, Object>();//maintain sentence order
 
-		for (Object intID : ret.keySet()) {
-			String line = (String) ret.get(intID);
-			String[] sentence = maltPar.formatSentenceForMaltParser(line.split(getTokenDelim()));
-			try {
-				DependencyStructure graph = maltPar.parse(sentence);
-				parseTrees.put(line, graph);
-			} catch (MaltChainedException ex) {
-				Logger.getLogger(StanPoSMaltDepParser.class.getName()).log(Level.SEVERE, null, ex);
-			}
-		}
+        for (Object intID : ret.keySet()) {
+            String line = (String) ret.get(intID);
+            if (config().depList() != null && config().hDepList() != null) {
+                //do not parse if dependency features have not been requested
+                String[] sentence = maltPar.formatSentenceForMaltParser(line.split(getTokenDelim()));
+                try {
+                    DependencyStructure graph = maltPar.parse(sentence);
+                    parseTrees.put(line, graph);
+                } catch (MaltChainedException ex) {
+                  Logger.getLogger(StanPoSMaltDepParser.class.getName()).log(Level.SEVERE, null, ex);
+                  System.err.println("Sentence is: \n" + Arrays.toString(sentence));
+                  System.err.println("Parser is: \n" + maltPar);
+                }
+            } else {
+                parseTrees.put(line, null);
+            }
+        }
 
-		parsers.offer(maltPar); //free up the parser, it is no longer required
-		return parseTrees;
-	}
+        parsers.offer(maltPar); //free up the parser, it is no longer required
+        return parseTrees;
+    }
 }
