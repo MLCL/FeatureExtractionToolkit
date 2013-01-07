@@ -13,8 +13,8 @@ import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
 import uk.ac.susx.mlcl.featureextraction.featurefunction.*;
 import uk.ac.susx.mlcl.lib.MiscUtil;
 import uk.ac.susx.mlcl.lib.io.Files;
-import uk.ac.susx.mlcl.strings.NewlineReader;
-import uk.ac.susx.mlcl.strings.StringSplitter;
+import uk.ac.susx.mlcl.strings.NewlineSplitter;
+import uk.ac.susx.mlcl.strings.TextSplitter;
 import uk.ac.susx.mlcl.util.Config;
 import uk.ac.susx.mlcl.util.Configurable;
 import uk.ac.susx.mlcl.util.IntSpan;
@@ -44,7 +44,7 @@ public abstract class AbstractParser implements Configurable {
 	private static final Logger LOG =
 	Logger.getLogger(AbstractParser.class.getName());
 
-	protected abstract static class AbstractParserConfig extends Config {
+	protected abstract class AbstractParserConfig extends Config {
 
 		private static final long serialVersionUID = 1L;
 
@@ -157,6 +157,15 @@ public abstract class AbstractParser implements Configurable {
 		@Parameter(names = {"-lce", "--useLowercaseEntries"},
 		description = "convert all entries and their token features to lower-case")
 		private boolean useLowercaseEntries = false;
+
+		@Parameter(names = {"-ispl", "--inputSplitter"},
+		description = "class that specifies the input splitter.",
+		converter = SplitterConverter.class)
+		private TextSplitter splitter = new NewlineSplitter();
+
+		public TextSplitter getNewSplitterObjectForText(CharSequence text) {
+			return splitter.copyForText(newLineDelim(), text);
+		}
 
 		public boolean isUseLowercaseEntries() {
 			return useLowercaseEntries;
@@ -306,8 +315,6 @@ public abstract class AbstractParser implements Configurable {
 
 	private BufferedWriter outFile;
 
-	private StringSplitter splitter;
-
 	private final AtomicInteger count = new AtomicInteger();
 
 	private FeatureFactory featureFactory;
@@ -357,16 +364,8 @@ public abstract class AbstractParser implements Configurable {
 
 	private static final String NOUN_GROUP_NOUN_PREFIX = "NGN:";
 
-	public StringSplitter getSplitter() {
-		return splitter;
-	}
-
 	public List<FeatureConstraint> getConstraints() {
 		return constraints;
-	}
-
-	public void setSplitter(StringSplitter splitter) {
-		this.splitter = splitter;
 	}
 
 	protected String getOutPath() {
@@ -508,11 +507,12 @@ public abstract class AbstractParser implements Configurable {
 			handleOutputPre();
 		}
 
-		//final List<String> entries = getSplitter().split(input.toString());
-		final NewlineReader reader = new NewlineReader(input, newLineDelim());
-		//for (final String entry : entries) {
-		while (reader.hasLine()) {
-			final String entry = reader.readLine();
+//		final List<String> entries = getNewSplitterObjectForText().split(input.toString());
+//		final Iterator<String> entryReader = config().getNewSplitterObjectForText();
+		TextSplitter entryReader = config().getNewSplitterObjectForText(input);
+
+		while (entryReader.hasNext()) {
+			final String entry = entryReader.next();
 			try {
 				throttle.acquire();
 			} catch (InterruptedException e) {
@@ -545,7 +545,7 @@ public abstract class AbstractParser implements Configurable {
 						}
 						final CharSequence output = handleEntry(preprocessedEntry);
 						handleOutput(output);
-					}  finally {
+					} finally {
 						throttle.release();
 					}
 					return null;
@@ -647,15 +647,9 @@ public abstract class AbstractParser implements Configurable {
 		List<Sentence> annotated = annotate(map);
 
 		if (annotated.isEmpty()) {
-			throw new InvalidEntryException("empty sentence!");
+			return "";
 		}
-//		else if (annotated.size() < 1) {
-//			throw new InvalidEntryException("single entry sentence!");
-//		}
-
-		CharSequence lines = getLines(annotated);
-
-		return lines;
+		return getLines(annotated);
 	}
 
 	protected CharSequence getLines(List<Sentence> sentences) {
@@ -820,6 +814,7 @@ public abstract class AbstractParser implements Configurable {
 	/**
 	 * Return the original text and the information the preprocessor object attached to it. Each subclasses can map
 	 * objects of different types--- see the implementing class' method
+	 *
 	 * @param text
 	 * @return
 	 * @throws ModelNotValidException

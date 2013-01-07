@@ -33,6 +33,12 @@
                 <enabled>true</enabled>
             </releases>
         </repository>
+
+        <repository>
+            <id>Spark repository</id>
+            <url>http://www.sparkjava.com/nexus/content/repositories/spark/</url>
+        </repository>
+
     </repositories>
 
     <dependencies>
@@ -80,6 +86,19 @@
             <artifactId>mockito-all</artifactId>
             <version>1.9.5</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.0.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>spark</groupId>
+            <artifactId>spark</artifactId>
+            <version>0.9.9.4-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
 
     <distributionManagement>

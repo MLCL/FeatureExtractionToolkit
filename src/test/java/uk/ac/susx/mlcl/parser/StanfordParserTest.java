@@ -33,7 +33,7 @@ public class StanfordParserTest {
 
     @Test
     public void testSingleSentence() {
-        StanfordParser sp = getMockedStanfordParser();
+        StanfordParser sp = getSingleThreadedStanfordParser();
 
         Map<Object, Object> sentMap = sp.rawTextParse(singleRawSent);
         assertEquals(1, sentMap.size());
@@ -47,7 +47,7 @@ public class StanfordParserTest {
 
     @Test
     public void testMultipleSentences() {
-        StanfordParser sp = getMockedStanfordParser();
+        StanfordParser sp = getSingleThreadedStanfordParser();
 
         Map<Object, Object> sentMap = sp.rawTextParse(twoRawSents);
         assertEquals(2, sentMap.size());//test sentence segmenter
@@ -60,7 +60,7 @@ public class StanfordParserTest {
         }
     }
 
-    private StanfordParser getMockedStanfordParser() {
+    private StanfordParser getSingleThreadedStanfordParser() {
         final StanfordParser.StanConfig mockConfig = mock(StanfordParser.StanConfig.class);
 
         StanfordParser sp = new StanfordParser() {

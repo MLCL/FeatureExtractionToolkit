@@ -17,7 +17,6 @@ import uk.ac.susx.mlcl.featureextraction.featureconstraint.DisjointFeatureConstr
 import uk.ac.susx.mlcl.featureextraction.featureconstraint.HasAnnotationFeatureConstraint;
 import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
 import uk.ac.susx.mlcl.featureextraction.featurefunction.NGramFeatureFunction;
-import uk.ac.susx.mlcl.strings.NewlineStringSplitter;
 import uk.ac.susx.mlcl.util.IntSpan;
 
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class NgramParser extends AbstractParser {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    private static class BWConfig extends AbstractParserConfig {
+    private class BWConfig extends AbstractParserConfig {
 
         private static final long serialVersionUID = 1L;
 
@@ -117,7 +116,7 @@ public class NgramParser extends AbstractParser {
     public void init(String[] args) {
         config = new BWConfig();
         config.load(args);
-        setSplitter(new NewlineStringSplitter());
+//        setSplitter(new NewlineStringSplitter());
     }
 
     private List<IndexToken<Character>> getKeyNgrams(int len) {

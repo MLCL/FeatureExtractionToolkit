@@ -28,7 +28,7 @@ public abstract class StanfordParser extends AbstractParser {
 	Logger.getLogger(AbstractParser.class.getName());
 
 
-	protected abstract static class StanConfig extends AbstractParserConfig {
+	protected abstract class StanConfig extends AbstractParserConfig {
 
 		private static final long serialVersionUID = 1L;
 

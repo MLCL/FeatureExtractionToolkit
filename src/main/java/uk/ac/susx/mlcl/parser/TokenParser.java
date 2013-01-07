@@ -14,7 +14,6 @@ import uk.ac.susx.mlcl.featureextraction.featureconstraint.ContextWindowsFeature
 import uk.ac.susx.mlcl.featureextraction.featureconstraint.DisjointFeatureConstraint;
 import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
 import uk.ac.susx.mlcl.featureextraction.featurefunction.TokenFeatureFunction;
-import uk.ac.susx.mlcl.strings.NewlineStringSplitter;
 import uk.ac.susx.mlcl.util.IntSpan;
 
 import java.util.ArrayList;
@@ -43,7 +42,7 @@ public class TokenParser extends AbstractParser {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
-	public static class TokenConfig extends AbstractParserConfig {
+	public class TokenConfig extends AbstractParserConfig {
 
 		private static final long serialVersionUID = 1L;
 
@@ -235,7 +234,7 @@ public class TokenParser extends AbstractParser {
 	public void init(String[] args) {
 		config = new TokenConfig();
 		config.load(args);
-		setSplitter(new NewlineStringSplitter());
+//		setSplitter(new NewlineStringSplitter());
 	}
 
 	@SuppressWarnings("unchecked")
