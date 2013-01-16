@@ -441,7 +441,7 @@ public abstract class AbstractParser implements Configurable {
 
 		List<String> files = Files.getFileList(
 		config().getInPath(), config().getInSuffix(),
-		false, false);
+		false, config().isRecursive());
 
 		for (String file : files) {
 			System.err.println(file);

@@ -6,7 +6,7 @@
 
     <groupId>uk.ac.susx.mlcl</groupId>
     <artifactId>FeatureExtractionToolkit</artifactId>
-    <version>0.3.4</version>
+    <version>0.3.5</version>
     <packaging>jar</packaging>
 
     <name>FeatureExtractionToolkit</name>
@@ -143,7 +143,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>>uk.ac.susx.mlcl.parser.StanPoSMaltDepParser</mainClass>
+                            <mainClass>>uk.ac.susx.mlcl.parser.PreprocessedConllParser</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -158,7 +158,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>uk.ac.susx.mlcl.parser.StanPoSMaltDepParser</mainClass>
+                            <mainClass>uk.ac.susx.mlcl.parser.PreprocessedConllParser</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
