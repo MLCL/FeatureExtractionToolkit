@@ -102,6 +102,11 @@ public class NgramParser extends AbstractParser {
         return outPath;
     }
 
+	@Override
+	protected Map<Object, Object> loadPreparsedEntry(String entry) {
+		throw new IllegalStateException("Loading pre-parsed text not implemented for this type");
+	}
+
 	public static void main(String[] args) {
 
         NgramParser tp = new NgramParser();

@@ -163,8 +163,16 @@ public abstract class AbstractParser implements Configurable {
 		converter = SplitterConverter.class)
 		private TextSplitter splitter = new NewlineSplitter();
 
+		@Parameter(names = {"-conll", "--ConllParsedInput"},
+		description = "Specifies that the input has been dependency-parsed and is stored in CONLL format")
+		private boolean alreadyParsed = true;
+
 		public TextSplitter getNewSplitterObjectForText(CharSequence text) {
 			return splitter.copyForText(newLineDelim(), text);
+		}
+
+		public boolean isAlreadyParsed() {
+			return alreadyParsed;
 		}
 
 		public boolean isUseLowercaseEntries() {
@@ -543,6 +551,9 @@ public abstract class AbstractParser implements Configurable {
 								e.printStackTrace();
 							}
 						}
+						if (config().isAlreadyParsed()) {
+							preprocessedEntry = loadPreparsedEntry(entry);
+						}
 						final CharSequence output = handleEntry(preprocessedEntry);
 						handleOutput(output);
 					} finally {
@@ -559,6 +570,8 @@ public abstract class AbstractParser implements Configurable {
 			handleOutputPost();
 		}
 	}
+
+	protected abstract Map<Object, Object> loadPreparsedEntry(String entry);
 
 	private void initThreads() {
 		if (exec != null || throttle != null || futures != null) {

@@ -126,6 +126,11 @@ public class TokenParser extends AbstractParser {
 	}
 
 	@Override
+	protected Map<Object, Object> loadPreparsedEntry(String entry) {
+		throw new IllegalStateException("Loading pre-parsed text not implemented for this type");
+	}
+
+	@Override
 	protected List<Sentence> annotate(Map<Object, Object> map){
 		//todo assumes the map contains a single string as a value
 		String entry = (String) new ArrayList<Object>(map.values()).get(0);

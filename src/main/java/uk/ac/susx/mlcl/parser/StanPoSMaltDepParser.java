@@ -46,9 +46,8 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		private List<String> hDepList = new ArrayList<String>();
 
 		@Parameter(names = {"-modN", "--modelName"},
-		required = true,
 		description = "Name of the dependancy parser model")
-		private String modN = null;
+		private String modN = "";
 
 		public List depList() {
 			return depList;
@@ -58,7 +57,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 			return hDepList;
 		}
 
-		public String modeName() {
+		public String modelName() {
 			return modN;
 		}
 	}
@@ -82,98 +81,23 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		}
 
 
-		try {
-			for (Object sentString : map.keySet()) {
-				Sentence sentObject = processEntry((String) sentString, (DependencyStructure) map.get(sentString));
-				if (sentObject.size() < 1) {
-					throw new InvalidEntryException("single entry sentence!");
-				}
-				applyFeatureFactory(getFeatureFactory(), sentObject);
-				annotatedSentences.add(sentObject);
+		for (Object sentString : map.keySet()) {
+			Sentence sentObject = annotateWithTokenInfo((String) sentString);
+			if (sentObject.size() < 1) {
+				throw new InvalidEntryException("empty sentence!");
 			}
-		} catch (MaltChainedException e) {
-			e.printStackTrace();
+			try {
+				sentObject = annotateWithDependencies((DependencyStructure) map.get(sentString), sentObject);
+			} catch (MaltChainedException e) {
+				e.printStackTrace();
+			}
+			applyFeatureFactory(getFeatureFactory(), sentObject);
+			annotatedSentences.add(sentObject);
 		}
-
 		return annotatedSentences;
 	}
 
-	/**
-	 * @param args the command line arguments
-	 */
-	public static void main(String[] args) {
-		StanPoSMaltDepParser sp = new StanPoSMaltDepParser();
-		sp.init(args);
-		long start = System.currentTimeMillis();
-		sp.parse();
-		System.out.println("Time (ms) = " + (System.currentTimeMillis() - start));
-	}
-
-	@Override
-	protected FeatureFactory buildFeatureFactory() {
-		FeatureFactory featurefactory = super.buildFeatureFactory();
-		for (String dep : config.depList) {
-			DependencyFeatureFunction fn = new DependencyFeatureFunction(dep, true);
-			fn.setPrefix(dep + "-DEP:");
-			featurefactory.addFeature("Dependency feature function (dep)" + dep, fn);
-		}
-
-		for (String dep : config.hDepList) {
-			DependencyFeatureFunction fn = new DependencyFeatureFunction(dep, false);
-			fn.setPrefix(dep + "-HEAD:");
-			featurefactory.addFeature("Dependency feature function (head)" + dep, fn);
-		}
-
-		return featurefactory;
-	}
-
-	@Override
-	public void init(String[] args) {
-		config = new StanMaltConfig();
-		config.load(args);
-		super.initPreProcessor();
-		int n = config.getNumCores();
-		this.parsers = new LinkedBlockingDeque<MaltParserWrapper>(n);
-		for (int i = 0; i < n; i++) {
-			MaltParserWrapper maltPar = new MaltParserWrapper(super.getPosDelim(), config.modeName(), i);
-			parsers.add(maltPar);
-		}
-	}
-
-	protected StanMaltConfig config() {
-		return config;
-	}
-
-	@Override
-	public String getOutPath() {
-		String outpath = super.getOutPath();
-
-		if (config().depList() != null) {
-			for (String dep : config.depList) {
-				outpath += "-" + dep;
-			}
-		}
-		if (config().hDepList() != null) {
-			for (String dep : config.hDepList) {
-				outpath += "-" + dep;
-			}
-		}
-
-		if (config().depList() != null) {
-			for (String dep : config.depList) {
-				outpath += "-" + dep;
-			}
-		}
-		if (config().hDepList() != null) {
-			for (String dep : config.hDepList) {
-				outpath += "-" + dep;
-			}
-		}
-
-		return outpath;
-	}
-
-	private Sentence processEntry(String sentenceStr, DependencyStructure graph) throws MaltChainedException {
+	Sentence annotateWithTokenInfo(String sentenceStr) {
 		//sentenceStr must be a single sentence
 		Sentence annotatedSent = new Sentence();
 		String[] splitSent = sentenceStr.split(getTokenDelim());
@@ -181,8 +105,10 @@ public class StanPoSMaltDepParser extends StanfordParser {
 			Token t = new Token();
 			String[] tokPos = splitSent[i].split(getPosDelim());
 			String pos = config.isUseCoarsePos() ? Token.coarsifyPoSTag(tokPos[2]) : tokPos[2];
-			t.setAnnotation(Annotations.TokenAnnotation.class, tokPos[1] + getPosDelim() + pos);
+			String lemma = tokPos[1];
 			t.setAnnotation(Annotations.OriginalTokenAnnotation.class, tokPos[0]);
+			String token = config.isUseLemma() ? lemma : tokPos[0];
+			t.setAnnotation(Annotations.TokenAnnotation.class, token + getPosDelim() + pos);
 			t.setAnnotation(Annotations.PoSAnnotation.class, pos);
 			if (config.depList() != null) {
 				t.setAnnotation(Annotations.DependencyListAnnotation.class, new HashMap<String, ArrayList<String>>());
@@ -195,6 +121,10 @@ public class StanPoSMaltDepParser extends StanfordParser {
 			annotatedSent.addKey(key);
 		}
 
+		return annotatedSent;
+	}
+
+	Sentence annotateWithDependencies(DependencyStructure graph, Sentence annotatedSent) throws MaltChainedException {
 		if (graph != null) {
 			for (Edge edge : graph.getEdges()) {
 				if (MaltParserWrapper.getHeadIndex(edge) - 1 >= 0 &&
@@ -241,6 +171,89 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	}
 
 	/**
+	 * @param args the command line arguments
+	 */
+	public static void main(String[] args) {
+		StanPoSMaltDepParser sp = new StanPoSMaltDepParser();
+		sp.init(args);
+		long start = System.currentTimeMillis();
+		sp.parse();
+		System.out.println("Time (ms) = " + (System.currentTimeMillis() - start));
+	}
+
+	@Override
+	protected FeatureFactory buildFeatureFactory() {
+		FeatureFactory featurefactory = super.buildFeatureFactory();
+		for (String dep : config.depList) {
+			DependencyFeatureFunction fn = new DependencyFeatureFunction(dep, true);
+			fn.setPrefix(dep + "-DEP:");
+			featurefactory.addFeature("Dependency feature function (dep)" + dep, fn);
+		}
+
+		for (String dep : config.hDepList) {
+			DependencyFeatureFunction fn = new DependencyFeatureFunction(dep, false);
+			fn.setPrefix(dep + "-HEAD:");
+			featurefactory.addFeature("Dependency feature function (head)" + dep, fn);
+		}
+
+		return featurefactory;
+	}
+
+	@Override
+	public void init(String[] args) {
+		config = new StanMaltConfig();
+		config.load(args);
+		int n = config.getNumCores();
+		this.parsers = new LinkedBlockingDeque<MaltParserWrapper>(n);
+		if (config.modelName().length() > 0) {
+			//only load PoS tagger and dep. parser models if they have been requested
+			super.initPreProcessor();
+			for (int i = 0; i < n; i++) {
+				MaltParserWrapper maltPar = new MaltParserWrapper(super.getPosDelim(), config.modelName(), i);
+				parsers.add(maltPar);
+			}
+		}
+	}
+
+	protected StanMaltConfig config() {
+		return config;
+	}
+
+	@Override
+	public String getOutPath() {
+		String outpath = super.getOutPath();
+
+		if (config().depList() != null) {
+			for (String dep : config.depList) {
+				outpath += "-" + dep;
+			}
+		}
+		if (config().hDepList() != null) {
+			for (String dep : config.hDepList) {
+				outpath += "-" + dep;
+			}
+		}
+
+		if (config().depList() != null) {
+			for (String dep : config.depList) {
+				outpath += "-" + dep;
+			}
+		}
+		if (config().hDepList() != null) {
+			for (String dep : config.hDepList) {
+				outpath += "-" + dep;
+			}
+		}
+
+		return outpath;
+	}
+
+	@Override
+	protected Map<Object, Object> loadPreparsedEntry(String entry) {
+		throw new IllegalStateException("Loading pre-parsed text not implemented for this type");
+	}
+
+	/**
 	 * Returns a map between PoS tagged, tokenized, lemmatized sentences and their corresponding parse trees
 	 *
 	 * @param text
@@ -253,12 +266,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 		Map<Object, Object> ret = super.rawTextParse(text);
 
 
-		MaltParserWrapper maltPar = null;
-		try {
-			maltPar = parsers.take();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		MaltParserWrapper maltPar = getNextAvailableParser();
 		Map<Object, Object> parseTrees = new LinkedHashMap<Object, Object>();//maintain sentence order
 
 		for (Object intID : ret.keySet()) {
@@ -279,7 +287,21 @@ public class StanPoSMaltDepParser extends StanfordParser {
 			}
 		}
 
-		parsers.offer(maltPar); //free up the parser, it is no longer required
+		returnParser(maltPar);
 		return parseTrees;
+	}
+
+	MaltParserWrapper getNextAvailableParser() {
+		MaltParserWrapper maltPar = null;
+		try {
+			maltPar = parsers.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return maltPar;
+	}
+
+	void returnParser(MaltParserWrapper maltPar) {
+		parsers.offer(maltPar); //free up the parser, it is no longer required
 	}
 }

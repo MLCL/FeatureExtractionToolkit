@@ -33,6 +33,7 @@ import java.util.Map;
 public class StanfordPreprocessedParser extends AbstractParser {
 
 	private static final String POS_DELIMITER = "/";
+	private StanfordPreprocessedConfig config;
 
 	public StanfordPreprocessedParser(String[] args) {
 		config = new StanfordPreprocessedConfig();
@@ -80,10 +81,13 @@ public class StanfordPreprocessedParser extends AbstractParser {
 
 	}
 
-	private StanfordPreprocessedConfig config;
-
 	protected StanfordPreprocessedConfig config() {
 		return config;
+	}
+
+	@Override
+	protected Map<Object, Object> loadPreparsedEntry(String entry) {
+		throw new IllegalStateException("Loading pre-parsed text not implemented for this type");
 	}
 
 	@Override

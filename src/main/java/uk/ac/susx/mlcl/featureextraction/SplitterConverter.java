@@ -22,6 +22,7 @@ public final class SplitterConverter implements IStringConverter<TextSplitter> {
 			}
 		} catch (InstantiationException e) {
 			LOG.log(Level.SEVERE, null, e);
+			System.exit(1);
 		} catch (IllegalAccessException e) {
 			LOG.log(Level.SEVERE, null, e);
 		}

@@ -64,7 +64,12 @@ public class StanfordParserTest {
         final StanfordParser.StanConfig mockConfig = mock(StanfordParser.StanConfig.class);
 
         StanfordParser sp = new StanfordParser() {
-            @Override
+	        @Override
+	        protected Map<Object, Object> loadPreparsedEntry(String entry) {
+		        throw new IllegalStateException("Loading pre-parsed text not implemented for this type");
+	        }
+
+	        @Override
             protected List<Sentence> annotate(Map<Object, Object> map) {
                 return null;
             }
