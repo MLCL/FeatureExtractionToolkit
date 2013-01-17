@@ -79,32 +79,28 @@ public class PreprocessedConllParser extends StanPoSMaltDepParser {
 				getAnnotation(Annotations.DependencyHeadListAnnotation.class).
 				get(relation);
 
-				if (config().hDepList() != null) {
-					if (feats == null) {
-						feats = new ArrayList<String>();
-						feats.add(dependant);
-						annotatedSent.get(headIndex).
-						getAnnotation(Annotations.DependencyHeadListAnnotation.class).
-						put(relation, feats);
-					} else {
-						feats.add(dependant);
-					}
+				if (feats == null) {
+					feats = new ArrayList<String>();
+					feats.add(dependant);
+					annotatedSent.get(headIndex).
+					getAnnotation(Annotations.DependencyHeadListAnnotation.class).
+					put(relation, feats);
+				} else {
+					feats.add(dependant);
 				}
-				if (config().depList() != null) {
-					feats = (ArrayList<String>) annotatedSent.
-					get(dependentIndex).
-					getAnnotation(Annotations.DependencyListAnnotation.class).
-					get(relation);
+				feats = (ArrayList<String>) annotatedSent.
+				get(dependentIndex).
+				getAnnotation(Annotations.DependencyListAnnotation.class).
+				get(relation);
 
-					if (feats == null) {
-						feats = new ArrayList<String>();
-						feats.add(head);
-						annotatedSent.get(dependentIndex).
-						getAnnotation(Annotations.DependencyListAnnotation.class).
-						put(relation, feats);
-					} else {
-						feats.add(head);
-					}
+				if (feats == null) {
+					feats = new ArrayList<String>();
+					feats.add(head);
+					annotatedSent.get(dependentIndex).
+					getAnnotation(Annotations.DependencyListAnnotation.class).
+					put(relation, feats);
+				} else {
+					feats.add(head);
 				}
 			}
 

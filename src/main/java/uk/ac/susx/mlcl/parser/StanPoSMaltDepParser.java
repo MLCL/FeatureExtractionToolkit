@@ -110,12 +110,8 @@ public class StanPoSMaltDepParser extends StanfordParser {
 			String token = config.isUseLemma() ? lemma : tokPos[0];
 			t.setAnnotation(Annotations.TokenAnnotation.class, token + getPosDelim() + pos);
 			t.setAnnotation(Annotations.PoSAnnotation.class, pos);
-			if (config.depList() != null) {
-				t.setAnnotation(Annotations.DependencyListAnnotation.class, new HashMap<String, ArrayList<String>>());
-			}
-			if (config.hDepList() != null) {
-				t.setAnnotation(Annotations.DependencyHeadListAnnotation.class, new HashMap<String, ArrayList<String>>());
-			}
+			t.setAnnotation(Annotations.DependencyListAnnotation.class, new HashMap<String, ArrayList<String>>());
+			t.setAnnotation(Annotations.DependencyHeadListAnnotation.class, new HashMap<String, ArrayList<String>>());
 			annotatedSent.add(t);
 			IndexToken<CharSequence> key = new IndexToken<CharSequence>(new IntSpan(i, i), Annotations.TokenAnnotation.class);
 			annotatedSent.addKey(key);
@@ -135,32 +131,28 @@ public class StanPoSMaltDepParser extends StanfordParser {
 					getAnnotation(Annotations.DependencyHeadListAnnotation.class).
 					get(MaltParserWrapper.getDepRel(edge, graph));
 
-					if (config.hDepList() != null) {
-						if (feats == null) {
-							feats = new ArrayList<String>();
-							feats.add(MaltParserWrapper.getDependant(edge, graph));
-							annotatedSent.get(MaltParserWrapper.getHeadIndex(edge) - 1).
-							getAnnotation(Annotations.DependencyHeadListAnnotation.class).
-							put(MaltParserWrapper.getDepRel(edge, graph), feats);
-						} else {
-							feats.add(MaltParserWrapper.getDependant(edge, graph));
-						}
+					if (feats == null) {
+						feats = new ArrayList<String>();
+						feats.add(MaltParserWrapper.getDependant(edge, graph));
+						annotatedSent.get(MaltParserWrapper.getHeadIndex(edge) - 1).
+						getAnnotation(Annotations.DependencyHeadListAnnotation.class).
+						put(MaltParserWrapper.getDepRel(edge, graph), feats);
+					} else {
+						feats.add(MaltParserWrapper.getDependant(edge, graph));
 					}
-					if (config.depList() != null) {
-						feats = (ArrayList<String>) annotatedSent.
-						get(MaltParserWrapper.getDependantIndex(edge) - 1).
-						getAnnotation(Annotations.DependencyListAnnotation.class).
-						get(MaltParserWrapper.getDepRel(edge, graph));
+					feats = (ArrayList<String>) annotatedSent.
+					get(MaltParserWrapper.getDependantIndex(edge) - 1).
+					getAnnotation(Annotations.DependencyListAnnotation.class).
+					get(MaltParserWrapper.getDepRel(edge, graph));
 
-						if (feats == null) {
-							feats = new ArrayList<String>();
-							feats.add(MaltParserWrapper.getHead(edge, graph));
-							annotatedSent.get(MaltParserWrapper.getDependantIndex(edge) - 1).
-							getAnnotation(Annotations.DependencyListAnnotation.class).
-							put(MaltParserWrapper.getDepRel(edge, graph), feats);
-						} else {
-							feats.add(MaltParserWrapper.getHead(edge, graph));
-						}
+					if (feats == null) {
+						feats = new ArrayList<String>();
+						feats.add(MaltParserWrapper.getHead(edge, graph));
+						annotatedSent.get(MaltParserWrapper.getDependantIndex(edge) - 1).
+						getAnnotation(Annotations.DependencyListAnnotation.class).
+						put(MaltParserWrapper.getDepRel(edge, graph), feats);
+					} else {
+						feats.add(MaltParserWrapper.getHead(edge, graph));
 					}
 				}
 			}
@@ -222,30 +214,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	@Override
 	public String getOutPath() {
 		String outpath = super.getOutPath();
-
-		if (config().depList() != null) {
-			for (String dep : config.depList) {
-				outpath += "-" + dep;
-			}
-		}
-		if (config().hDepList() != null) {
-			for (String dep : config.hDepList) {
-				outpath += "-" + dep;
-			}
-		}
-
-		if (config().depList() != null) {
-			for (String dep : config.depList) {
-				outpath += "-" + dep;
-			}
-		}
-		if (config().hDepList() != null) {
-			for (String dep : config.hDepList) {
-				outpath += "-" + dep;
-			}
-		}
-
-		return outpath;
+		return outpath + "alldeps";
 	}
 
 	@Override
@@ -271,19 +240,15 @@ public class StanPoSMaltDepParser extends StanfordParser {
 
 		for (Object intID : ret.keySet()) {
 			String line = (String) ret.get(intID);
-			if (config().depList() != null && config().hDepList() != null) {
-				//do not parse if dependency features have not been requested
-				String[] sentence = maltPar.formatSentenceForMaltParser(line.split(getTokenDelim()));
-				try {
-					DependencyStructure graph = maltPar.parse(sentence);
-					parseTrees.put(line, graph);
-				} catch (MaltChainedException ex) {
-					Logger.getLogger(StanPoSMaltDepParser.class.getName()).log(Level.SEVERE, null, ex);
-					System.err.println("Sentence is: \n" + Arrays.toString(sentence));
+			//do not parse if dependency features have not been requested
+			String[] sentence = maltPar.formatSentenceForMaltParser(line.split(getTokenDelim()));
+			try {
+				DependencyStructure graph = maltPar.parse(sentence);
+				parseTrees.put(line, graph);
+			} catch (MaltChainedException ex) {
+				Logger.getLogger(StanPoSMaltDepParser.class.getName()).log(Level.SEVERE, null, ex);
+				System.err.println("Sentence is: \n" + Arrays.toString(sentence));
 //                  System.err.println("Parser is: \n" + maltPar);
-				}
-			} else {
-				parseTrees.put(line, null);
 			}
 		}
 
