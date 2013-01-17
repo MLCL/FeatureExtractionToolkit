@@ -159,7 +159,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 							getAnnotation(Annotations.DependencyListAnnotation.class).
 							put(MaltParserWrapper.getDepRel(edge, graph), feats);
 						} else {
-							feats.add(MaltParserWrapper.getDependant(edge, graph));
+							feats.add(MaltParserWrapper.getHead(edge, graph));
 						}
 					}
 				}

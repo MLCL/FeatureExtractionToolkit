@@ -103,7 +103,7 @@ public class PreprocessedConllParser extends StanPoSMaltDepParser {
 						getAnnotation(Annotations.DependencyListAnnotation.class).
 						put(relation, feats);
 					} else {
-						feats.add(dependant);
+						feats.add(head);
 					}
 				}
 			}
