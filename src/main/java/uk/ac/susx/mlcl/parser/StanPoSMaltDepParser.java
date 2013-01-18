@@ -37,25 +37,25 @@ public class StanPoSMaltDepParser extends StanfordParser {
 
 		private static final long serialVersionUID = 1L;
 
-		@Parameter(names = {"-dr", "--depRels"},
-		description = "Array of dependancy relations to extract.")
-		private List<String> depList = new ArrayList<String>();
-
-		@Parameter(names = {"-hdr", "--headDepRels"},
-		description = "Array of head dependancy relations to extract.")
-		private List<String> hDepList = new ArrayList<String>();
+//		@Parameter(names = {"-dr", "--depRels"},
+//		description = "Array of dependancy relations to extract.")
+//		private List<String> depList = new ArrayList<String>();
+//
+//		@Parameter(names = {"-hdr", "--headDepRels"},
+//		description = "Array of head dependancy relations to extract.")
+//		private List<String> hDepList = new ArrayList<String>();
 
 		@Parameter(names = {"-modN", "--modelName"},
 		description = "Name of the dependancy parser model")
 		private String modN = "";
 
-		public List depList() {
-			return depList;
-		}
-
-		public List hDepList() {
-			return hDepList;
-		}
+//		public List depList() {
+//			return depList;
+//		}
+//
+//		public List hDepList() {
+//			return hDepList;
+//		}
 
 		public String modelName() {
 			return modN;
@@ -75,10 +75,10 @@ public class StanPoSMaltDepParser extends StanfordParser {
 			"useTokenAsBase is off, there must be base entries!");
 		}
 
-		if (config.depList == null && config().hDepList == null) {
-			throw new RuntimeException(
-			"No dependancy relations specified!");
-		}
+//		if (config.depList == null && config().hDepList == null) {
+//			throw new RuntimeException(
+//			"No dependancy relations specified!");
+//		}
 
 
 		for (Object sentString : map.keySet()) {
@@ -176,13 +176,73 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	@Override
 	protected FeatureFactory buildFeatureFactory() {
 		FeatureFactory featurefactory = super.buildFeatureFactory();
-		for (String dep : config.depList) {
+		List<String> deps = new LinkedList<String>() {{
+			add("abbrev");
+			add("acomp");
+			add("advcl");
+			add("advmod");
+			add("agent");
+			add("amod");
+			add("appos");
+			add("arg");
+			add("attr");
+			add("aux");
+			add("auxpass");
+			add("cc");
+			add("ccomp");
+			add("comp");
+			add("cop");
+			add("complm");
+			add("conj");
+			add("csubj");
+			add("csubjpass");
+			add("dep");
+			add("det");
+			add("dobj");
+			add("expl");
+			add("infmod");
+			add("iobj");
+			add("mark");
+			add("mwe");
+			add("neg");
+			add("nn");
+			add("npadvmod");
+			add("nsubj");
+			add("nsubjpass");
+			add("num");
+			add("number");
+			add("obj");
+			add("parataxis");
+			add("partmod");
+			add("pcomp");
+			add("pobj");
+			add("poss");
+			add("possessive");
+			add("preconj");
+			add("predet");
+			add("prep");
+			add("prepc");
+			add("prt");
+			add("punct");
+			add("purpcl");
+			add("quantmod");
+			add("rcmod");
+			add("ref");
+			add("rel");
+			add("sdep");
+			add("tmod");
+			add("xsubj");
+			add("xcomp");
+		}};
+
+
+		for (String dep : deps) {
 			DependencyFeatureFunction fn = new DependencyFeatureFunction(dep, true);
 			fn.setPrefix(dep + "-DEP:");
 			featurefactory.addFeature("Dependency feature function (dep)" + dep, fn);
 		}
 
-		for (String dep : config.hDepList) {
+		for (String dep : deps) {
 			DependencyFeatureFunction fn = new DependencyFeatureFunction(dep, false);
 			fn.setPrefix(dep + "-HEAD:");
 			featurefactory.addFeature("Dependency feature function (head)" + dep, fn);
