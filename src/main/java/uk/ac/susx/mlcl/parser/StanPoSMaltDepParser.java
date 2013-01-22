@@ -128,28 +128,29 @@ public class StanPoSMaltDepParser extends StanfordParser {
 
 					ArrayList<String> feats = (ArrayList<String>) annotatedSent.
 					get(MaltParserWrapper.getHeadIndex(edge) - 1).
-					getAnnotation(Annotations.DependencyHeadListAnnotation.class).
+					getAnnotation(Annotations.DependencyListAnnotation.class).
 					get(MaltParserWrapper.getDepRel(edge, graph));
 
 					if (feats == null) {
 						feats = new ArrayList<String>();
 						feats.add(MaltParserWrapper.getDependant(edge, graph));
 						annotatedSent.get(MaltParserWrapper.getHeadIndex(edge) - 1).
-						getAnnotation(Annotations.DependencyHeadListAnnotation.class).
+						getAnnotation(Annotations.DependencyListAnnotation.class).
 						put(MaltParserWrapper.getDepRel(edge, graph), feats);
 					} else {
 						feats.add(MaltParserWrapper.getDependant(edge, graph));
 					}
+
 					feats = (ArrayList<String>) annotatedSent.
 					get(MaltParserWrapper.getDependantIndex(edge) - 1).
-					getAnnotation(Annotations.DependencyListAnnotation.class).
+					getAnnotation(Annotations.DependencyHeadListAnnotation.class).
 					get(MaltParserWrapper.getDepRel(edge, graph));
 
 					if (feats == null) {
 						feats = new ArrayList<String>();
 						feats.add(MaltParserWrapper.getHead(edge, graph));
 						annotatedSent.get(MaltParserWrapper.getDependantIndex(edge) - 1).
-						getAnnotation(Annotations.DependencyListAnnotation.class).
+						getAnnotation(Annotations.DependencyHeadListAnnotation.class).
 						put(MaltParserWrapper.getDepRel(edge, graph), feats);
 					} else {
 						feats.add(MaltParserWrapper.getHead(edge, graph));

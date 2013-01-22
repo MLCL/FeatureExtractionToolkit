@@ -165,7 +165,7 @@ public abstract class AbstractParser implements Configurable {
 
 		@Parameter(names = {"-conll", "--ConllParsedInput"},
 		description = "Specifies that the input has been dependency-parsed and is stored in CONLL format")
-		private boolean alreadyParsed = true;
+		private boolean alreadyParsed = false;
 
 		public TextSplitter getNewSplitterObjectForText(CharSequence text) {
 			return splitter.copyForText(newLineDelim(), text);
