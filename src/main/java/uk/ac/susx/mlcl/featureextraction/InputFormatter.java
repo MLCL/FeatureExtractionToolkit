@@ -8,7 +8,7 @@ package uk.ac.susx.mlcl.featureextraction;
  *
  * @author jp242
  */
-public interface InputFormatter extends Formatter {
+public interface InputFormatter {
         
     public void processEntry(final String entry, final Sentence annotated);
     

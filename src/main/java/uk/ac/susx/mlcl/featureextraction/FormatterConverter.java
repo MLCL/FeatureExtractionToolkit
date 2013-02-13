@@ -12,12 +12,12 @@ import java.util.logging.Logger;
  *
  * @author hiam20
  */
-public final class FormatterConverter implements IStringConverter<Formatter> {
+public final class FormatterConverter implements IStringConverter<OutputFormatter> {
 
     private static final Logger LOG = Logger.getLogger(FormatterConverter.class.getName());
 
     @Override
-    public final Formatter convert(final String value) {
+    public final OutputFormatter convert(final String value) {
         OutputFormatter f = null;
         try {
             try {
