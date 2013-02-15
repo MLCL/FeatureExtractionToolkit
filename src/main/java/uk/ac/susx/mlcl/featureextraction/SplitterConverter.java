@@ -13,8 +13,12 @@ public final class SplitterConverter implements IStringConverter<TextSplitter> {
 	@Override
 	public final TextSplitter convert(final String value) {
 		TextSplitter f = null;
-		try {
-			try {
+                // XXX (Hamish): For the love of god, who did this? System.exit() is almost always a bad idea, and it is
+                //               especially a when used as exception handling. (Just for starters, the error can potentially not
+                //               print because the VM terminates first... ) Even throwing a runtime exception would be
+                //               preferable.
+        try {
+            try {
 				f = ((Class<TextSplitter>) Class.forName(value)).newInstance();
 			} catch (ClassNotFoundException e) {
 				LOG.log(Level.WARNING, "Formatter: {0} not found.", value);

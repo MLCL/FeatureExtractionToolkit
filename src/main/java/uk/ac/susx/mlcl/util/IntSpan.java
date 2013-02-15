@@ -185,7 +185,7 @@ public final class IntSpan implements Serializable, Comparable<IntSpan> {
             this.span = new IntSpan(left, right);
         }
 
-        protected final IntSpan readResolve() {
+        protected final Object readResolve() {
             return span;
         }
 

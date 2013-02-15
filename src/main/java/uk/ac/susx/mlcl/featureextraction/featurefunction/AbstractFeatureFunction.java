@@ -29,8 +29,6 @@ public abstract class AbstractFeatureFunction implements FeatureFunction {
 
     private final List<FeatureConstraint> constraints;
     
-    private String tag;
-
     public AbstractFeatureFunction(String prefix, String tag, FeatureConstraint... constraints) {
         Checks.checkNotNull("prefix", prefix);
         Checks.checkNotNull("constraints", constraints);
@@ -38,7 +36,6 @@ public abstract class AbstractFeatureFunction implements FeatureFunction {
         if (constraints.length > 0)
             this.constraints.addAll(Arrays.asList(constraints));
         this.prefix = prefix;
-        this.tag = tag;
     }
 
     /*

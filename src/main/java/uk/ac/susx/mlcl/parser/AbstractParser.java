@@ -605,11 +605,13 @@ public abstract class AbstractParser implements Configurable {
 		File outDirFile = new File(outDir);
 		if (!outDirFile.exists()) {
 			LOG.warning("Output file does not exist, creating...");
-			outDirFile.mkdirs();
+			if(!outDirFile.mkdirs())
+                throw new RuntimeException(new IOException("Failure to create output directory: " + outDir));
 		}
 		if (!outPath.endsWith(".txt"))
 			outPath += ".txt";
 		try {
+            // XXX (Hamish): Should specify character encoding here to avoid potential butt-hurt
 			outFile = new BufferedWriter(new FileWriter(outPath));
 		} catch (IOException e) {
 			System.err.println(e);
@@ -709,7 +711,7 @@ public abstract class AbstractParser implements Configurable {
 		}
 	}
 
-	public class ModelNotValidException extends Exception {
+	public static class ModelNotValidException extends Exception {
 
 		public ModelNotValidException() {
 		}

@@ -12,6 +12,4 @@ import java.util.HashMap;
  */
 public abstract class AbstractDictionaryAnnotation<T> extends AbstractAnnotation<HashMap>{
     
-    private HashMap dic;
-    
 }

@@ -328,6 +328,7 @@ public class StanPoSMaltDepParser extends StanfordParser {
 	}
 
 	void returnParser(MaltParserWrapper maltPar) {
+        // XXX (Hamish): Queues can potentially reject the offer (check return value and do something intelligent)
 		parsers.offer(maltPar); //free up the parser, it is no longer required
 	}
 }

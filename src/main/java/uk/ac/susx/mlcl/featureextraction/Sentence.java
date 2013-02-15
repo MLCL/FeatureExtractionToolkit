@@ -18,6 +18,10 @@ import uk.ac.susx.mlcl.featureextraction.annotations.Annotations;
 /**
  * Class representing an individual sentence holding all relevant parameters and
  * methods for manipulation.
+ *
+ * XXX (Hamish): Serialization won't work because IndexToken objects are not serializable. In addition Serialization of
+ *               this class can potentially fail when the collection holding keys is not serializable.
+ *
  * @author Simon Wibberley
  */
 public class Sentence extends ArrayList<Token> {

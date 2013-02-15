@@ -52,6 +52,9 @@ public class IndexToken<T> extends Token implements Comparable<IndexToken<?>> {
         setAnnotation(__FeatureAnnotation.class, feature);
     }
 
+    // XXX (Hamish): This is pretty bad code because equals and compare can produce different results (when compared
+    //               against objects of a different type. Instead equals and hashcode should be implemented normally
+    //               for this class as Token super class, then the ordering can be applied with a Comparator.
     @Override
     public int compareTo(IndexToken<?> other) {
         return BEGIN_ORDER.compare(this, other);

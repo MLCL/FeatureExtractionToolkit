@@ -108,7 +108,7 @@ public class PreprocessedConllParser extends StanPoSMaltDepParser {
 		return annotatedSent;
 	}
 
-	private class Edge {
+	private static class Edge {
 		public int head, dep;
 		String label;
 

@@ -46,6 +46,7 @@ public class Config implements Serializable {
                 if (jc.getParsedCommand() != null) {
                     jc.usage(jc.getParsedCommand());
                 }
+                // XXX (Hamish): Pretty sure this is redundant and bad :-(
                 System.exit(0);
             }
 
