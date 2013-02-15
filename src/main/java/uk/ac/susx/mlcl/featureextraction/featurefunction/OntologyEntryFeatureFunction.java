@@ -55,7 +55,6 @@ public class OntologyEntryFeatureFunction extends AbstractFeatureFunction{
         i = (depth >= 0) ? i+1: i-1;
         while((i >= limit && tagFound < (depth - (2*depth))
                 && depth <= 0) || (i <= limit && tagFound < depth && depth >= 0)){
-            final StringBuilder sb = new StringBuilder();
             Token token = sentence.get(i);
             if(token.getAnnotation(Annotations.PoSAnnotation.class).startsWith(tag) || tag == null){
                 final String ontEnt = token.getAnnotation(Annotations.OntologyEntryAnnotation.class);
