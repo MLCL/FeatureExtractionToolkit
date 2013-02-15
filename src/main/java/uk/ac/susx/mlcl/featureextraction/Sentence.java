@@ -4,6 +4,7 @@
  */
 package uk.ac.susx.mlcl.featureextraction;
 
+import uk.ac.susx.mlcl.featureextraction.annotations.Annotation;
 import uk.ac.susx.mlcl.util.IntSpan;
 import uk.ac.susx.mlcl.featureextraction.featurefactory.FeatureFactory;
 import uk.ac.susx.mlcl.featureextraction.featurefunction.FeatureFunction;
@@ -100,7 +101,7 @@ public class Sentence extends ArrayList<Token> {
 
         for (int i = span.left; i <= span.right; ++i) {
             if(exPos == null || !exPos.equals(this.get(i).getAnnotation(Annotations.PoSAnnotation.class))){
-                sb.append(this.get(i).getAnnotation(key.getKeyType()));
+                sb.append(this.get(i).getAnnotation((Class<? extends Annotation>)key.getKeyType()));
                 if (i < span.right) {
                     sb.append(this.getTokenSeparator());
                 }
