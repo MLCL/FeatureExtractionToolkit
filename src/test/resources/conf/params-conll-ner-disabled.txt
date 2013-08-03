@@ -12,11 +12,10 @@ src/test/resources/input/
 -is
 "needham.txt.tagged.conll.parsed"
 -op
-src/test/resources/output/test-conll-ner
+src/test/resources/output/test-conll-ner-disabled
 --outputFormatter
 uk.ac.susx.mlcl.featureextraction.featurefunction.TabOutputFormatterNoPoS
 --contextWindow
 -1+1
 --numCores
 4
---useNerTagAsPosTag

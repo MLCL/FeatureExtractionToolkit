@@ -1,5 +1,7 @@
 package uk.ac.susx.mlcl.parser;
 
+import com.beust.jcommander.Parameter;
+
 /**
  * Copyright
  * User: mmb28
@@ -9,11 +11,31 @@ package uk.ac.susx.mlcl.parser;
  */
 public class PreprocessedConllParserWithNER extends PreprocessedConllParser {
 
+    public class PreprocessdConllConfig extends StanConfig {
+        @Parameter(names = {"-nerpos", "--useNerTagAsPosTag"},
+                description = "Name of the dependancy parser model")
+        private boolean normalise = false;
+
+        public boolean isNormalise() {
+            return normalise;
+        }
+    }
+
     private int nerColumn;
+    private boolean normalize = false;
+    private PreprocessdConllConfig config;
 
     public PreprocessedConllParserWithNER(String[] args) {
         super(args);
         this.nerColumn = 4;
+    }
+
+    @Override
+    public void init(String[] args) {
+        super.init(args);
+        config = new PreprocessdConllConfig();
+        config.load(args);
+        this.normalize = config.isNormalise();
     }
 
     @Override
@@ -24,13 +46,14 @@ public class PreprocessedConllParserWithNER extends PreprocessedConllParser {
         String pos = components[this.posColumn];
         String ner = components[this.nerColumn];
 
-        if (ner.toUpperCase().equals("PERSON") ||
-                ner.toUpperCase().equals("ORGANIZATION") ||
-                ner.toUpperCase().equals("LOCATION") ||
-                ner.toUpperCase().equals("NUMBER")
-                )
-            // use the Stanford NER IOB tag as the PoS tag for all named entities
-            pos = ner;
+        if (this.normalize)
+            if (ner.toUpperCase().equals("PERSON") ||
+                    ner.toUpperCase().equals("ORGANIZATION") ||
+                    ner.toUpperCase().equals("LOCATION") ||
+                    ner.toUpperCase().equals("NUMBER")
+                    )
+                // use the Stanford NER IOB tag as the PoS tag for all named entities
+                pos = ner;
         return word + getPosDelim() + lemma + getPosDelim() + pos;
     }
 

@@ -145,9 +145,9 @@ public class PreprocessedConllParser extends StanPoSMaltDepParser {
         throw new IllegalStateException("Raw text parsing not implemented for this type");
     }
 
-    @Override
-    public void init(String[] args) {
-    }
+//    @Override
+//    public void init(String[] args) {
+//    }
 
     public static void main(String[] args) {
         PreprocessedConllParser sp = new PreprocessedConllParser(args);
