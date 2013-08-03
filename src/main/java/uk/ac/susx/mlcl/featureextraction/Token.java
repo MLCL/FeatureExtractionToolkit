@@ -128,6 +128,16 @@ public class Token {
 		put("'", "PUNCT");
 		put("\"", "PUNCT");
 		put("'", "PUNCT");
+
+        // Stanford NER tags
+        put("PERSON", "PERSON");
+        put("LOCATION", "LOC");
+        put("ORGANIZATION", "ORG");
+        put("MISC", "MISC");
+        put("DATE", "DATE");
+        put("TIME", "TIME");
+        put("MONEY", "MONEY");
+        put("NUMBER", "NUMBER");
 	}};
 
 	/**

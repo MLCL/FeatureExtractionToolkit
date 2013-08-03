@@ -6,7 +6,6 @@ import org.maltparser.core.exception.MaltChainedException;
 import org.maltparser.core.syntaxgraph.DependencyStructure;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
 
 /**
  * Created with IntelliJ IDEA.
@@ -49,7 +48,7 @@ public class StanPoSMaltDepParserTest {
         assertNull(maltParserPipeline.parsers);
         assertNull(maltParserPipeline.pipelines);
         //test if the stanford and malt workers have been loaded correctly
-        String[] args = {"@" + RESOURCES_DIR + "params1.txt"};
+        String[] args = {"@" + RESOURCES_DIR + "conf/params1.txt"};
         maltParserPipeline.init(args);
         assertNotNull(maltParserPipeline.parsers);
         assertNotNull(maltParserPipeline.pipelines);
