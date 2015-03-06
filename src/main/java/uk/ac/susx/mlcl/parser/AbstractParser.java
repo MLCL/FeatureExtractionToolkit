@@ -533,7 +533,7 @@ public abstract class AbstractParser implements Configurable {
 			}
 
 			final int entryid = count.addAndGet(1);
-			if (entryid % 100 == 0) {
+			if (entryid % 10000 == 0) {
 				System.err.println("Queing entry " + entryid);
 				System.err.println(MiscUtil.memoryInfoString());
 			}
