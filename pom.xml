@@ -23,22 +23,21 @@
 
     <repositories>
         <repository>
-            <id>mlcl-repository</id>
-            <name>MLCL Group Public Repository</name>
-            <url>http://kungf.eu:8081/nexus/content/groups/public/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
+            <id>tag-release</id>
+            <name>Tag Releases</name>
+            <layout>default</layout>
+            <url>http://tag.inf.susx.ac.uk/mvn/release</url>
         </repository>
 
         <repository>
-            <id>Spark repository</id>
-            <url>http://www.sparkjava.com/nexus/content/repositories/spark/</url>
+            <id>tag-snapshot</id>
+            <name>Tag Snapshots</name>
+            <layout>default</layout>
+            <url>http://tag.inf.susx.ac.uk/mvn/snapshot</url>
+            <snapshots>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
         </repository>
-
     </repositories>
 
     <dependencies>
@@ -93,25 +92,17 @@
             <version>4.0.2</version>
         </dependency>
 
-        <dependency>
-            <groupId>spark</groupId>
-            <artifactId>spark</artifactId>
-            <version>0.9.9.4-SNAPSHOT</version>
-        </dependency>
-
     </dependencies>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>mlcl-snapshots</id>
-            <name>MLCL Group Snapshots</name>
-            <url>http://kungf.eu:8081/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
         <repository>
-            <id>mlcl-releases</id>
-            <name>MLCL Group Releases</name>
-            <url>http://kungf.eu:8081/nexus/content/repositories/releases/</url>
+            <id>tag-release</id>
+            <url>sftp://tag-dev.inf.susx.ac.uk/mvn/release</url>
         </repository>
+        <snapshotRepository>
+            <id>tag-snapshot</id>
+            <url>sftp://tag-dev.inf.susx.ac.uk/mvn/snapshot</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <build>
